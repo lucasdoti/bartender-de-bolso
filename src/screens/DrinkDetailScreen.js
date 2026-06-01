@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
 import { colors, fonts, radius, spacing } from '../theme';
 import AppIcon from '../components/AppIcon';
-import { glassMap } from '../components/glasses';
+import { glassMap } from '../components/glasses/Glasses';
 import drinks from '../data/drinks';
 
 export default function DrinkDetailScreen({ navigation, route }) {
