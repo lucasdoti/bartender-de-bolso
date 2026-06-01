@@ -1,0 +1,308 @@
+import { useState } from 'react';
+import {
+  View, Text, ScrollView, TouchableOpacity, StyleSheet,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useApp } from '../context/AppContext';
+import { colors, fonts, radius, spacing } from '../theme';
+import AppIcon from '../components/AppIcon';
+import BottomNav from '../components/BottomNav';
+import { DrinkCardList } from '../components/DrinkCard';
+import drinks from '../data/drinks';
+import { ingredientCategories } from '../data/ingredients';
+
+function calcMatches(selected) {
+  return drinks.map(drink => {
+    const missing = (drink.needs || []).filter(n => !selected.includes(n));
+    const have    = (drink.needs || []).filter(n => selected.includes(n)).length;
+    const total   = (drink.needs || []).length;
+    const match   = total > 0 ? Math.round((have / total) * 100) : 0;
+    return { ...drink, match, missing };
+  }).sort((a, b) => b.match - a.match);
+}
+
+const allItems = ingredientCategories.flatMap(c => c.items);
+const getItem  = (id) => allItems.find(i => i.id === id);
+
+export default function MeuBarScreen({ navigation }) {
+  const { ingredients, toggleIngredient, favorites, toggleFavorite } = useApp();
+  const [activeTab, setActiveTab]       = useState('bar');
+  const [tempSelected, setTempSelected] = useState([]);
+  const [showResults, setShowResults]   = useState(false);
+  const [openCat, setOpenCat]           = useState('Destilados');
+
+  const toggleTemp = (id) =>
+    setTempSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+
+  const clearTemp = () => { setTempSelected([]); setShowResults(false); };
+
+  const barResults    = calcMatches(ingredients);
+  const barPerfect    = barResults.filter(d => d.match === 100);
+  const barPartial    = barResults.filter(d => d.match >= 50 && d.match < 100);
+  const searchResults = calcMatches(tempSelected);
+  const searchPerfect = searchResults.filter(d => d.match === 100);
+  const searchPartial = searchResults.filter(d => d.match >= 50 && d.match < 100);
+
+  const CategoryList = ({ selected, onToggle }) =>
+    ingredientCategories.map(cat => {
+      const isOpen = openCat === cat.cat;
+      const catSelected = selected.filter(s => cat.items.find(i => i.id === s)).length;
+      return (
+        <View key={cat.cat} style={[styles.catCard, { marginBottom: 8 }]}>
+          <TouchableOpacity onPress={() => setOpenCat(isOpen ? null : cat.cat)} activeOpacity={0.8} style={styles.catHeader}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <Text style={styles.catEmoji}>{cat.emoji}</Text>
+              <Text style={styles.catName}>{cat.cat}</Text>
+              {catSelected > 0 && (
+                <View style={styles.catBadge}>
+                  <Text style={styles.catBadgeText}>{catSelected}</Text>
+                </View>
+              )}
+            </View>
+            <Text style={styles.chevron}>{isOpen ? '⌃' : '⌄'}</Text>
+          </TouchableOpacity>
+          {isOpen && (
+            <View style={styles.chipsGrid}>
+              {cat.items.map(item => {
+                const active = selected.includes(item.id);
+                return (
+                  <TouchableOpacity key={item.id} onPress={() => onToggle(item.id)} activeOpacity={0.8} style={[styles.chip, active && styles.chipActive]}>
+                    <Text style={styles.chipEmoji}>{item.emoji}</Text>
+                    <Text style={[styles.chipLabel, active && styles.chipLabelActive]}>{item.label}</Text>
+                    {active && <Text style={styles.checkMark}>✓</Text>}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          )}
+        </View>
+      );
+    });
+
+  const ResultsList = ({ perfect, partial }) => (
+    <View style={{ gap: 12 }}>
+      {perfect.length > 0 && (
+        <>
+          <View style={styles.divider}>
+            <View style={styles.dividerLine}/><Text style={styles.dividerLabel}>✦ PRONTOS AGORA</Text><View style={styles.dividerLine}/>
+          </View>
+          <View style={{ gap: 10 }}>
+            {perfect.map(drink => (
+              <DrinkCardList key={drink.id} drink={drink}
+                isFavorite={favorites.includes(drink.id)}
+                onPress={() => navigation.navigate('Home', { screen: 'DrinkDetail', params: { drinkId: drink.id } })}
+                onFavorite={() => toggleFavorite(drink.id)}
+              />
+            ))}
+          </View>
+        </>
+      )}
+      {partial.length > 0 && (
+        <>
+          <View style={[styles.divider, { marginTop: 8 }]}>
+            <View style={styles.dividerLine}/><Text style={[styles.dividerLabel, { color: '#E65100' }]}>QUASE LÁ</Text><View style={styles.dividerLine}/>
+          </View>
+          <View style={{ gap: 10 }}>
+            {partial.map(drink => (
+              <View key={drink.id} style={styles.partialCard}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                  <Text style={styles.partialName}>{drink.name}</Text>
+                  <View style={styles.pctBadge}><Text style={styles.pctText}>{drink.match}%</Text></View>
+                </View>
+                <View style={styles.progressBg}>
+                  <View style={[styles.progressFill, { width: `${drink.match}%`, backgroundColor: drink.accent }]}/>
+                </View>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginTop: 6 }}>
+                  {drink.missing.map(m => {
+                    const item = getItem(m);
+                    return item ? <View key={m} style={styles.missingTag}><Text style={styles.missingText}>+ {item.label}</Text></View> : null;
+                  })}
+                </View>
+              </View>
+            ))}
+          </View>
+        </>
+      )}
+      {perfect.length === 0 && partial.length === 0 && (
+        <View style={styles.empty}>
+          <Text style={{ fontSize: 36 }}>🥲</Text>
+          <Text style={styles.emptyTitle}>Nenhum drink encontrado</Text>
+          <Text style={styles.emptySub}>Adicione mais ingredientes!</Text>
+        </View>
+      )}
+    </View>
+  );
+
+  return (
+    <SafeAreaView style={styles.safe} edges={['top']}>
+      <View style={styles.header}>
+        <View>
+          <Text style={styles.title}>Meu <Text style={styles.titleAccent}>Bar</Text></Text>
+          <Text style={styles.subtitle}>Gerencie seus ingredientes</Text>
+        </View>
+        <AppIcon size={38} />
+      </View>
+
+      <View style={styles.tabs}>
+        <TouchableOpacity onPress={() => setActiveTab('bar')} activeOpacity={0.8} style={[styles.tab, activeTab === 'bar' && styles.tabActive]}>
+          <Text style={styles.tabEmoji}>🏠</Text>
+          <Text style={[styles.tabLabel, activeTab === 'bar' && styles.tabLabelActive]}>Bar Salvo</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setActiveTab('busca')} activeOpacity={0.8} style={[styles.tab, activeTab === 'busca' && styles.tabActive]}>
+          <Text style={styles.tabEmoji}>🔍</Text>
+          <Text style={[styles.tabLabel, activeTab === 'busca' && styles.tabLabelActive]}>Busca Rápida</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* ── BAR SALVO ── */}
+      {activeTab === 'bar' && (
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Ingredientes no bar ({ingredients.length})</Text>
+              {ingredients.length > 0 && (
+                <TouchableOpacity onPress={() => ingredients.slice().forEach(id => toggleIngredient(id))}>
+                  <Text style={styles.clearBtn}>Limpar tudo</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+            <CategoryList selected={ingredients} onToggle={toggleIngredient} />
+          </View>
+
+          {ingredients.length > 0 && (
+            <View style={styles.section}>
+              <ResultsList perfect={barPerfect} partial={barPartial} />
+            </View>
+          )}
+
+          {ingredients.length === 0 && (
+            <View style={styles.section}>
+              <View style={styles.hintCard}>
+                <Text style={{ fontSize: 28 }}>👆</Text>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.hintTitle}>Seu bar está vazio</Text>
+                  <Text style={styles.hintSub}>Adicione ingredientes para ver os drinks disponíveis automaticamente!</Text>
+                </View>
+              </View>
+            </View>
+          )}
+        </ScrollView>
+      )}
+
+      {/* ── BUSCA RÁPIDA ── */}
+      {activeTab === 'busca' && (
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+          <View style={styles.section}>
+            <Text style={styles.searchHint}>
+              Selecione ingredientes temporariamente para descobrir um drink — sem salvar no seu bar.
+            </Text>
+
+            {tempSelected.length > 0 && (
+              <View style={{ marginBottom: 12 }}>
+                <View style={styles.countRow}>
+                  <View style={styles.countBadge}>
+                    <Text>✅</Text>
+                    <Text style={styles.countText}>{tempSelected.length} ingrediente{tempSelected.length > 1 ? 's' : ''}</Text>
+                  </View>
+                  <TouchableOpacity onPress={clearTemp}><Text style={styles.clearBtn}>Limpar</Text></TouchableOpacity>
+                </View>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingVertical: 8 }}>
+                  {tempSelected.map(id => {
+                    const item = getItem(id);
+                    return item ? (
+                      <TouchableOpacity key={id} onPress={() => toggleTemp(id)} style={styles.selectedChip}>
+                        <Text style={styles.chipEmoji}>{item.emoji}</Text>
+                        <Text style={styles.selectedChipLabel}>{item.label}</Text>
+                        <Text style={styles.removeX}>✕</Text>
+                      </TouchableOpacity>
+                    ) : null;
+                  })}
+                </ScrollView>
+              </View>
+            )}
+
+            {!showResults && <CategoryList selected={tempSelected} onToggle={toggleTemp} />}
+
+            {!showResults && tempSelected.length > 0 && (
+              <TouchableOpacity onPress={() => setShowResults(true)} activeOpacity={0.85} style={styles.ctaBtn}>
+                <Text style={styles.ctaBtnLabel}>✦ Descobrir</Text>
+                <Text style={styles.ctaBtnTitle}>Ver drinks com {tempSelected.length} ingrediente{tempSelected.length > 1 ? 's' : ''}</Text>
+              </TouchableOpacity>
+            )}
+
+            {showResults && (
+              <View style={{ gap: 12 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Text style={styles.sectionTitle}>Resultados 🎯</Text>
+                  <TouchableOpacity onPress={() => setShowResults(false)}><Text style={styles.clearBtn}>‹ Editar</Text></TouchableOpacity>
+                </View>
+                <ResultsList perfect={searchPerfect} partial={searchPartial} />
+              </View>
+            )}
+          </View>
+        </ScrollView>
+      )}
+
+      <BottomNav active="MeuBar" navigation={navigation} />
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: colors.background },
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', padding: spacing.xl, paddingBottom: spacing.md },
+  title: { fontSize: 26, fontFamily: fonts.displayBold, color: colors.text },
+  titleAccent: { fontFamily: fonts.displayItal, color: colors.primary },
+  subtitle: { fontSize: 13, fontFamily: fonts.semiBold, color: colors.textMuted, marginTop: 2 },
+  tabs: { flexDirection: 'row', marginHorizontal: spacing.xl, backgroundColor: '#F0F0EC', borderRadius: radius.lg, padding: 4, gap: 4, marginBottom: spacing.md },
+  tab: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderRadius: 12 },
+  tabActive: { backgroundColor: colors.surface, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 },
+  tabEmoji: { fontSize: 15 },
+  tabLabel: { fontSize: 13, fontFamily: fonts.extraBold, color: colors.textLight },
+  tabLabelActive: { color: colors.text },
+  section: { paddingHorizontal: spacing.xl, paddingBottom: spacing.md },
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  sectionTitle: { fontSize: 15, fontFamily: fonts.extraBold, color: colors.text },
+  clearBtn: { fontSize: 12, fontFamily: fonts.extraBold, color: colors.primary },
+  searchHint: { fontSize: 13, fontFamily: fonts.semiBold, color: colors.textMuted, marginBottom: 16, lineHeight: 20 },
+  catCard: { backgroundColor: colors.surface, borderRadius: radius.lg, overflow: 'hidden', borderWidth: 2, borderColor: '#F5F5F5' },
+  catHeader: { padding: spacing.md, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  catEmoji: { fontSize: 20 },
+  catName: { fontSize: 14, fontFamily: fonts.extraBold, color: colors.text },
+  catBadge: { width: 20, height: 20, borderRadius: 10, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
+  catBadgeText: { fontSize: 10, fontFamily: fonts.extraBold, color: '#fff' },
+  chevron: { fontSize: 14, color: colors.textLight },
+  chipsGrid: { padding: 12, paddingTop: 4, flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  chip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 7, borderRadius: 50, backgroundColor: '#F5F5F2' },
+  chipActive: { backgroundColor: colors.dark },
+  chipEmoji: { fontSize: 13 },
+  chipLabel: { fontSize: 12, fontFamily: fonts.extraBold, color: '#555' },
+  chipLabelActive: { color: '#fff' },
+  checkMark: { fontSize: 10, color: colors.primary, marginLeft: 1 },
+  countRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 4 },
+  countBadge: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 8, backgroundColor: colors.surface, borderRadius: 50, paddingHorizontal: 14, paddingVertical: 9, borderWidth: 2, borderColor: colors.border },
+  countText: { fontSize: 13, fontFamily: fonts.extraBold, color: colors.text },
+  selectedChip: { flexDirection: 'row', alignItems: 'center', gap: 5, paddingHorizontal: 12, paddingVertical: 6, borderRadius: 50, backgroundColor: colors.dark },
+  selectedChipLabel: { fontSize: 11, fontFamily: fonts.extraBold, color: '#fff' },
+  removeX: { fontSize: 10, color: '#888', marginLeft: 2 },
+  divider: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: colors.border },
+  dividerLabel: { fontSize: 11, fontFamily: fonts.extraBold, color: '#2E7D32', letterSpacing: 1 },
+  partialCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.md, borderWidth: 2, borderColor: '#F5F5F5' },
+  partialName: { fontSize: 15, fontFamily: fonts.extraBold, color: colors.text },
+  pctBadge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 50, backgroundColor: '#FFF3E0' },
+  pctText: { fontSize: 10, fontFamily: fonts.extraBold, color: '#E65100' },
+  progressBg: { height: 4, backgroundColor: '#F0F0EC', borderRadius: 2, overflow: 'hidden' },
+  progressFill: { height: '100%', borderRadius: 2 },
+  missingTag: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 50, backgroundColor: '#FFF3E0' },
+  missingText: { fontSize: 10, fontFamily: fonts.extraBold, color: '#E65100' },
+  ctaBtn: { backgroundColor: colors.dark, borderRadius: radius.lg, padding: spacing.lg, alignItems: 'center', marginTop: 8, shadowColor: colors.dark, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.28, shadowRadius: 16, elevation: 8 },
+  ctaBtnLabel: { fontSize: 11, fontFamily: fonts.extraBold, color: '#B8860B', letterSpacing: 1.2, textTransform: 'uppercase' },
+  ctaBtnTitle: { fontSize: 17, fontFamily: fonts.extraBold, color: '#fff', marginTop: 4 },
+  hintCard: { backgroundColor: colors.dark, borderRadius: radius.lg, padding: spacing.lg, flexDirection: 'row', gap: 14, alignItems: 'flex-start', opacity: 0.7 },
+  hintTitle: { fontSize: 14, fontFamily: fonts.extraBold, color: '#FFD966', marginBottom: 4 },
+  hintSub: { fontSize: 12, fontFamily: fonts.semiBold, color: '#888', lineHeight: 18 },
+  empty: { alignItems: 'center', paddingVertical: 40 },
+  emptyTitle: { fontSize: 15, fontFamily: fonts.extraBold, color: colors.text, marginTop: 10 },
+  emptySub: { fontSize: 12, fontFamily: fonts.semiBold, color: colors.textLight, marginTop: 4, textAlign: 'center' },
+});
