@@ -13,8 +13,6 @@ import drinks from '../data/drinks';
 import { ingredientCategories } from '../data/ingredients';
 import { xaropes, engarrafados } from '../data/recipes';
 
-const INGREDIENT_ALIASES = { limao_taiti: 'limao', limao_siciliano: 'limao' };
-function norm(id) { return INGREDIENT_ALIASES[id] || id; }
 const allItems = ingredientCategories.flatMap(c => c.items);
 
 // limao_taiti e limao_siciliano satisfazem o requisito 'limao' nos drinks
@@ -49,7 +47,7 @@ export default function MeuBarScreen({ navigation }) {
 
   // Calcula o que falta comprar baseado nos favoritos
   const shoppingList = (() => {
-    const normalized = ingredients.map(norm);
+    const normalized = ingredients.map(normalizeIngredient);
     const favDrinks = drinks.filter(d => favorites.includes(d.id));
     const needed = new Set(
       favDrinks.flatMap(d => (d.needs || []).filter(n => !normalized.includes(n)))
