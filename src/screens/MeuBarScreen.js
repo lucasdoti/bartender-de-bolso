@@ -10,6 +10,7 @@ import BottomNav from '../components/BottomNav';
 import { DrinkCardList } from '../components/DrinkCard';
 import drinks from '../data/drinks';
 import { ingredientCategories } from '../data/ingredients';
+import { xaropes, engarrafados } from '../data/recipes';
 
 // limao_taiti e limao_siciliano satisfazem o requisito 'limao' nos drinks
 const INGREDIENT_ALIASES = {
@@ -39,6 +40,7 @@ export default function MeuBarScreen({ navigation }) {
   const [tempSelected, setTempSelected] = useState([]);
   const [showResults, setShowResults]   = useState(false);
   const [openCat, setOpenCat]           = useState('Destilados');
+  const [openRecipe, setOpenRecipe]     = useState(null);
 
   const toggleTemp = (id) =>
     setTempSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -164,6 +166,10 @@ export default function MeuBarScreen({ navigation }) {
           <Text style={styles.tabEmoji}>🔍</Text>
           <Text style={[styles.tabLabel, activeTab === 'busca' && styles.tabLabelActive]}>Busca Rápida</Text>
         </TouchableOpacity>
+        <TouchableOpacity onPress={() => setActiveTab('receitas')} activeOpacity={0.8} style={[styles.tab, activeTab === 'receitas' && styles.tabActive]}>
+          <Text style={styles.tabEmoji}>🧪</Text>
+          <Text style={[styles.tabLabel, activeTab === 'receitas' && styles.tabLabelActive]}>Receitas</Text>
+        </TouchableOpacity>
       </View>
 
       {/* ── BAR SALVO ── */}
@@ -258,6 +264,155 @@ export default function MeuBarScreen({ navigation }) {
         </ScrollView>
       )}
 
+      {/* ── RECEITAS DE BAR ── */}
+      {activeTab === 'receitas' && (
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+          <View style={styles.section}>
+            <Text style={styles.searchHint}>
+              Receitas de base para montar seu bar. Xaropes caseiros e drinks pré-prontos para facilitar o preparo.
+            </Text>
+
+            {/* XAROPES */}
+            <View style={styles.recipeSectionHeader}>
+              <Text style={styles.recipeSectionTitle}>🍯 Xaropes</Text>
+            </View>
+
+            {xaropes.map((recipe, idx) => {
+              const isOpen = openRecipe === recipe.id;
+              const isFirst = idx === 0;
+              return (
+                <View key={recipe.id} style={[styles.recipeCard, isFirst && styles.recipeCardFeatured]}>
+                  <TouchableOpacity onPress={() => setOpenRecipe(isOpen ? null : recipe.id)} activeOpacity={0.8} style={styles.recipeHeader}>
+                    <View style={{ flex: 1 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                        <Text style={[styles.recipeBadge, { backgroundColor: recipe.badgeColor + '22', color: recipe.badgeColor }]}>
+                          {isFirst ? '★ ' : ''}{recipe.badge}
+                        </Text>
+                      </View>
+                      <Text style={[styles.recipeName, isFirst && { color: '#FFD966' }]}>{recipe.name}</Text>
+                      <Text style={styles.recipeMeta}>{recipe.yield} · {recipe.shelf}</Text>
+                    </View>
+                    <View style={{ alignItems: 'flex-end', gap: 6 }}>
+                      <Text style={{ fontSize: 24 }}>{recipe.emoji}</Text>
+                      <Text style={styles.chevron}>{isOpen ? '⌃' : '⌄'}</Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  {isOpen && (
+                    <View style={styles.recipeBody}>
+                      <Text style={styles.recipeSubtitle}>Ingredientes</Text>
+                      {recipe.ingredients.map((ing, i) => (
+                        <View key={i} style={styles.recipeIngRow}>
+                          <Text style={styles.recipeIngAmt}>{ing.amount}</Text>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.recipeIngName}>{ing.name}</Text>
+                            {ing.tip ? <Text style={styles.recipeIngTip}>{ing.tip}</Text> : null}
+                          </View>
+                        </View>
+                      ))}
+
+                      <Text style={[styles.recipeSubtitle, { marginTop: 16 }]}>Modo de preparo</Text>
+                      {recipe.steps.map(step => (
+                        <View key={step.num} style={styles.recipeStepRow}>
+                          <View style={styles.recipeStepNum}>
+                            <Text style={styles.recipeStepNumText}>{step.num}</Text>
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.recipeStepTitle}>{step.title}</Text>
+                            <Text style={styles.recipeStepDesc}>{step.desc}</Text>
+                          </View>
+                        </View>
+                      ))}
+
+                      {recipe.tip && (
+                        <View style={styles.recipeTipBox}>
+                          <Text style={styles.recipeTipText}>💡 {recipe.tip}</Text>
+                        </View>
+                      )}
+
+                      {recipe.usedIn && recipe.usedIn.length > 0 && (
+                        <View style={{ marginTop: 12 }}>
+                          <Text style={styles.recipeSubtitle}>Usado em</Text>
+                          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+                            {recipe.usedIn.map(name => (
+                              <View key={name} style={styles.usedInChip}>
+                                <Text style={styles.usedInText}>{name}</Text>
+                              </View>
+                            ))}
+                          </View>
+                        </View>
+                      )}
+                    </View>
+                  )}
+                </View>
+              );
+            })}
+
+            {/* ENGARRAFADOS */}
+            <View style={[styles.recipeSectionHeader, { marginTop: 24 }]}>
+              <Text style={styles.recipeSectionTitle}>🍾 Drinks Engarrafados</Text>
+            </View>
+
+            {engarrafados.map(recipe => {
+              const isOpen = openRecipe === recipe.id;
+              return (
+                <View key={recipe.id} style={styles.recipeCard}>
+                  <TouchableOpacity onPress={() => setOpenRecipe(isOpen ? null : recipe.id)} activeOpacity={0.8} style={styles.recipeHeader}>
+                    <View style={{ flex: 1 }}>
+                      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                        <Text style={[styles.recipeBadge, { backgroundColor: recipe.badgeColor + '22', color: recipe.badgeColor }]}>
+                          {recipe.badge}
+                        </Text>
+                      </View>
+                      <Text style={styles.recipeName}>{recipe.name}</Text>
+                      <Text style={styles.recipeMeta}>{recipe.yield} · {recipe.shelf}</Text>
+                    </View>
+                    <View style={{ alignItems: 'flex-end', gap: 6 }}>
+                      <Text style={{ fontSize: 24 }}>{recipe.emoji}</Text>
+                      <Text style={styles.chevron}>{isOpen ? '⌃' : '⌄'}</Text>
+                    </View>
+                  </TouchableOpacity>
+
+                  {isOpen && (
+                    <View style={styles.recipeBody}>
+                      <Text style={styles.recipeSubtitle}>Ingredientes</Text>
+                      {recipe.ingredients.map((ing, i) => (
+                        <View key={i} style={styles.recipeIngRow}>
+                          <Text style={styles.recipeIngAmt}>{ing.amount}</Text>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.recipeIngName}>{ing.name}</Text>
+                            {ing.tip ? <Text style={styles.recipeIngTip}>{ing.tip}</Text> : null}
+                          </View>
+                        </View>
+                      ))}
+
+                      <Text style={[styles.recipeSubtitle, { marginTop: 16 }]}>Modo de preparo</Text>
+                      {recipe.steps.map(step => (
+                        <View key={step.num} style={styles.recipeStepRow}>
+                          <View style={styles.recipeStepNum}>
+                            <Text style={styles.recipeStepNumText}>{step.num}</Text>
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text style={styles.recipeStepTitle}>{step.title}</Text>
+                            <Text style={styles.recipeStepDesc}>{step.desc}</Text>
+                          </View>
+                        </View>
+                      ))}
+
+                      {recipe.tip && (
+                        <View style={styles.recipeTipBox}>
+                          <Text style={styles.recipeTipText}>💡 {recipe.tip}</Text>
+                        </View>
+                      )}
+                    </View>
+                  )}
+                </View>
+              );
+            })}
+          </View>
+        </ScrollView>
+      )}
+
       <BottomNav active="MeuBar" navigation={navigation} />
     </SafeAreaView>
   );
@@ -320,4 +475,29 @@ const styles = StyleSheet.create({
   empty: { alignItems: 'center', paddingVertical: 40 },
   emptyTitle: { fontSize: 15, fontFamily: fonts.extraBold, color: colors.text, marginTop: 10 },
   emptySub: { fontSize: 12, fontFamily: fonts.semiBold, color: colors.textLight, marginTop: 4, textAlign: 'center' },
+
+  // Receitas
+  recipeSectionHeader: { marginBottom: 10 },
+  recipeSectionTitle: { fontSize: 16, fontFamily: fonts.extraBold, color: colors.text },
+  recipeCard: { backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 2, borderColor: '#F5F5F5', marginBottom: 10, overflow: 'hidden' },
+  recipeCardFeatured: { backgroundColor: '#1C1A14', borderColor: '#B8860B44' },
+  recipeHeader: { padding: spacing.md, flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between' },
+  recipeBadge: { fontSize: 10, fontFamily: fonts.extraBold, paddingHorizontal: 8, paddingVertical: 3, borderRadius: 50, overflow: 'hidden' },
+  recipeName: { fontSize: 15, fontFamily: fonts.extraBold, color: colors.text, marginBottom: 2 },
+  recipeMeta: { fontSize: 11, fontFamily: fonts.semiBold, color: colors.textMuted },
+  recipeBody: { paddingHorizontal: spacing.md, paddingBottom: spacing.md, borderTopWidth: 1, borderTopColor: '#F0F0EC' },
+  recipeSubtitle: { fontSize: 12, fontFamily: fonts.extraBold, color: colors.textMuted, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 10, marginTop: 4 },
+  recipeIngRow: { flexDirection: 'row', gap: 12, marginBottom: 8, alignItems: 'flex-start' },
+  recipeIngAmt: { fontSize: 12, fontFamily: fonts.extraBold, color: colors.primary, minWidth: 60 },
+  recipeIngName: { fontSize: 13, fontFamily: fonts.extraBold, color: colors.text },
+  recipeIngTip: { fontSize: 11, fontFamily: fonts.semiBold, color: colors.textMuted, marginTop: 1 },
+  recipeStepRow: { flexDirection: 'row', gap: 12, marginBottom: 12, alignItems: 'flex-start' },
+  recipeStepNum: { width: 24, height: 24, borderRadius: 12, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center', marginTop: 1 },
+  recipeStepNumText: { fontSize: 11, fontFamily: fonts.extraBold, color: '#fff' },
+  recipeStepTitle: { fontSize: 13, fontFamily: fonts.extraBold, color: colors.text, marginBottom: 2 },
+  recipeStepDesc: { fontSize: 13, fontFamily: fonts.semiBold, color: colors.textMuted, lineHeight: 19 },
+  recipeTipBox: { backgroundColor: '#FFF9E6', borderRadius: radius.md, padding: spacing.sm, marginTop: 12, borderLeftWidth: 3, borderLeftColor: '#B8860B' },
+  recipeTipText: { fontSize: 12, fontFamily: fonts.semiBold, color: '#7A5C00', lineHeight: 18 },
+  usedInChip: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 50, backgroundColor: '#F0F0EC' },
+  usedInText: { fontSize: 11, fontFamily: fonts.extraBold, color: colors.text },
 });
