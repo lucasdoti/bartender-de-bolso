@@ -54,7 +54,7 @@ export default function MeuBarScreen({ navigation }) {
     );
     return ingredientCategories.flatMap(cat =>
       cat.items
-        .filter(item => needed.has(item.id) || needed.has(norm(item.id)))
+        .filter(item => needed.has(item.id) || needed.has(normalizeIngredient(item.id)))
         .map(item => ({ ...item, cat: cat.cat }))
     );
   })();
