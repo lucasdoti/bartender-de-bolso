@@ -2,7 +2,8 @@ const sharp = require('sharp');
 const path  = require('path');
 const fs    = require('fs');
 
-// SVG que replica o AppIcon.js — fundo escuro arredondado + taça dourada
+// Ícone desenhado diretamente em 512×512 — sem transforms aninhados
+// Taça de martini dourada com cereja, centralizada e com padding seguro
 const iconSvg = `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
@@ -19,27 +20,43 @@ const iconSvg = `
       <stop offset="50%" stop-color="#FFD966"/>
       <stop offset="100%" stop-color="#B8860B"/>
     </linearGradient>
-    <clipPath id="rounded">
-      <rect x="0" y="0" width="512" height="512" rx="116" ry="116"/>
-    </clipPath>
   </defs>
 
-  <!-- Fundo escuro com bordas arredondadas -->
+  <!-- Fundo escuro arredondado -->
   <rect x="0" y="0" width="512" height="512" rx="116" ry="116" fill="#1C1A14"/>
 
-  <!-- Conteúdo centralizado (escala de 110x120 → ~320x350, centrado em 512x512) -->
-  <g clip-path="url(#rounded)" transform="translate(96, 81) scale(2.91)">
-    <path d="M14 18 L55 70 L96 18" stroke="url(#ig)" stroke-width="2.5" stroke-linejoin="round" fill="none" stroke-linecap="round"/>
-    <path d="M14 18 L55 50 L96 18 Z" fill="url(#il)" opacity="0.9"/>
-    <path d="M20 20 L40 34" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" stroke-linecap="round"/>
-    <line x1="55" y1="70" x2="55" y2="100" stroke="url(#is)" stroke-width="2.5" stroke-linecap="round"/>
-    <path d="M34 100 Q55 96 76 100" stroke="url(#ig)" stroke-width="2.5" stroke-linecap="round" fill="none"/>
-    <line x1="42" y1="10" x2="62" y2="32" stroke="#FFD966" stroke-width="1.5" stroke-linecap="round"/>
-    <circle cx="42" cy="10" r="6" fill="#C84B31" stroke="#FFD966" stroke-width="1.5"/>
-    <circle cx="42" cy="10" r="2" fill="#FFD966"/>
-    <circle cx="88" cy="28" r="1.5" fill="#FFD966" opacity="0.7"/>
-    <circle cx="20" cy="38" r="1" fill="#FFD966" opacity="0.5"/>
-  </g>
+  <!-- Boca da taça: de (96,130) ao vértice (256,340) até (416,130) -->
+  <path d="M96 130 L256 340 L416 130"
+        stroke="url(#ig)" stroke-width="10" stroke-linejoin="round"
+        fill="none" stroke-linecap="round"/>
+
+  <!-- Preenchimento interno (líquido) -->
+  <path d="M96 130 L256 310 L416 130 Z"
+        fill="url(#il)" opacity="0.9"/>
+
+  <!-- Reflexo de luz no líquido -->
+  <path d="M110 138 L170 175"
+        stroke="rgba(255,255,255,0.18)" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Haste da taça -->
+  <line x1="256" y1="340" x2="256" y2="415"
+        stroke="url(#is)" stroke-width="10" stroke-linecap="round"/>
+
+  <!-- Base da taça -->
+  <path d="M186 422 Q256 414 326 422"
+        stroke="url(#ig)" stroke-width="10" stroke-linecap="round" fill="none"/>
+
+  <!-- Palito da cereja -->
+  <line x1="196" y1="96" x2="240" y2="158"
+        stroke="#FFD966" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Cereja -->
+  <circle cx="186" cy="84" r="24" fill="#C84B31" stroke="#FFD966" stroke-width="6"/>
+  <circle cx="186" cy="84" r="9"  fill="#FFD966"/>
+
+  <!-- Pontos decorativos de brilho -->
+  <circle cx="360" cy="152" r="5" fill="#FFD966" opacity="0.6"/>
+  <circle cx="112" cy="192" r="4" fill="#FFD966" opacity="0.4"/>
 </svg>
 `;
 
