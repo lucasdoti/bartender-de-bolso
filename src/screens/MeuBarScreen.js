@@ -11,10 +11,19 @@ import { DrinkCardList } from '../components/DrinkCard';
 import drinks from '../data/drinks';
 import { ingredientCategories } from '../data/ingredients';
 
+// limao_taiti e limao_siciliano satisfazem o requisito 'limao' nos drinks
+const INGREDIENT_ALIASES = {
+  limao_taiti:     'limao',
+  limao_siciliano: 'limao',
+};
+
+function normalizeIngredient(id) { return INGREDIENT_ALIASES[id] || id; }
+
 function calcMatches(selected) {
+  const normalized = selected.map(normalizeIngredient);
   return drinks.map(drink => {
-    const missing = (drink.needs || []).filter(n => !selected.includes(n));
-    const have    = (drink.needs || []).filter(n => selected.includes(n)).length;
+    const missing = (drink.needs || []).filter(n => !normalized.includes(n));
+    const have    = (drink.needs || []).filter(n => normalized.includes(n)).length;
     const total   = (drink.needs || []).length;
     const match   = total > 0 ? Math.round((have / total) * 100) : 0;
     return { ...drink, match, missing };
@@ -67,7 +76,10 @@ export default function MeuBarScreen({ navigation }) {
                 const active = selected.includes(item.id);
                 return (
                   <TouchableOpacity key={item.id} onPress={() => onToggle(item.id)} activeOpacity={0.8} style={[styles.chip, active && styles.chipActive]}>
-                    <Text style={styles.chipEmoji}>{item.emoji}</Text>
+                    {item.SvgIcon
+                      ? <item.SvgIcon size={18} />
+                      : <Text style={styles.chipEmoji}>{item.emoji}</Text>
+                    }
                     <Text style={[styles.chipLabel, active && styles.chipLabelActive]}>{item.label}</Text>
                     {active && <Text style={styles.checkMark}>✓</Text>}
                   </TouchableOpacity>
@@ -211,7 +223,10 @@ export default function MeuBarScreen({ navigation }) {
                     const item = getItem(id);
                     return item ? (
                       <TouchableOpacity key={id} onPress={() => toggleTemp(id)} style={styles.selectedChip}>
-                        <Text style={styles.chipEmoji}>{item.emoji}</Text>
+                        {item.SvgIcon
+                          ? <item.SvgIcon size={16} />
+                          : <Text style={styles.chipEmoji}>{item.emoji}</Text>
+                        }
                         <Text style={styles.selectedChipLabel}>{item.label}</Text>
                         <Text style={styles.removeX}>✕</Text>
                       </TouchableOpacity>
