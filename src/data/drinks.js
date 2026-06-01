@@ -154,7 +154,7 @@ export const drinks = [
     ],
     steps: [
       { num: 1, title: 'Corte', desc: 'Corte 1 limão taiti em 8 pedaços e retire o miolo branco.' },
-      { num: 2, title: 'Macere', desc: 'Coloque os pedaços no copo com 15ml de xarope de açúcar (ou 2 col. de açúcar) e macere levemente só para liberar o aroma.' },
+      { num: 2, title: 'Macere', desc: 'Coloque os pedaços no copo com 20ml de xarope de açúcar (ou 2 col. de açúcar) e macere levemente só para liberar o aroma.' },
       { num: 3, title: 'Gelo', desc: 'Adicione bastante gelo triturado.' },
       { num: 4, title: 'Cachaça', desc: 'Despeje 60ml de cachaça e mexa.' },
     ],
@@ -187,7 +187,7 @@ export const drinks = [
       { amount: 'Q.B.', name: 'Gelo', tip: 'Triturado' },
     ],
     steps: [
-      { num: 1, title: 'Macere', desc: 'Corte 1/2 limão em pedaços e coloque no copo com 15ml de xarope de açúcar (ou 2 col. de açúcar). Macere levemente.' },
+      { num: 1, title: 'Macere', desc: 'Corte 1/2 limão em pedaços e coloque no copo com 20ml de xarope de açúcar (ou 2 col. de açúcar). Macere levemente.' },
       { num: 2, title: 'Maracujá', desc: 'Adicione a polpa de 1/2 maracujá.' },
       { num: 3, title: 'Gelo', desc: 'Adicione bastante gelo triturado.' },
       { num: 4, title: 'Cachaça', desc: 'Despeje 60ml de cachaça e mexa.' },
@@ -221,7 +221,7 @@ export const drinks = [
       { amount: 'Q.B.', name: 'Gelo', tip: 'Triturado' },
     ],
     steps: [
-      { num: 1, title: 'Macere', desc: 'Coloque 1/2 limão (em pedaços), 4 morangos maduros e 15ml de xarope de açúcar (ou 2 col. de açúcar) no copo. Macere levemente.' },
+      { num: 1, title: 'Macere', desc: 'Coloque 1/2 limão (em pedaços), 4 morangos maduros e 20ml de xarope de açúcar (ou 2 col. de açúcar) no copo. Macere levemente.' },
       { num: 2, title: 'Gelo', desc: 'Adicione bastante gelo triturado.' },
       { num: 3, title: 'Cachaça', desc: 'Despeje 60ml de cachaça e mexa.' },
     ],
@@ -253,7 +253,7 @@ export const drinks = [
       { amount: 'Q.B.', name: 'Gelo', tip: 'Triturado' },
     ],
     steps: [
-      { num: 1, title: 'Macere', desc: 'Corte 1 limão em pedaços e coloque no copo com 15ml de xarope de açúcar (ou 2 col. de açúcar). Macere levemente.' },
+      { num: 1, title: 'Macere', desc: 'Corte 1 limão em pedaços e coloque no copo com 20ml de xarope de açúcar (ou 2 col. de açúcar). Macere levemente.' },
       { num: 2, title: 'Gelo', desc: 'Adicione bastante gelo triturado.' },
       { num: 3, title: 'Vodka', desc: 'Despeje 60ml de vodka e mexa.' },
     ],
@@ -747,7 +747,7 @@ export const drinks = [
       { amount: 'Q.B.', name: 'Gelo', tip: 'Triturado, bastante' },
     ],
     steps: [
-      { num: 1, title: 'Macere', desc: 'Coloque 10 folhas de hortelã e 15ml de xarope de açúcar (ou 1 col. de açúcar) no copo. Macere levemente — só para liberar o aroma.' },
+      { num: 1, title: 'Macere', desc: 'Coloque 10 folhas de hortelã e 10ml de xarope de açúcar (ou 1 col. de açúcar) no copo. Macere levemente — só para liberar o aroma.' },
       { num: 2, title: 'Bourbon', desc: 'Adicione 60ml de bourbon.' },
       { num: 3, title: 'Gelo', desc: 'Encha com bastante gelo triturado e mexa até o copo gelar.' },
       { num: 4, title: 'Decore', desc: 'Buquê generoso de hortelã fresca.' },
@@ -782,7 +782,7 @@ export const drinks = [
       { amount: 'Completar', name: 'Água com gás', tip: 'Por último, sem mexer muito' },
     ],
     steps: [
-      { num: 1, title: 'Macere', desc: 'Coloque 30ml de suco de limão, 15ml de xarope de açúcar (ou 2 col. de açúcar) e 8 folhas de hortelã no copo. Macere levemente só para liberar o aroma.' },
+      { num: 1, title: 'Macere', desc: 'Coloque 30ml de suco de limão, 20ml de xarope de açúcar (ou 2 col. de açúcar) e 8 folhas de hortelã no copo. Macere levemente só para liberar o aroma.' },
       { num: 2, title: 'Gelo', desc: 'Encha o copo com bastante gelo picado.' },
       { num: 3, title: 'Rum', desc: 'Despeje 60ml de rum branco sobre o gelo.' },
       { num: 4, title: 'Finalize', desc: 'Complete com água com gás. Mexa uma vez só.' },
@@ -921,7 +921,7 @@ export const drinks = [
       { amount: '1 pedra', name: 'Gelo', tip: 'Grande' },
     ],
     steps: [
-      { num: 1, title: 'Dissolva', desc: 'Dissolva 15ml de xarope de açúcar (ou 1 col. de açúcar) com 2 dashes de Angostura e um fio de água no copo.' },
+      { num: 1, title: 'Dissolva', desc: 'Dissolva 10ml de xarope de açúcar (ou 1 col. de açúcar) com 2 dashes de Angostura e um fio de água no copo.' },
       { num: 2, title: 'Whisky', desc: 'Adicione 60ml de bourbon e 1 pedra grande de gelo.' },
       { num: 3, title: 'Mexa', desc: 'Mexa por 30 segundos.' },
       { num: 4, title: 'Decore', desc: 'Expresse 1 casca de laranja sobre o drink.' },
