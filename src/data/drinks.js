@@ -149,12 +149,12 @@ export const drinks = [
     ingredients: [
       { amount: '60ml', name: 'Cachaça', tip: 'Leblon ou Ypióca ouro' },
       { amount: '1 un.', name: 'Limão taiti', tip: 'Em 8 pedaços' },
-      { amount: '2 col.', name: 'Açúcar', tip: 'A gosto' },
+      { amount: '20ml', name: 'Xarope simples', tip: 'Ou 2 col. de açúcar' },
       { amount: 'Q.B.', name: 'Gelo', tip: 'Triturado' },
     ],
     steps: [
       { num: 1, title: 'Corte', desc: 'Corte 1 limão taiti em 8 pedaços e retire o miolo branco.' },
-      { num: 2, title: 'Macere', desc: 'Coloque os pedaços no copo com 20ml de xarope de açúcar (ou 2 col. de açúcar) e macere levemente só para liberar o aroma.' },
+      { num: 2, title: 'Macere', desc: 'Coloque os pedaços no copo com 20ml de xarope simples (ou 2 col. de açúcar) e macere levemente só para liberar o aroma.' },
       { num: 3, title: 'Gelo', desc: 'Adicione bastante gelo triturado.' },
       { num: 4, title: 'Cachaça', desc: 'Despeje 60ml de cachaça e mexa.' },
     ],
@@ -183,11 +183,11 @@ export const drinks = [
       { amount: '60ml', name: 'Cachaça', tip: 'Branca' },
       { amount: '1/2 un.', name: 'Maracujá', tip: 'Polpa fresca' },
       { amount: '1/2 un.', name: 'Limão', tip: 'Em pedaços' },
-      { amount: '2 col.', name: 'Açúcar', tip: 'A gosto' },
+      { amount: '20ml', name: 'Xarope simples', tip: 'Ou 2 col. de açúcar' },
       { amount: 'Q.B.', name: 'Gelo', tip: 'Triturado' },
     ],
     steps: [
-      { num: 1, title: 'Macere', desc: 'Corte 1/2 limão em pedaços e coloque no copo com 20ml de xarope de açúcar (ou 2 col. de açúcar). Macere levemente.' },
+      { num: 1, title: 'Macere', desc: 'Corte 1/2 limão em pedaços e coloque no copo com 20ml de xarope simples (ou 2 col. de açúcar). Macere levemente.' },
       { num: 2, title: 'Maracujá', desc: 'Adicione a polpa de 1/2 maracujá.' },
       { num: 3, title: 'Gelo', desc: 'Adicione bastante gelo triturado.' },
       { num: 4, title: 'Cachaça', desc: 'Despeje 60ml de cachaça e mexa.' },
@@ -217,11 +217,11 @@ export const drinks = [
       { amount: '60ml', name: 'Cachaça', tip: 'Branca' },
       { amount: '1/2 un.', name: 'Limão', tip: 'Em pedaços' },
       { amount: '4 un.', name: 'Morango', tip: 'Maduros' },
-      { amount: '2 col.', name: 'Açúcar', tip: 'A gosto' },
+      { amount: '20ml', name: 'Xarope simples', tip: 'Ou 2 col. de açúcar' },
       { amount: 'Q.B.', name: 'Gelo', tip: 'Triturado' },
     ],
     steps: [
-      { num: 1, title: 'Macere', desc: 'Coloque 1/2 limão (em pedaços), 4 morangos maduros e 20ml de xarope de açúcar (ou 2 col. de açúcar) no copo. Macere levemente.' },
+      { num: 1, title: 'Macere', desc: 'Coloque 1/2 limão (em pedaços), 4 morangos maduros e 20ml de xarope simples (ou 2 col. de açúcar) no copo. Macere levemente.' },
       { num: 2, title: 'Gelo', desc: 'Adicione bastante gelo triturado.' },
       { num: 3, title: 'Cachaça', desc: 'Despeje 60ml de cachaça e mexa.' },
     ],
@@ -249,11 +249,11 @@ export const drinks = [
     ingredients: [
       { amount: '60ml', name: 'Vodka', tip: 'No lugar da cachaça' },
       { amount: '1 un.', name: 'Limão', tip: 'Em pedaços' },
-      { amount: '2 col.', name: 'Açúcar', tip: 'A gosto' },
+      { amount: '20ml', name: 'Xarope simples', tip: 'Ou 2 col. de açúcar' },
       { amount: 'Q.B.', name: 'Gelo', tip: 'Triturado' },
     ],
     steps: [
-      { num: 1, title: 'Macere', desc: 'Corte 1 limão em pedaços e coloque no copo com 20ml de xarope de açúcar (ou 2 col. de açúcar). Macere levemente.' },
+      { num: 1, title: 'Macere', desc: 'Corte 1 limão em pedaços e coloque no copo com 20ml de xarope simples (ou 2 col. de açúcar). Macere levemente.' },
       { num: 2, title: 'Gelo', desc: 'Adicione bastante gelo triturado.' },
       { num: 3, title: 'Vodka', desc: 'Despeje 60ml de vodka e mexa.' },
     ],
@@ -417,7 +417,7 @@ export const drinks = [
       { amount: 'Q.B.', name: 'Gelo', tip: 'Para bater' },
     ],
     steps: [
-      { num: 1, title: 'Bata', desc: 'Combine 60ml de rum branco, 25ml de suco de limão e 15ml de xarope de açúcar na coqueteleira com gelo. Bata por 15 segundos.' },
+      { num: 1, title: 'Bata', desc: 'Combine 60ml de rum branco, 25ml de suco de limão e 15ml de xarope simples na coqueteleira com gelo. Bata por 15 segundos.' },
       { num: 2, title: 'Coe', desc: 'Coe na taça gelada.' },
       { num: 3, title: 'Sirva', desc: 'Decore com 1 rodela de limão.' },
     ],
@@ -484,7 +484,7 @@ export const drinks = [
     ],
     steps: [
       { num: 1, title: 'Café', desc: 'Prepare 30ml de café espresso fresco e deixe esfriar um pouco.' },
-      { num: 2, title: 'Bata', desc: 'Bata 50ml de vodka, 30ml de licor de café, 30ml de espresso e 10ml de xarope de açúcar com gelo vigorosamente.' },
+      { num: 2, title: 'Bata', desc: 'Bata 50ml de vodka, 30ml de licor de café, 30ml de espresso e 10ml de xarope simples com gelo vigorosamente.' },
       { num: 3, title: 'Coe', desc: 'Coe na taça.' },
       { num: 4, title: 'Decore', desc: 'Decore com 3 grãos de café.' },
     ],
@@ -517,7 +517,7 @@ export const drinks = [
       { amount: 'Completar', name: 'Água com gás', tip: 'Por cima' },
     ],
     steps: [
-      { num: 1, title: 'Dry shake', desc: 'Coloque 45ml de gin, 30ml de suco de limão, 15ml de xarope de açúcar e 1 clara de ovo na coqueteleira. Bata sem gelo por 10 segundos.' },
+      { num: 1, title: 'Dry shake', desc: 'Coloque 45ml de gin, 30ml de suco de limão, 15ml de xarope simples e 1 clara de ovo na coqueteleira. Bata sem gelo por 10 segundos.' },
       { num: 2, title: 'Bata', desc: 'Adicione gelo e bata novamente.' },
       { num: 3, title: 'Coe', desc: 'Coe no copo.' },
       { num: 4, title: 'Complete', desc: 'Complete com água com gás gelada.' },
@@ -742,12 +742,12 @@ export const drinks = [
     tags: ['calor', 'classico', 'solo'],
     ingredients: [
       { amount: '60ml', name: 'Bourbon', tip: 'Kentucky' },
-      { amount: '1 col.', name: 'Açúcar', tip: 'Ou xarope' },
+      { amount: '10ml', name: 'Xarope simples', tip: 'Ou 1 col. de açúcar' },
       { amount: '10 folhas', name: 'Hortelã', tip: 'Fresca' },
       { amount: 'Q.B.', name: 'Gelo', tip: 'Triturado, bastante' },
     ],
     steps: [
-      { num: 1, title: 'Macere', desc: 'Coloque 10 folhas de hortelã e 10ml de xarope de açúcar (ou 1 col. de açúcar) no copo. Macere levemente — só para liberar o aroma.' },
+      { num: 1, title: 'Macere', desc: 'Coloque 10 folhas de hortelã e 10ml de xarope simples (ou 1 col. de açúcar) no copo. Macere levemente — só para liberar o aroma.' },
       { num: 2, title: 'Bourbon', desc: 'Adicione 60ml de bourbon.' },
       { num: 3, title: 'Gelo', desc: 'Encha com bastante gelo triturado e mexa até o copo gelar.' },
       { num: 4, title: 'Decore', desc: 'Buquê generoso de hortelã fresca.' },
@@ -776,13 +776,13 @@ export const drinks = [
     ingredients: [
       { amount: '60ml', name: 'Rum branco', tip: 'Havana Club 3 anos é o clássico' },
       { amount: '30ml', name: 'Suco de limão', tip: 'Sempre fresco' },
-      { amount: '2 col.', name: 'Açúcar', tip: 'Pode usar xarope simples' },
+      { amount: '20ml', name: 'Xarope simples', tip: 'Ou 2 col. de açúcar' },
       { amount: '8 folhas', name: 'Hortelã', tip: 'Dê um tapa nas folhas antes' },
       { amount: 'Q.B.', name: 'Gelo picado', tip: 'Libera mais frio' },
       { amount: 'Completar', name: 'Água com gás', tip: 'Por último, sem mexer muito' },
     ],
     steps: [
-      { num: 1, title: 'Macere', desc: 'Coloque 30ml de suco de limão, 20ml de xarope de açúcar (ou 2 col. de açúcar) e 8 folhas de hortelã no copo. Macere levemente só para liberar o aroma.' },
+      { num: 1, title: 'Macere', desc: 'Coloque 30ml de suco de limão, 20ml de xarope simples (ou 2 col. de açúcar) e 8 folhas de hortelã no copo. Macere levemente só para liberar o aroma.' },
       { num: 2, title: 'Gelo', desc: 'Encha o copo com bastante gelo picado.' },
       { num: 3, title: 'Rum', desc: 'Despeje 60ml de rum branco sobre o gelo.' },
       { num: 4, title: 'Finalize', desc: 'Complete com água com gás. Mexa uma vez só.' },
@@ -915,13 +915,13 @@ export const drinks = [
     tags: ['frio', 'classico', 'solo', 'date'],
     ingredients: [
       { amount: '60ml', name: 'Bourbon', tip: 'Maker\'s Mark' },
-      { amount: '1 col.', name: 'Açúcar', tip: 'Ou cubo' },
+      { amount: '10ml', name: 'Xarope simples', tip: 'Ou 1 col. de açúcar' },
       { amount: '2 dashes', name: 'Angostura', tip: 'Não pule' },
       { amount: '1 casca', name: 'Laranja', tip: 'Expressa os óleos' },
       { amount: '1 pedra', name: 'Gelo', tip: 'Grande' },
     ],
     steps: [
-      { num: 1, title: 'Dissolva', desc: 'Dissolva 10ml de xarope de açúcar (ou 1 col. de açúcar) com 2 dashes de Angostura e um fio de água no copo.' },
+      { num: 1, title: 'Dissolva', desc: 'Dissolva 10ml de xarope simples (ou 1 col. de açúcar) com 2 dashes de Angostura e um fio de água no copo.' },
       { num: 2, title: 'Whisky', desc: 'Adicione 60ml de bourbon e 1 pedra grande de gelo.' },
       { num: 3, title: 'Mexa', desc: 'Mexa por 30 segundos.' },
       { num: 4, title: 'Decore', desc: 'Expresse 1 casca de laranja sobre o drink.' },
@@ -1152,7 +1152,7 @@ export const drinks = [
       { amount: 'Q.B.', name: 'Gelo', tip: 'Cubos' },
     ],
     steps: [
-      { num: 1, title: 'Bata', desc: 'Bata 45ml de gin, 30ml de suco de limão e 15ml de xarope de açúcar com gelo.' },
+      { num: 1, title: 'Bata', desc: 'Bata 45ml de gin, 30ml de suco de limão e 15ml de xarope simples com gelo.' },
       { num: 2, title: 'Coe', desc: 'Coe no copo alto com gelo.' },
       { num: 3, title: 'Complete', desc: 'Complete com água com gás gelada.' },
       { num: 4, title: 'Decore', desc: 'Decore com rodela de limão e cereja.' },
@@ -1186,7 +1186,7 @@ export const drinks = [
       { amount: 'Q.B.', name: 'Gelo', tip: 'Para bater' },
     ],
     steps: [
-      { num: 1, title: 'Dry shake', desc: 'Bata 60ml de bourbon, 30ml de suco de limão, 15ml de xarope de açúcar e 1 clara de ovo na coqueteleira sem gelo primeiro.' },
+      { num: 1, title: 'Dry shake', desc: 'Bata 60ml de bourbon, 30ml de suco de limão, 15ml de xarope simples e 1 clara de ovo na coqueteleira sem gelo primeiro.' },
       { num: 2, title: 'Bata', desc: 'Adicione gelo e bata novamente vigorosamente.' },
       { num: 3, title: 'Coe', desc: 'Coe sobre gelo.' },
       { num: 4, title: 'Decore', desc: 'Decore com rodela de limão e cereja.' },

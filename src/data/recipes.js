@@ -17,7 +17,7 @@ export const xaropes = [
       { num: 3, title: 'Resfrie', desc: 'Desligue o fogo e deixe esfriar completamente.' },
       { num: 4, title: 'Armazene', desc: 'Transfira para uma garrafa limpa e refrigere. Dura 2 semanas.' },
     ],
-    tip: 'Use 15ml no lugar de 2 col. de açúcar em qualquer receita.',
+    tip: 'Use 20ml no lugar de 2 col. de açúcar em qualquer receita.',
     usedIn: ['Mojito', 'Caipirinha', 'Daiquiri', 'Whisky Sour', 'Tom Collins', 'Old Fashioned', 'Mint Julep'],
   },
   {
@@ -37,7 +37,7 @@ export const xaropes = [
       { num: 2, title: 'Mexa', desc: 'Mexa bem até homogeneizar completamente.' },
       { num: 3, title: 'Resfrie', desc: 'Deixe esfriar e transfira para um frasco.' },
     ],
-    tip: 'Substitui o xarope de açúcar no Bee\'s Knees e no Gold Rush.',
+    tip: 'Substitui o xarope simples no Bee\'s Knees e no Gold Rush.',
     usedIn: ["Bee's Knees", 'Gold Rush', 'Penicillin'],
   },
   {
@@ -95,13 +95,13 @@ export const xaropes = [
     ingredients: [
       { amount: '100g',  name: 'Gengibre fresco',    tip: 'Quanto mais fresco, mais picante' },
       { amount: '30ml',  name: 'Suco de limão taiti', tip: 'Fresco' },
-      { amount: '20ml',  name: 'Xarope de açúcar',   tip: 'Use a receita acima' },
+      { amount: '20ml',  name: 'Xarope simples',   tip: 'Use a receita acima' },
       { amount: '1 un.', name: 'Clara de ovo',        tip: 'Cria a estrutura da espuma' },
       { amount: '30ml',  name: 'Água com gás',        tip: 'Gelada, adiciona leveza' },
     ],
     steps: [
       { num: 1, title: 'Suco', desc: 'Rale 100g de gengibre fresco e esprema num pano limpo para extrair cerca de 40ml de suco concentrado.' },
-      { num: 2, title: 'Misture', desc: 'Combine o suco de gengibre com 30ml de suco de limão e 20ml de xarope de açúcar numa coqueteleira.' },
+      { num: 2, title: 'Misture', desc: 'Combine o suco de gengibre com 30ml de suco de limão e 20ml de xarope simples numa coqueteleira.' },
       { num: 3, title: 'Clara', desc: 'Adicione 1 clara de ovo.' },
       { num: 4, title: 'Dry shake', desc: 'Bata na coqueteleira sem gelo por 30 segundos — a clara vai criar espuma densa.' },
       { num: 5, title: 'Finalize', desc: 'Abra a coqueteleira, adicione 30ml de água com gás gelada e misture suavemente. A espuma fica pronta para usar.' },
@@ -165,12 +165,12 @@ export const engarrafados = [
     shelf: 'Dura 2 meses (sem gelo)',
     ingredients: [
       { amount: '300ml', name: 'Bourbon',         tip: "Maker's Mark ou similar" },
-      { amount: '45ml',  name: 'Xarope de açúcar', tip: 'Use a receita acima' },
+      { amount: '45ml',  name: 'Xarope simples', tip: 'Use a receita acima' },
       { amount: '10 dashes', name: 'Angostura bitters', tip: 'Imprescindível' },
       { amount: '60ml',  name: 'Água filtrada',   tip: 'Diluição' },
     ],
     steps: [
-      { num: 1, title: 'Combine', desc: 'Misture 300ml de bourbon, 45ml de xarope de açúcar e 10 dashes de Angostura numa garrafa.' },
+      { num: 1, title: 'Combine', desc: 'Misture 300ml de bourbon, 45ml de xarope simples e 10 dashes de Angostura numa garrafa.' },
       { num: 2, title: 'Dilua', desc: 'Adicione 60ml de água filtrada.' },
       { num: 3, title: 'Misture', desc: 'Agite suavemente e refrigere por pelo menos 24h.' },
       { num: 4, title: 'Sirva', desc: 'Na hora de servir: 80ml sobre 1 pedra de gelo. Expresse casca de laranja.' },
@@ -188,11 +188,11 @@ export const engarrafados = [
     ingredients: [
       { amount: '300ml', name: 'Cachaça',           tip: 'Branca ou ouro' },
       { amount: '120ml', name: 'Suco de limão taiti', tip: 'Fresco, coado' },
-      { amount: '90ml',  name: 'Xarope de açúcar',  tip: 'Use a receita acima' },
+      { amount: '90ml',  name: 'Xarope simples',  tip: 'Use a receita acima' },
     ],
     steps: [
       { num: 1, title: 'Esprema', desc: 'Esprema limões taiti até obter 120ml de suco fresco. Coe para retirar sementes.' },
-      { num: 2, title: 'Combine', desc: 'Misture 300ml de cachaça, 120ml de suco de limão e 90ml de xarope de açúcar.' },
+      { num: 2, title: 'Combine', desc: 'Misture 300ml de cachaça, 120ml de suco de limão e 90ml de xarope simples.' },
       { num: 3, title: 'Prove', desc: 'Ajuste doçura e acidez a gosto.' },
       { num: 4, title: 'Armazene', desc: 'Refrigere. Na hora de servir: 85ml sobre gelo triturado. Decore com limão.' },
     ],
@@ -231,11 +231,11 @@ export const engarrafados = [
     ingredients: [
       { amount: '400ml', name: 'Rum branco',         tip: 'Havana Club 3 anos' },
       { amount: '160ml', name: 'Suco de limão taiti', tip: 'Fresco, coado' },
-      { amount: '120ml', name: 'Xarope de açúcar',  tip: 'Use a receita acima' },
+      { amount: '120ml', name: 'Xarope simples',  tip: 'Use a receita acima' },
       { amount: '30 folhas', name: 'Hortelã fresca', tip: 'Grande punhado' },
     ],
     steps: [
-      { num: 1, title: 'Infusione', desc: 'Combine 30 folhas de hortelã e 120ml de xarope de açúcar numa garrafa. Agite e deixe 2h na geladeira.' },
+      { num: 1, title: 'Infusione', desc: 'Combine 30 folhas de hortelã e 120ml de xarope simples numa garrafa. Agite e deixe 2h na geladeira.' },
       { num: 2, title: 'Coe', desc: 'Coe a hortelã do xarope.' },
       { num: 3, title: 'Misture', desc: 'Adicione 400ml de rum e 160ml de suco de limão. Misture bem.' },
       { num: 4, title: 'Sirva', desc: 'Na hora: 85ml do concentrado sobre gelo picado + água com gás. Decore com hortelã fresca.' },
