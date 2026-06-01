@@ -19,10 +19,27 @@ const moods = [
   { id: 'festas', label: 'Festa',        emoji: '🎉' },
 ];
 
+const INGREDIENT_ALIASES = { limao_taiti: 'limao', limao_siciliano: 'limao' };
+function norm(id) { return INGREDIENT_ALIASES[id] || id; }
+
 export default function HomeScreen({ navigation }) {
-  const { favorites, toggleFavorite } = useApp();
+  const { favorites, toggleFavorite, ingredients } = useApp();
   const [activeMood, setActiveMood] = useState(null);
   const [search, setSearch]         = useState('');
+
+  const surpriseMe = () => {
+    const normalized = ingredients.map(norm);
+    const canMake = drinks.filter(d =>
+      (d.needs || []).length > 0 &&
+      (d.needs || []).every(n => normalized.includes(n))
+    );
+    if (canMake.length === 0) {
+      navigation.navigate('MeuBar');
+      return;
+    }
+    const pick = canMake[Math.floor(Math.random() * canMake.length)];
+    navigation.navigate('DrinkDetail', { drinkId: pick.id });
+  };
 
   const filtered = drinks
     .filter(d => {
@@ -71,6 +88,18 @@ export default function HomeScreen({ navigation }) {
             style={styles.searchInput}
           />
         </View>
+
+        {/* CTA — SURPREENDA-ME */}
+        <TouchableOpacity onPress={surpriseMe} activeOpacity={0.85} style={[styles.ctaCard, { backgroundColor: '#0D1B2A', marginBottom: 12 }]}>
+          <View>
+            <Text style={styles.ctaLabel}>✦ Drink aleatório</Text>
+            <Text style={styles.ctaTitle}>Surpreenda-me 🎲</Text>
+            <Text style={styles.ctaSub}>Um drink com o que você tem no bar</Text>
+          </View>
+          <View style={[styles.ctaIcon, { backgroundColor: '#1A3A5C' }]}>
+            <Text style={{ fontSize: 26 }}>🎲</Text>
+          </View>
+        </TouchableOpacity>
 
         {/* CTA — MEU BAR */}
         <TouchableOpacity onPress={() => navigation.navigate('MeuBar')} activeOpacity={0.85} style={styles.ctaCard}>

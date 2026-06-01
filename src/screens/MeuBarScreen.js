@@ -8,9 +8,14 @@ import { colors, fonts, radius, spacing } from '../theme';
 import AppIcon from '../components/AppIcon';
 import BottomNav from '../components/BottomNav';
 import { DrinkCardList } from '../components/DrinkCard';
+import { Share } from 'react-native';
 import drinks from '../data/drinks';
 import { ingredientCategories } from '../data/ingredients';
 import { xaropes, engarrafados } from '../data/recipes';
+
+const INGREDIENT_ALIASES = { limao_taiti: 'limao', limao_siciliano: 'limao' };
+function norm(id) { return INGREDIENT_ALIASES[id] || id; }
+const allItems = ingredientCategories.flatMap(c => c.items);
 
 // limao_taiti e limao_siciliano satisfazem o requisito 'limao' nos drinks
 const INGREDIENT_ALIASES = {
@@ -31,7 +36,6 @@ function calcMatches(selected) {
   }).sort((a, b) => b.match - a.match);
 }
 
-const allItems = ingredientCategories.flatMap(c => c.items);
 const getItem  = (id) => allItems.find(i => i.id === id);
 
 export default function MeuBarScreen({ navigation }) {
@@ -41,6 +45,21 @@ export default function MeuBarScreen({ navigation }) {
   const [showResults, setShowResults]   = useState(false);
   const [openCat, setOpenCat]           = useState('Destilados');
   const [openRecipe, setOpenRecipe]     = useState(null);
+  const [showShoppingList, setShowShoppingList] = useState(false);
+
+  // Calcula o que falta comprar baseado nos favoritos
+  const shoppingList = (() => {
+    const normalized = ingredients.map(norm);
+    const favDrinks = drinks.filter(d => favorites.includes(d.id));
+    const needed = new Set(
+      favDrinks.flatMap(d => (d.needs || []).filter(n => !normalized.includes(n)))
+    );
+    return ingredientCategories.flatMap(cat =>
+      cat.items
+        .filter(item => needed.has(item.id) || needed.has(norm(item.id)))
+        .map(item => ({ ...item, cat: cat.cat }))
+    );
+  })();
 
   const toggleTemp = (id) =>
     setTempSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -189,6 +208,60 @@ export default function MeuBarScreen({ navigation }) {
 
           {ingredients.length > 0 && (
             <View style={styles.section}>
+              {/* Lista de Compras */}
+              <TouchableOpacity
+                onPress={() => setShowShoppingList(v => !v)}
+                activeOpacity={0.8}
+                style={styles.shoppingBtn}
+              >
+                <Text style={styles.shoppingBtnText}>🛒 Lista de compras</Text>
+                <Text style={styles.shoppingBtnSub}>
+                  {shoppingList.length === 0
+                    ? 'Você tem tudo para seus favoritos!'
+                    : `${shoppingList.length} item${shoppingList.length > 1 ? 'ns' : ''} faltando para seus favoritos`}
+                </Text>
+              </TouchableOpacity>
+
+              {showShoppingList && (
+                <View style={styles.shoppingPanel}>
+                  {shoppingList.length === 0 ? (
+                    <Text style={styles.shoppingEmpty}>✅ Seu bar já tem tudo para preparar os drinks favoritos!</Text>
+                  ) : (
+                    <>
+                      {ingredientCategories.map(cat => {
+                        const catItems = shoppingList.filter(i => i.cat === cat.cat);
+                        if (catItems.length === 0) return null;
+                        return (
+                          <View key={cat.cat} style={{ marginBottom: 12 }}>
+                            <Text style={styles.shoppingCat}>{cat.emoji} {cat.cat}</Text>
+                            {catItems.map(item => (
+                              <View key={item.id} style={styles.shoppingItem}>
+                                <Text style={styles.shoppingDot}>·</Text>
+                                <Text style={styles.shoppingItemName}>{item.label}</Text>
+                              </View>
+                            ))}
+                          </View>
+                        );
+                      })}
+                      <TouchableOpacity
+                        onPress={() => {
+                          const text = '🛒 Lista de compras — Bartender de Bolso\n\n' +
+                            ingredientCategories.flatMap(cat => {
+                              const items = shoppingList.filter(i => i.cat === cat.cat);
+                              if (!items.length) return [];
+                              return [`${cat.emoji} ${cat.cat}`, ...items.map(i => `  · ${i.label}`), ''];
+                            }).join('\n');
+                          Share.share({ message: text });
+                        }}
+                        style={styles.shoppingShareBtn}
+                      >
+                        <Text style={styles.shoppingShareText}>📤 Compartilhar lista</Text>
+                      </TouchableOpacity>
+                    </>
+                  )}
+                </View>
+              )}
+
               <ResultsList perfect={barPerfect} partial={barPartial} />
             </View>
           )}
@@ -500,4 +573,17 @@ const styles = StyleSheet.create({
   recipeTipText: { fontSize: 12, fontFamily: fonts.semiBold, color: '#7A5C00', lineHeight: 18 },
   usedInChip: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 50, backgroundColor: '#F0F0EC' },
   usedInText: { fontSize: 11, fontFamily: fonts.extraBold, color: colors.text },
+
+  // Shopping list
+  shoppingBtn: { backgroundColor: '#0D1B2A', borderRadius: radius.lg, padding: spacing.md, marginBottom: 12 },
+  shoppingBtnText: { fontSize: 14, fontFamily: fonts.extraBold, color: '#FFD966' },
+  shoppingBtnSub: { fontSize: 11, fontFamily: fonts.semiBold, color: '#888', marginTop: 3 },
+  shoppingPanel: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.md, marginBottom: 16, borderWidth: 2, borderColor: '#F0F0EC' },
+  shoppingEmpty: { fontSize: 13, fontFamily: fonts.semiBold, color: '#2E7D32', textAlign: 'center', paddingVertical: 8 },
+  shoppingCat: { fontSize: 12, fontFamily: fonts.extraBold, color: colors.textMuted, marginBottom: 6, letterSpacing: 0.5 },
+  shoppingItem: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 3 },
+  shoppingDot: { fontSize: 16, color: colors.primary, lineHeight: 20 },
+  shoppingItemName: { fontSize: 13, fontFamily: fonts.semiBold, color: colors.text },
+  shoppingShareBtn: { marginTop: 12, backgroundColor: '#F0F0EC', borderRadius: radius.md, padding: spacing.sm, alignItems: 'center' },
+  shoppingShareText: { fontSize: 13, fontFamily: fonts.extraBold, color: colors.text },
 });

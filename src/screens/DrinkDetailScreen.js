@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert,
 } from 'react-native';
@@ -9,15 +9,59 @@ import AppIcon from '../components/AppIcon';
 import { glassMap } from '../components/glasses/Glasses';
 import drinks from '../data/drinks';
 
+const SCALES = [1, 2, 4, 6];
+
+function scaleAmount(amount, scale) {
+  if (scale === 1) return amount;
+  if (!amount) return amount;
+  const unchanged = ['Q.B.', 'Completar', 'A gosto', 'Opcional'];
+  if (unchanged.some(s => amount.includes(s))) return amount;
+
+  // frações: "1/2 un."
+  const fracMatch = amount.match(/^(\d+)\/(\d+)\s*(.*)$/);
+  if (fracMatch) {
+    const num = parseInt(fracMatch[1]) / parseInt(fracMatch[2]);
+    const unit = fracMatch[3].trim();
+    const result = num * scale;
+    const fmt = result % 1 === 0 ? result.toString() : result.toFixed(1).replace(/\.0$/, '');
+    return unit ? `${fmt} ${unit}` : fmt;
+  }
+
+  // números normais: "30ml", "2 col.", "10 folhas"
+  const numMatch = amount.match(/^(\d+(?:[,\.]\d+)?)\s*(.*)$/);
+  if (!numMatch) return amount;
+  const num = parseFloat(numMatch[1].replace(',', '.'));
+  const unit = numMatch[2].trim();
+  const result = num * scale;
+  const fmt = result % 1 === 0 ? result.toString() : result.toFixed(0);
+  return unit ? `${fmt}${unit.startsWith('m') || unit.startsWith('g') ? '' : ' '}${unit}` : fmt;
+}
+
 export default function DrinkDetailScreen({ navigation, route }) {
   const { drinkId } = route.params;
   const drink = drinks.find(d => d.id === drinkId);
   const { favorites, toggleFavorite, addToHistory } = useApp();
-  const [activeTab, setActiveTab]       = useState('receita');
-  const [completedSteps, setCompleted]  = useState([]);
-  const [marcadoComoFeito, setMarcado]  = useState(false);
+  const [activeTab, setActiveTab]      = useState('receita');
+  const [completedSteps, setCompleted] = useState([]);
+  const [marcadoComoFeito, setMarcado] = useState(false);
+  const [scale, setScale]              = useState(1);
+  const [timerActive, setTimerActive]  = useState(false);
+  const [timerLeft, setTimerLeft]      = useState(drink.stirSeconds || 30);
+
   const GlassComponent = glassMap[drink.id];
   const isFav = favorites.includes(drink.id);
+  const method = drink.method || 'built';
+
+  useEffect(() => {
+    if (!timerActive) return;
+    if (timerLeft <= 0) {
+      setTimerActive(false);
+      setTimerLeft(drink.stirSeconds || 30);
+      return;
+    }
+    const id = setTimeout(() => setTimerLeft(t => t - 1), 1000);
+    return () => clearTimeout(id);
+  }, [timerActive, timerLeft]);
 
   const toggleStep = (num) =>
     setCompleted(prev => prev.includes(num) ? prev.filter(n => n !== num) : [...prev, num]);
@@ -27,6 +71,16 @@ export default function DrinkDetailScreen({ navigation, route }) {
     addToHistory(drink.id);
     setMarcado(true);
     Alert.alert('Mandou bem! 🍸', `${drink.name} foi adicionado ao seu histórico. Saúde! 🥂`);
+  };
+
+  const startTimer = () => {
+    setTimerLeft(drink.stirSeconds || 30);
+    setTimerActive(true);
+  };
+
+  const stopTimer = () => {
+    setTimerActive(false);
+    setTimerLeft(drink.stirSeconds || 30);
   };
 
   return (
@@ -118,11 +172,34 @@ export default function DrinkDetailScreen({ navigation, route }) {
           {/* ── RECEITA ── */}
           {activeTab === 'receita' && (
             <View style={{ gap: 10 }}>
-              <Text style={styles.sectionLabel}>Ingredientes</Text>
+              {/* Seletor de porções */}
+              <View style={styles.scaleRow}>
+                <Text style={styles.sectionLabel}>Ingredientes</Text>
+                <View style={styles.scaleSelector}>
+                  {SCALES.map(s => (
+                    <TouchableOpacity
+                      key={s}
+                      onPress={() => setScale(s)}
+                      style={[styles.scaleBtn, scale === s && { backgroundColor: drink.accent }]}
+                    >
+                      <Text style={[styles.scaleBtnText, scale === s && { color: '#fff' }]}>
+                        {s === 1 ? '1x' : `${s}p`}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+              {scale > 1 && (
+                <Text style={styles.scaleHint}>
+                  Receita escalada para {scale} pessoas
+                </Text>
+              )}
               {drink.ingredients.map((ing, i) => (
                 <View key={i} style={styles.ingCard}>
                   <View style={[styles.ingAmount, { backgroundColor: drink.color }]}>
-                    <Text style={[styles.ingAmountText, { color: drink.accent }]}>{ing.amount}</Text>
+                    <Text style={[styles.ingAmountText, { color: drink.accent }]}>
+                      {scaleAmount(ing.amount, scale)}
+                    </Text>
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.ingName}>{ing.name}</Text>
@@ -146,6 +223,7 @@ export default function DrinkDetailScreen({ navigation, route }) {
                   </TouchableOpacity>
                 )}
               </View>
+
               {/* Progress */}
               <View style={styles.progressBg}>
                 <View style={[styles.progressFill, {
@@ -153,6 +231,39 @@ export default function DrinkDetailScreen({ navigation, route }) {
                   backgroundColor: drink.accent,
                 }]}/>
               </View>
+
+              {/* Timer — só drinks mexidos */}
+              {method === 'stirred' && (
+                <View style={[styles.timerCard, { borderColor: drink.accent + '44' }]}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.timerLabel}>⏱ Timer de mexida</Text>
+                    <Text style={styles.timerSub}>
+                      {drink.stirSeconds || 30}s é o tempo ideal para resfriar sem diluir demais
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={timerActive ? stopTimer : startTimer}
+                    style={[styles.timerBtn, { backgroundColor: timerActive ? drink.accent : '#1C1A14' }]}
+                  >
+                    <Text style={styles.timerCount}>
+                      {timerActive ? timerLeft : (drink.stirSeconds || 30)}
+                    </Text>
+                    <Text style={styles.timerBtnLabel}>{timerActive ? 'parar' : 'iniciar'}</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {/* Nota — drinks batidos/liquidificador */}
+              {(method === 'shaken' || method === 'blended') && (
+                <View style={styles.shakenNote}>
+                  <Text style={styles.shakenNoteText}>
+                    {method === 'blended'
+                      ? '🧊 Bata no liquidificador até ficar homogêneo e bem gelado.'
+                      : '🤲 Bata na coqueteleira até sentir o metal gelar nas mãos — sinal que está na temperatura certa.'}
+                  </Text>
+                </View>
+              )}
+
               {drink.steps.map(step => {
                 const done = completedSteps.includes(step.num);
                 return (
@@ -266,6 +377,13 @@ const styles = StyleSheet.create({
 
   sectionLabel: { fontSize: 13, fontFamily: fonts.extraBold, color: colors.textMuted, letterSpacing: 1, textTransform: 'uppercase', marginBottom: spacing.sm },
 
+  // Scale
+  scaleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
+  scaleSelector: { flexDirection: 'row', gap: 6 },
+  scaleBtn: { paddingHorizontal: 12, paddingVertical: 5, borderRadius: 50, backgroundColor: '#F0F0EC' },
+  scaleBtnText: { fontSize: 11, fontFamily: fonts.extraBold, color: '#666' },
+  scaleHint: { fontSize: 11, fontFamily: fonts.semiBold, color: colors.textMuted, marginBottom: 4 },
+
   ingCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.md, flexDirection: 'row', alignItems: 'center', gap: 14, borderWidth: 2, borderColor: '#F5F5F5' },
   ingAmount: { width: 52, height: 52, borderRadius: 14, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   ingAmountText: { fontSize: 12, fontFamily: fonts.black, textAlign: 'center', lineHeight: 16 },
@@ -275,6 +393,18 @@ const styles = StyleSheet.create({
   progressBg:   { height: 4, backgroundColor: '#F0F0EC', borderRadius: 2, overflow: 'hidden', marginBottom: 4 },
   progressFill: { height: '100%', borderRadius: 2 },
   resetBtn: { fontSize: 11, fontFamily: fonts.extraBold, color: colors.primary },
+
+  // Timer
+  timerCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: '#1C1A14', borderRadius: radius.lg, padding: spacing.md, gap: 14, borderWidth: 1 },
+  timerLabel: { fontSize: 13, fontFamily: fonts.extraBold, color: '#FFD966', marginBottom: 3 },
+  timerSub: { fontSize: 11, fontFamily: fonts.semiBold, color: '#888', lineHeight: 16 },
+  timerBtn: { width: 64, height: 64, borderRadius: 32, alignItems: 'center', justifyContent: 'center' },
+  timerCount: { fontSize: 22, fontFamily: fonts.black, color: '#fff', lineHeight: 26 },
+  timerBtnLabel: { fontSize: 9, fontFamily: fonts.extraBold, color: 'rgba(255,255,255,0.7)', letterSpacing: 0.5 },
+
+  // Shaken note
+  shakenNote: { backgroundColor: '#F0F7FF', borderRadius: radius.md, padding: spacing.md, borderLeftWidth: 3, borderLeftColor: '#1565C0' },
+  shakenNoteText: { fontSize: 13, fontFamily: fonts.semiBold, color: '#1565C0', lineHeight: 19 },
 
   stepCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.md, flexDirection: 'row', gap: 14, alignItems: 'flex-start', borderWidth: 2, borderColor: '#F5F5F5' },
   stepNum: { width: 36, height: 36, borderRadius: 12, backgroundColor: '#F0F0EC', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },

@@ -30,6 +30,7 @@ export const drinks = [
     famous: 'Gaspare Campari',
     funFact: 'James Bond pediu um Americano no primeiro livro de 007.',
     needs: ['campari', 'vermute', 'agua_gas', 'gelo'],
+    method: 'built',
   },
   {
     id: 16,
@@ -63,6 +64,7 @@ export const drinks = [
     famous: 'Irmãos Barbieri',
     funFact: 'É o drink mais pedido na Itália na hora do aperitivo.',
     needs: ['aperol', 'prosecco', 'agua_gas', 'gelo'],
+    method: 'built',
   },
   {
     id: 18,
@@ -94,6 +96,7 @@ export const drinks = [
     famous: 'Festas juninas brasileiras',
     funFact: 'Existem batidas de maracujá, morango, amendoim e muito mais.',
     needs: ['cachaca', 'leite_coco', 'gelo'],
+    method: 'blended',
   },
   {
     id: 11,
@@ -126,6 +129,7 @@ export const drinks = [
     famous: 'Fernand Petiot',
     funFact: 'Existem versões com bacon, camarão e até hambúrguer na decoração.',
     needs: ['vodka', 'limao', 'gelo'],
+    method: 'built',
   },
   {
     id: 17,
@@ -158,6 +162,7 @@ export const drinks = [
     famous: 'O povo brasileiro',
     funFact: 'A ANVISA reconhece a caipirinha como bebida típica nacional.',
     needs: ['cachaca', 'limao', 'acucar', 'gelo'],
+    method: 'built',
   },
   {
     id: 36,
@@ -191,6 +196,7 @@ export const drinks = [
     famous: 'Bares brasileiros',
     funFact: 'As sementes do maracujá dão um charme visual ao drink.',
     needs: ['cachaca', 'limao', 'maracuja', 'acucar', 'gelo'],
+    method: 'built',
   },
   {
     id: 32,
@@ -223,6 +229,7 @@ export const drinks = [
     famous: 'Bares brasileiros',
     funFact: 'Maracujá, kiwi e abacaxi são variações campeãs.',
     needs: ['cachaca', 'limao', 'morango', 'acucar', 'gelo'],
+    method: 'built',
   },
   {
     id: 20,
@@ -254,6 +261,7 @@ export const drinks = [
     famous: 'Bares brasileiros',
     funFact: 'Com saquê vira Caipisaquê; com rum, Caipiríssima.',
     needs: ['vodka', 'limao', 'acucar', 'gelo'],
+    method: 'built',
   },
   {
     id: 24,
@@ -286,6 +294,7 @@ export const drinks = [
     famous: 'Festas argentinas',
     funFact: 'Cada família tem sua mistura secreta de frutas.',
     needs: ['prosecco', 'maca', 'morango', 'gelo'],
+    method: 'built',
   },
   {
     id: 28,
@@ -319,6 +328,7 @@ export const drinks = [
     famous: 'Clube de cavalheiros da Filadélfia',
     funFact: 'Era considerado um drink "feminino" injustamente nos anos 1900.',
     needs: ['gin', 'limao', 'morango', 'gelo'],
+    method: 'shaken',
   },
   {
     id: 9,
@@ -351,6 +361,7 @@ export const drinks = [
     famous: 'Carrie Bradshaw',
     funFact: 'Após Sex and the City, as vendas de Cointreau subiram 30%.',
     needs: ['vodka', 'triplesec', 'limao', 'sumo_laranja', 'gelo'],
+    method: 'shaken',
   },
   {
     id: 4,
@@ -382,6 +393,7 @@ export const drinks = [
     famous: 'Soldados americanos em Cuba',
     funFact: 'O brinde "Por Cuba Libre!" deu nome ao drink.',
     needs: ['rum', 'limao', 'gelo'],
+    method: 'built',
   },
   {
     id: 2,
@@ -413,6 +425,7 @@ export const drinks = [
     famous: 'Ernest Hemingway',
     funFact: 'O Hemingway Special leva o dobro de rum e nada de açúcar.',
     needs: ['rum', 'limao', 'acucar', 'gelo'],
+    method: 'shaken',
   },
   {
     id: 31,
@@ -445,6 +458,7 @@ export const drinks = [
     famous: 'Marinheiros das Bermudas',
     funFact: 'A Goslings registrou legalmente o nome do coquetel.',
     needs: ['rum', 'gengibre', 'gelo'],
+    method: 'built',
   },
   {
     id: 19,
@@ -478,6 +492,7 @@ export const drinks = [
     famous: 'Dick Bradsell',
     funFact: 'A espuma cremosa vem de bater bem o café fresco.',
     needs: ['vodka', 'gelo'],
+    method: 'shaken',
   },
   {
     id: 27,
@@ -511,6 +526,7 @@ export const drinks = [
     famous: 'Henry Ramos',
     funFact: 'O Ramos Gin Fizz original era batido por 12 minutos!',
     needs: ['gin', 'limao', 'acucar', 'agua_gas', 'gelo'],
+    method: 'shaken',
   },
   {
     id: 6,
@@ -543,6 +559,7 @@ export const drinks = [
     famous: 'Oficiais britânicos na Índia',
     funFact: 'O quinino da tônica brilha sob luz negra.',
     needs: ['gin', 'gelo'],
+    method: 'built',
   },
   {
     id: 22,
@@ -576,6 +593,7 @@ export const drinks = [
     famous: 'Trader Vic',
     funFact: 'A primeira pessoa que provou exclamou "Mai tai roa ae!" (o melhor!).',
     needs: ['rum', 'triplesec', 'limao', 'gelo'],
+    method: 'shaken',
   },
   {
     id: 12,
@@ -608,6 +626,7 @@ export const drinks = [
     famous: 'Carlos "Danny" Herrera',
     funFact: 'É o coquetel mais vendido nos Estados Unidos.',
     needs: ['tequila', 'triplesec', 'limao', 'gelo'],
+    method: 'shaken',
   },
   {
     id: 25,
@@ -639,6 +658,7 @@ export const drinks = [
     famous: 'Mariano Martinez',
     funFact: 'A primeira máquina dele foi adaptada de uma máquina de sorvete.',
     needs: ['tequila', 'triplesec', 'limao', 'gelo'],
+    method: 'blended',
   },
   {
     id: 8,
@@ -671,6 +691,8 @@ export const drinks = [
     famous: 'James Bond',
     funFact: 'Bond pedia "batido, não mexido" — mas puristas sempre mexem.',
     needs: ['gin', 'vermute', 'gelo'],
+    method: 'stirred',
+    stirSeconds: 30,
   },
   {
     id: 30,
@@ -701,6 +723,7 @@ export const drinks = [
     famous: 'Hotel Ritz Paris',
     funFact: 'A proporção 1:1 é a clássica, mas pode ajustar a gosto.',
     needs: ['prosecco', 'sumo_laranja'],
+    method: 'built',
   },
   {
     id: 35,
@@ -733,6 +756,7 @@ export const drinks = [
     famous: 'Kentucky Derby',
     funFact: 'São servidos cerca de 120 mil juleps no Derby a cada ano.',
     needs: ['bourbon', 'hortela', 'acucar', 'gelo'],
+    method: 'built',
   },
   {
     id: 1,
@@ -768,6 +792,7 @@ export const drinks = [
     famous: 'Ernest Hemingway',
     funFact: 'Hemingway dizia: \'Meu Mojito no La Bodeguita.\'',
     needs: ['rum', 'limao', 'hortela', 'acucar', 'agua_gas', 'gelo'],
+    method: 'built',
   },
   {
     id: 10,
@@ -800,6 +825,7 @@ export const drinks = [
     famous: 'John G. Martin',
     funFact: 'A caneca de cobre mantém o drink mais gelado por mais tempo.',
     needs: ['vodka', 'gengibre', 'limao', 'gelo'],
+    method: 'built',
   },
   {
     id: 5,
@@ -833,6 +859,8 @@ export const drinks = [
     famous: 'Conde Camillo Negroni',
     funFact: 'O Negroni Sbagliato troca o gin por Prosecco.',
     needs: ['gin', 'campari', 'vermute', 'gelo'],
+    method: 'stirred',
+    stirSeconds: 25,
   },
   {
     id: 29,
@@ -865,6 +893,7 @@ export const drinks = [
     famous: 'Mirko Stocchetto',
     funFact: 'Viralizou em 2022 após um vídeo de atrizes de House of the Dragon.',
     needs: ['campari', 'vermute', 'prosecco', 'gelo'],
+    method: 'built',
   },
   {
     id: 14,
@@ -898,6 +927,8 @@ export const drinks = [
     famous: 'Don Draper (Mad Men)',
     funFact: 'Mad Men reacendeu a popularidade do Old Fashioned.',
     needs: ['bourbon', 'angostura', 'acucar', 'gelo'],
+    method: 'stirred',
+    stirSeconds: 30,
   },
   {
     id: 26,
@@ -931,6 +962,7 @@ export const drinks = [
     famous: 'Bartenders mexicanos',
     funFact: '"Paloma" significa "pomba" em espanhol.',
     needs: ['tequila', 'limao', 'gelo'],
+    method: 'built',
   },
   {
     id: 3,
@@ -962,6 +994,7 @@ export const drinks = [
     famous: 'Ramón "Monchito" Marrero',
     funFact: 'Porto Rico declarou a Piña Colada bebida oficial em 1978.',
     needs: ['rum', 'creme_coco', 'gelo'],
+    method: 'blended',
   },
   {
     id: 23,
@@ -994,6 +1027,7 @@ export const drinks = [
     famous: 'Bares de praia brasileiros',
     funFact: 'A hortelã realça o frescor do abacaxi.',
     needs: ['rum', 'hortela', 'limao', 'gelo'],
+    method: 'blended',
   },
   {
     id: 34,
@@ -1025,6 +1059,7 @@ export const drinks = [
     famous: 'Bares americanos',
     funFact: 'Trocando a toranja por abacaxi vira um Bay Breeze.',
     needs: ['vodka', 'gelo'],
+    method: 'built',
   },
   {
     id: 21,
@@ -1057,6 +1092,7 @@ export const drinks = [
     famous: 'Bares da Flórida',
     funFact: 'Nasceu numa competição para vender mais peach schnapps.',
     needs: ['vodka', 'sumo_laranja', 'gelo'],
+    method: 'built',
   },
   {
     id: 13,
@@ -1088,6 +1124,7 @@ export const drinks = [
     famous: 'Rolling Stones',
     funFact: 'A turnê de 1972 dos Stones foi apelidada de "Cocaine & Tequila Sunrise Tour".',
     needs: ['tequila', 'sumo_laranja', 'gelo'],
+    method: 'built',
   },
   {
     id: 7,
@@ -1121,6 +1158,7 @@ export const drinks = [
     famous: 'Jerry Thomas',
     funFact: 'O nome veio de uma pegadinha popular em Nova York nos anos 1870.',
     needs: ['gin', 'limao', 'acucar', 'agua_gas', 'gelo'],
+    method: 'shaken',
   },
   {
     id: 15,
@@ -1154,6 +1192,7 @@ export const drinks = [
     famous: 'Jerry Thomas',
     funFact: 'A clara de ovo cria uma espuma sedosa característica.',
     needs: ['whisky', 'limao', 'acucar', 'gelo'],
+    method: 'shaken',
   },
 ];
 
