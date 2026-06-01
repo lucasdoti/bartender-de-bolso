@@ -20,7 +20,7 @@ const moods = [
 ];
 
 export default function HomeScreen({ navigation }) {
-  const { favorites, toggleFavorite, ingredients } = useApp();
+  const { favorites, toggleFavorite } = useApp();
   const [activeMood, setActiveMood] = useState(null);
   const [search, setSearch]         = useState('');
 
@@ -30,11 +30,6 @@ export default function HomeScreen({ navigation }) {
       d.base.toLowerCase().includes(search.toLowerCase());
     return matchMood && matchSearch;
   });
-
-  // Drinks que o usuário pode fazer com o bar salvo
-  const barDrinks = drinks.filter(d =>
-    (d.needs || []).every(n => ingredients.includes(n))
-  );
 
   const greeting = () => {
     const h = new Date().getHours();
@@ -71,51 +66,17 @@ export default function HomeScreen({ navigation }) {
           />
         </View>
 
-        {/* SEU BAR — só aparece se tiver ingredientes salvos */}
-        {barDrinks.length > 0 && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Com o seu bar 🥃</Text>
-              <TouchableOpacity onPress={() => navigation.navigate('MeuBar')}>
-                <Text style={styles.sectionLink}>Gerenciar</Text>
-              </TouchableOpacity>
-            </View>
-            <View style={{ gap: 12 }}>
-              {barDrinks.slice(0, 3).map(drink => (
-                <DrinkCardList
-                  key={drink.id}
-                  drink={drink}
-                  isFavorite={favorites.includes(drink.id)}
-                  onPress={() => navigation.navigate('DrinkDetail', { drinkId: drink.id })}
-                  onFavorite={() => toggleFavorite(drink.id)}
-                />
-              ))}
-              {barDrinks.length > 3 && (
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('MeuBar')}
-                  activeOpacity={0.8}
-                  style={styles.moreBtn}
-                >
-                  <Text style={styles.moreBtnText}>+ {barDrinks.length - 3} drinks disponíveis no seu bar</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          </View>
-        )}
-
         {/* CTA — MEU BAR */}
-        {barDrinks.length === 0 && (
-          <TouchableOpacity onPress={() => navigation.navigate('MeuBar')} activeOpacity={0.85} style={styles.ctaCard}>
-            <View>
-              <Text style={styles.ctaLabel}>✦ Feature estrela</Text>
-              <Text style={styles.ctaTitle}>O que tenho em casa?</Text>
-              <Text style={styles.ctaSub}>Selecione seus ingredientes e descubra</Text>
-            </View>
-            <View style={styles.ctaIcon}>
-              <Text style={{ fontSize: 26 }}>🥃</Text>
-            </View>
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity onPress={() => navigation.navigate('MeuBar')} activeOpacity={0.85} style={styles.ctaCard}>
+          <View>
+            <Text style={styles.ctaLabel}>✦ Feature estrela</Text>
+            <Text style={styles.ctaTitle}>O que tenho em casa?</Text>
+            <Text style={styles.ctaSub}>Selecione seus ingredientes e descubra</Text>
+          </View>
+          <View style={styles.ctaIcon}>
+            <Text style={{ fontSize: 26 }}>🥃</Text>
+          </View>
+        </TouchableOpacity>
 
         {/* MOODS */}
         <View style={styles.section}>
@@ -206,8 +167,6 @@ const styles = StyleSheet.create({
   moodEmoji: { fontSize: 14 },
   moodLabel: { fontSize: 12, fontFamily: fonts.extraBold, color: '#555' },
   moodLabelActive: { color: '#fff' },
-  moreBtn: { backgroundColor: '#F0F0EC', borderRadius: radius.lg, padding: spacing.md, alignItems: 'center' },
-  moreBtnText: { fontSize: 13, fontFamily: fonts.extraBold, color: colors.primary },
   empty: { alignItems: 'center', paddingVertical: 48 },
   emptyTitle: { fontSize: 14, fontFamily: fonts.extraBold, color: colors.text, marginTop: 8 },
   emptySub: { fontSize: 12, fontFamily: fonts.semiBold, color: colors.textLight, marginTop: 4 },
