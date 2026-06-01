@@ -33,13 +33,15 @@ export default function CardapioScreen({ navigation }) {
   const [view, setView]     = useState('list');
   const [showBases, setShowBases] = useState(false);
 
-  const filtered = drinks.filter(d => {
-    const matchFilter = filter === 'todos' || d.tags.includes(filter);
-    const matchBase   = base === 'Todos' || d.base === base;
-    const matchSearch = d.name.toLowerCase().includes(search.toLowerCase()) ||
-      d.base.toLowerCase().includes(search.toLowerCase());
-    return matchFilter && matchBase && matchSearch;
-  });
+  const filtered = drinks
+    .filter(d => {
+      const matchFilter = filter === 'todos' || d.tags.includes(filter);
+      const matchBase   = base === 'Todos' || d.base === base;
+      const matchSearch = d.name.toLowerCase().includes(search.toLowerCase()) ||
+        d.base.toLowerCase().includes(search.toLowerCase());
+      return matchFilter && matchBase && matchSearch;
+    })
+    .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
 
   const ListHeader = (
     <>

@@ -9,7 +9,7 @@ import { colors, fonts, radius, spacing } from '../theme';
 import AppIcon from '../components/AppIcon';
 import BottomNav from '../components/BottomNav';
 import { DrinkCardList } from '../components/DrinkCard';
-import drinks from '../data/drinks';
+import drinks, { ibaOrder } from '../data/drinks';
 
 const moods = [
   { id: 'calor',  label: 'Refrescante',  emoji: '☀️' },
@@ -24,12 +24,18 @@ export default function HomeScreen({ navigation }) {
   const [activeMood, setActiveMood] = useState(null);
   const [search, setSearch]         = useState('');
 
-  const filtered = drinks.filter(d => {
-    const matchMood   = activeMood ? d.tags.includes(activeMood) : true;
-    const matchSearch = d.name.toLowerCase().includes(search.toLowerCase()) ||
-      d.base.toLowerCase().includes(search.toLowerCase());
-    return matchMood && matchSearch;
-  });
+  const filtered = drinks
+    .filter(d => {
+      const matchMood   = activeMood ? d.tags.includes(activeMood) : true;
+      const matchSearch = d.name.toLowerCase().includes(search.toLowerCase()) ||
+        d.base.toLowerCase().includes(search.toLowerCase());
+      return matchMood && matchSearch;
+    })
+    .sort((a, b) => {
+      const ai = ibaOrder.indexOf(a.id);
+      const bi = ibaOrder.indexOf(b.id);
+      return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+    });
 
   const greeting = () => {
     const h = new Date().getHours();

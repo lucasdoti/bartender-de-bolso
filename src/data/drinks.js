@@ -1157,4 +1157,44 @@ export const drinks = [
   },
 ];
 
+// Ordem de popularidade baseada no ranking IBA (Unforgettables → Contemporary Classics → regionais)
+export const ibaOrder = [
+  14, // Old Fashioned
+  8,  // Martini
+  1,  // Mojito
+  2,  // Daiquiri
+  12, // Margarita
+  5,  // Negroni
+  15, // Whisky Sour
+  33, // Americano
+  9,  // Cosmopolitan
+  3,  // Piña Colada
+  19, // Espresso Martini
+  17, // Caipirinha
+  6,  // Gin Tônica
+  16, // Aperol Spritz
+  10, // Moscow Mule
+  11, // Bloody Mary
+  7,  // Tom Collins
+  21, // Sex on the Beach
+  13, // Tequila Sunrise
+  4,  // Cuba Libre
+  22, // Mai Tai
+  30, // Mimosa
+  27, // Gin Fizz
+  28, // Clover Club
+  31, // Dark n Stormy
+  35, // Mint Julep
+  26, // Paloma
+  29, // Negroni Sbagliato
+  20, // Caipiroska
+  32, // Caipirinha de Morango
+  36, // Caipirinha de Maracujá
+  25, // Margarita Frozen
+  34, // Sea Breeze
+  18, // Batida de Coco
+  24, // Clericot
+  23, // Piña Verde
+];
+
 export default drinks;
