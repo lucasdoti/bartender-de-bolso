@@ -470,6 +470,204 @@ const G36 = ({ size = 48 }) => (
   </Svg>
 );
 
+// 37 — Bee's Knees (coupe dourada)
+const G37 = ({ size = 48 }) => (
+  <Svg viewBox="0 0 80 80" width={size} height={size} fill="none">
+    <Path d="M12 16 Q12 42 40 48 Q68 42 68 16 Z" fill="#FFF8E1" stroke="#F57F17" strokeWidth="2"/>
+    <Path d="M12 16 Q12 32 40 36 Q68 32 68 16 Z" fill="#FFEE58" opacity="0.5"/>
+    <Circle cx="58" cy="20" r="5" fill="#FDD835" stroke="#F57F17" strokeWidth="1"/>
+    <Line x1="40" y1="48" x2="40" y2="66" stroke="#F57F17" strokeWidth="3"/>
+    <Ellipse cx="40" cy="68" rx="13" ry="3.5" fill="#F57F17"/>
+  </Svg>
+);
+
+// 38 — Boulevardier (rocks âmbar)
+const G38 = ({ size = 48 }) => (
+  <Svg viewBox="0 0 80 80" width={size} height={size} fill="none">
+    <Path d="M18 20 L22 65 L58 65 L62 20 Z" fill="#FFCCBC" stroke="#BF360C" strokeWidth="2" strokeLinejoin="round"/>
+    <Path d="M18 20 L22 40 L58 40 L62 20 Z" fill="#FF7043" opacity="0.5"/>
+    <Rect x="26" y="44" width="14" height="14" rx="3" fill="white" opacity="0.7" stroke="#ddd" strokeWidth="1"/>
+    <Path d="M50 26 Q58 20 62 28" stroke="#FF6D00" strokeWidth="3" fill="none" strokeLinecap="round"/>
+    <Rect x="28" y="65" width="24" height="5" rx="2.5" fill="#BF360C"/>
+  </Svg>
+);
+
+// 39 — Bramble (rocks roxo com drizzle)
+const G39 = ({ size = 48 }) => (
+  <Svg viewBox="0 0 80 80" width={size} height={size} fill="none">
+    <Path d="M18 22 L22 65 L58 65 L62 22 Z" fill="#F3E5F5" stroke="#6A1B9A" strokeWidth="2" strokeLinejoin="round"/>
+    <Path d="M18 22 L22 44 L58 44 L62 22 Z" fill="#CE93D8" opacity="0.4"/>
+    <Path d="M44 22 Q50 32 46 44 Q52 36 56 44" stroke="#6A1B9A" strokeWidth="2.5" fill="none" strokeLinecap="round" opacity="0.8"/>
+    <Circle cx="30" cy="30" r="3" fill="#6A1B9A" opacity="0.7"/>
+    <Circle cx="36" cy="26" r="2.5" fill="#8E24AA" opacity="0.6"/>
+    <Rect x="28" y="65" width="24" height="5" rx="2.5" fill="#6A1B9A"/>
+  </Svg>
+);
+
+// 40 — French 75 (flute com bolhas)
+const G40 = ({ size = 48 }) => (
+  <Svg viewBox="0 0 80 80" width={size} height={size} fill="none">
+    <Path d="M30 10 L32 52 L48 52 L50 10 Z" fill="#FFFDE7" stroke="#F9A825" strokeWidth="2"/>
+    <Path d="M30 10 L31 30 L49 30 L50 10 Z" fill="#FFEE58" opacity="0.4"/>
+    <Circle cx="37" cy="22" r="1.2" fill="white" opacity="0.8"/>
+    <Circle cx="42" cy="34" r="1" fill="white" opacity="0.7"/>
+    <Circle cx="39" cy="44" r="1" fill="white" opacity="0.6"/>
+    <Circle cx="44" cy="16" r="1.2" fill="white" opacity="0.7"/>
+    <Line x1="40" y1="52" x2="40" y2="68" stroke="#F9A825" strokeWidth="2.5"/>
+    <Ellipse cx="40" cy="70" rx="11" ry="3" fill="#F9A825"/>
+  </Svg>
+);
+
+// 41 — Garibaldi (highball laranja)
+const G41 = ({ size = 48 }) => (
+  <Svg viewBox="0 0 80 80" width={size} height={size} fill="none">
+    <Rect x="22" y="10" width="36" height="54" rx="5" fill="#FFCCBC" stroke="#E64A19" strokeWidth="2"/>
+    <Rect x="22" y="10" width="36" height="26" rx="5" fill="#FF7043" opacity="0.5"/>
+    <Circle cx="52" cy="22" r="7" fill="#FF6D00" stroke="#E64A19" strokeWidth="1.2"/>
+    <Circle cx="52" cy="22" r="3.5" fill="#FFB74D"/>
+    <Circle cx="30" cy="44" r="2" fill="white" opacity="0.5"/>
+    <Circle cx="40" cy="50" r="1.5" fill="white" opacity="0.4"/>
+    <Rect x="28" y="64" width="24" height="5" rx="2.5" fill="#E64A19"/>
+  </Svg>
+);
+
+// 42 — Gin Basil Smash (rocks verde com manjericão)
+const G42 = ({ size = 48 }) => (
+  <Svg viewBox="0 0 80 80" width={size} height={size} fill="none">
+    <Path d="M18 22 L22 65 L58 65 L62 22 Z" fill="#E8F5E9" stroke="#2E7D32" strokeWidth="2" strokeLinejoin="round"/>
+    <Path d="M18 22 L22 42 L58 42 L62 22 Z" fill="#A5D6A7" opacity="0.5"/>
+    <Ellipse cx="36" cy="26" rx="9" ry="5" fill="#388E3C" opacity="0.8" transform="rotate(-10, 36, 26)"/>
+    <Ellipse cx="46" cy="30" rx="8" ry="4" fill="#43A047" opacity="0.7" transform="rotate(15, 46, 30)"/>
+    <Rect x="28" y="65" width="24" height="5" rx="2.5" fill="#1B5E20"/>
+  </Svg>
+);
+
+// 43 — Irish Coffee (caneca com creme)
+const G43 = ({ size = 48 }) => (
+  <Svg viewBox="0 0 80 80" width={size} height={size} fill="none">
+    <Rect x="18" y="14" width="38" height="48" rx="5" fill="#5D4037" stroke="#3E2723" strokeWidth="2"/>
+    <Rect x="18" y="14" width="38" height="16" rx="5" fill="#F5F5F5" opacity="0.95"/>
+    <Ellipse cx="37" cy="14" rx="19" ry="4" fill="#EEEEEE"/>
+    <Path d="M56 30 Q66 32 66 44 Q66 52 58 52" stroke="#3E2723" strokeWidth="3" fill="none"/>
+    <Rect x="24" y="18" width="26" height="8" rx="3" fill="white" opacity="0.6"/>
+    <Rect x="24" y="62" width="26" height="4" rx="2" fill="#3E2723"/>
+  </Svg>
+);
+
+// 44 — John Collins (highball amarelo)
+const G44 = ({ size = 48 }) => (
+  <Svg viewBox="0 0 80 80" width={size} height={size} fill="none">
+    <Rect x="24" y="8" width="32" height="58" rx="5" fill="#FFF9C4" stroke="#F57F17" strokeWidth="2"/>
+    <Rect x="24" y="8" width="32" height="22" rx="5" fill="#FFEE58" opacity="0.5"/>
+    <Circle cx="30" cy="38" r="2" fill="white" opacity="0.6"/>
+    <Circle cx="44" cy="46" r="1.8" fill="white" opacity="0.5"/>
+    <Circle cx="50" cy="20" r="6" fill="#FDD835" stroke="#F9A825" strokeWidth="1.2"/>
+    <Rect x="48" y="4" width="3" height="28" rx="1.5" fill="#FF8A65"/>
+    <Rect x="30" y="66" width="20" height="5" rx="2.5" fill="#F57F17"/>
+  </Svg>
+);
+
+// 45 — Manhattan (coupe com cereja)
+const G45 = ({ size = 48 }) => (
+  <Svg viewBox="0 0 80 80" width={size} height={size} fill="none">
+    <Path d="M14 18 Q14 44 40 48 Q66 44 66 18 Z" fill="#FFE0B2" stroke="#BF360C" strokeWidth="2"/>
+    <Path d="M14 18 Q14 34 40 38 Q66 34 66 18 Z" fill="#FF7043" opacity="0.45"/>
+    <Line x1="52" y1="14" x2="44" y2="30" stroke="#8D6E63" strokeWidth="1.2"/>
+    <Circle cx="52" cy="13" r="5" fill="#C62828" stroke="#BF360C" strokeWidth="1.2"/>
+    <Circle cx="52" cy="13" r="2" fill="#FF5252"/>
+    <Line x1="40" y1="48" x2="40" y2="66" stroke="#BF360C" strokeWidth="3"/>
+    <Ellipse cx="40" cy="68" rx="14" ry="4" fill="#BF360C"/>
+  </Svg>
+);
+
+// 46 — New York Sour (rocks espuma + camada vinho)
+const G46 = ({ size = 48 }) => (
+  <Svg viewBox="0 0 80 80" width={size} height={size} fill="none">
+    <Path d="M16 22 L20 65 L60 65 L64 22 Z" fill="#FFE0B2" stroke="#880E4F" strokeWidth="2" strokeLinejoin="round"/>
+    <Path d="M16 22 L18 32 L62 32 L64 22 Z" fill="#F8BBD0" opacity="0.9"/>
+    <Ellipse cx="40" cy="22" rx="24" ry="4.5" fill="#FCE4EC"/>
+    <Path d="M18 32 L20 42 L60 42 L62 32 Z" fill="#880E4F" opacity="0.55"/>
+    <Rect x="26" y="46" width="12" height="12" rx="3" fill="white" opacity="0.55" stroke="#ddd" strokeWidth="1"/>
+    <Rect x="28" y="65" width="24" height="5" rx="2.5" fill="#880E4F"/>
+  </Svg>
+);
+
+// 47 — Penicillin (rocks âmbar com fumaça)
+const G47 = ({ size = 48 }) => (
+  <Svg viewBox="0 0 80 80" width={size} height={size} fill="none">
+    <Path d="M16 22 L20 65 L60 65 L64 22 Z" fill="#FFF3E0" stroke="#E65100" strokeWidth="2" strokeLinejoin="round"/>
+    <Path d="M16 22 L20 42 L60 42 L64 22 Z" fill="#FFAB40" opacity="0.5"/>
+    <Path d="M24 18 Q28 12 32 16 Q36 10 40 14" stroke="#B0BEC5" strokeWidth="2" fill="none" strokeLinecap="round" opacity="0.7"/>
+    <Path d="M32 16 Q36 10 40 14 Q44 8 48 12" stroke="#90A4AE" strokeWidth="1.8" fill="none" strokeLinecap="round" opacity="0.5"/>
+    <Rect x="28" y="44" width="14" height="14" rx="3" fill="white" opacity="0.65" stroke="#ddd" strokeWidth="1"/>
+    <Rect x="28" y="65" width="24" height="5" rx="2.5" fill="#E65100"/>
+  </Svg>
+);
+
+// 48 — Pisco Sour (coupe com espuma e angostura)
+const G48 = ({ size = 48 }) => (
+  <Svg viewBox="0 0 80 80" width={size} height={size} fill="none">
+    <Path d="M13 18 Q13 44 40 48 Q67 44 67 18 Z" fill="#FFF9C4" stroke="#F9A825" strokeWidth="2"/>
+    <Path d="M13 18 Q40 12 67 18" stroke="#FFFDE7" strokeWidth="5" strokeLinecap="round"/>
+    <Ellipse cx="40" cy="18" rx="27" ry="5" fill="#FFFDE7" opacity="0.9"/>
+    <Circle cx="35" cy="16" r="1.2" fill="#C62828" opacity="0.7"/>
+    <Circle cx="40" cy="15" r="1.2" fill="#C62828" opacity="0.7"/>
+    <Circle cx="45" cy="16" r="1.2" fill="#C62828" opacity="0.7"/>
+    <Line x1="40" y1="48" x2="40" y2="66" stroke="#F9A825" strokeWidth="3"/>
+    <Ellipse cx="40" cy="68" rx="14" ry="4" fill="#F9A825"/>
+  </Svg>
+);
+
+// 49 — Rabo de Galo (rocks vermelho escuro)
+const G49 = ({ size = 48 }) => (
+  <Svg viewBox="0 0 80 80" width={size} height={size} fill="none">
+    <Path d="M16 22 L20 65 L60 65 L64 22 Z" fill="#FFCDD2" stroke="#C62828" strokeWidth="2" strokeLinejoin="round"/>
+    <Path d="M16 22 L20 44 L60 44 L64 22 Z" fill="#EF5350" opacity="0.55"/>
+    <Rect x="26" y="46" width="14" height="13" rx="3" fill="white" opacity="0.65" stroke="#ddd" strokeWidth="1"/>
+    <Path d="M50 27 Q58 22 62 30" stroke="#FF6D00" strokeWidth="3" fill="none" strokeLinecap="round"/>
+    <Rect x="28" y="65" width="24" height="5" rx="2.5" fill="#C62828"/>
+  </Svg>
+);
+
+// 50 — Porn Star Martini (martini com maracujá)
+const G50 = ({ size = 48 }) => (
+  <Svg viewBox="0 0 80 80" width={size} height={size} fill="none">
+    <Path d="M12 16 L40 50 L68 16 Z" fill="#FFF8E1" stroke="#FF8F00" strokeWidth="2" strokeLinejoin="round"/>
+    <Path d="M12 16 L40 36 L68 16 Z" fill="#FFE082" opacity="0.6"/>
+    <Circle cx="34" cy="18" r="1.2" fill="#5D4037" opacity="0.7"/>
+    <Circle cx="40" cy="17" r="1.2" fill="#5D4037" opacity="0.7"/>
+    <Circle cx="46" cy="18" r="1.2" fill="#5D4037" opacity="0.7"/>
+    <Circle cx="62" cy="22" r="7" fill="#FF8F00" stroke="#E65100" strokeWidth="1.2"/>
+    <Circle cx="62" cy="22" r="3" fill="#FFE082"/>
+    <Line x1="40" y1="50" x2="40" y2="66" stroke="#FF8F00" strokeWidth="3"/>
+    <Ellipse cx="40" cy="68" rx="14" ry="4" fill="#FF8F00"/>
+  </Svg>
+);
+
+// 51 — Tommy's Margarita (taça margarita verde)
+const G51 = ({ size = 48 }) => (
+  <Svg viewBox="0 0 80 80" width={size} height={size} fill="none">
+    <Path d="M13 18 L40 54 L67 18 Z" fill="#E8F5E9" stroke="#2E7D32" strokeWidth="2" strokeLinejoin="round"/>
+    <Path d="M13 18 L40 38 L67 18 Z" fill="#A5D6A7" opacity="0.5"/>
+    <Circle cx="62" cy="22" r="8" fill="#8BC34A" stroke="#558B2F" strokeWidth="1.5"/>
+    <Circle cx="62" cy="22" r="4" fill="#DCEDC8"/>
+    <Line x1="40" y1="54" x2="40" y2="68" stroke="#2E7D32" strokeWidth="3"/>
+    <Ellipse cx="40" cy="68" rx="14" ry="4" fill="#2E7D32"/>
+  </Svg>
+);
+
+// 52 — White Lady (coupe azul claro)
+const G52 = ({ size = 48 }) => (
+  <Svg viewBox="0 0 80 80" width={size} height={size} fill="none">
+    <Path d="M12 16 Q12 44 40 48 Q68 44 68 16 Z" fill="#E8EAF6" stroke="#3949AB" strokeWidth="2"/>
+    <Path d="M12 16 Q40 10 68 16" stroke="#C5CAE9" strokeWidth="3" strokeLinecap="round"/>
+    <Ellipse cx="40" cy="16" rx="28" ry="5" fill="#E8EAF6" opacity="0.9"/>
+    <Path d="M12 16 Q12 32 40 36 Q68 32 68 16 Z" fill="#C5CAE9" opacity="0.4"/>
+    <Line x1="40" y1="48" x2="40" y2="66" stroke="#3949AB" strokeWidth="3"/>
+    <Ellipse cx="40" cy="68" rx="14" ry="4" fill="#3949AB"/>
+  </Svg>
+);
+
 export const glassMap = {
   1: G1,   2: G2,   3: G3,   4: G4,   5: G5,   6: G6,
   7: G7,   8: G8,   9: G9,   10: G10, 11: G11, 12: G12,
@@ -477,6 +675,9 @@ export const glassMap = {
   19: G19, 20: G20, 21: G21, 22: G22, 23: G23, 24: G24,
   25: G25, 26: G26, 27: G27, 28: G28, 29: G29, 30: G30,
   31: G31, 32: G32, 33: G33, 34: G34, 35: G35, 36: G36,
+  37: G37, 38: G38, 39: G39, 40: G40, 41: G41, 42: G42,
+  43: G43, 44: G44, 45: G45, 46: G46, 47: G47, 48: G48,
+  49: G49, 50: G50, 51: G51, 52: G52,
 };
 
 export default glassMap;
