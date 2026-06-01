@@ -10,27 +10,6 @@ import AppIcon from '../components/AppIcon';
 import BottomNav from '../components/BottomNav';
 import drinks from '../data/drinks';
 
-const badges = [
-  { emoji: '🍹', label: 'Primeiro drink',      earned: true  },
-  { emoji: '🔥', label: '5 drinks feitos',     earned: true  },
-  { emoji: '⭐', label: '10 favoritos',        earned: true  },
-  { emoji: '🥃', label: 'Bartender Pro',       earned: false },
-  { emoji: '🌍', label: 'World Tour',          earned: false },
-  { emoji: '🏆', label: 'Mestre dos drinques', earned: false },
-];
-
-const weekBars = [
-  { day: 'Seg', v: 0 }, { day: 'Ter', v: 1 }, { day: 'Qua', v: 2 },
-  { day: 'Qui', v: 1 }, { day: 'Sex', v: 3 }, { day: 'Sáb', v: 2 }, { day: 'Dom', v: 1 },
-];
-
-const destilados = [
-  { name: 'Rum',     pct: 38, color: '#C84B31' },
-  { name: 'Gin',     pct: 28, color: '#1565C0' },
-  { name: 'Vodka',   pct: 20, color: '#7B1FA2' },
-  { name: 'Cachaça', pct: 14, color: '#2E7D32' },
-];
-
 const configItems = [
   { icon: '🔔', label: 'Notificações',  sub: 'Novidades e receitas',  danger: false },
   { icon: '🌙', label: 'Modo escuro',   sub: 'Em breve',              danger: false },
@@ -51,6 +30,73 @@ export default function PerfilScreen({ navigation }) {
       { text: 'Sair', style: 'destructive', onPress: () => signOut() },
     ]);
   };
+
+  // ── ESTATÍSTICAS REAIS (calculadas do histórico) ──
+
+  // Drink mais preparado
+  const contagem = {};
+  history.forEach(h => { contagem[h.id] = (contagem[h.id] || 0) + 1; });
+  let drinkFavoritoId = null, maxVezes = 0;
+  Object.entries(contagem).forEach(([id, n]) => {
+    if (n > maxVezes) { maxVezes = n; drinkFavoritoId = Number(id); }
+  });
+  const drinkFavorito = drinks.find(d => d.id === drinkFavoritoId);
+
+  // Nível: 1 a cada 5 drinks feitos (mínimo nível 1)
+  const nivel = Math.max(1, Math.floor(history.length / 5) + 1);
+  const drinksNoNivel = history.length % 5;
+  const progressoNivel = (drinksNoNivel / 5) * 100;
+
+  // Destilados mais usados (a partir do histórico)
+  const baseCores = {
+    Rum: '#C84B31', Gin: '#1565C0', Vodka: '#7B1FA2', Cachaça: '#2E7D32',
+    Tequila: '#F9A825', Whisky: '#E65100', Bourbon: '#BF360C', Aperol: '#E64A19',
+    Campari: '#C62828',
+  };
+  const baseContagem = {};
+  history.forEach(h => {
+    const d = drinks.find(dr => dr.id === h.id);
+    if (d) baseContagem[d.base] = (baseContagem[d.base] || 0) + 1;
+  });
+  const totalBase = Object.values(baseContagem).reduce((a, b) => a + b, 0);
+  const destilados = Object.entries(baseContagem)
+    .map(([name, count]) => ({ name, pct: Math.round((count / totalBase) * 100), color: baseCores[name] || '#999' }))
+    .sort((a, b) => b.pct - a.pct)
+    .slice(0, 4);
+
+  // Drinks da semana real (últimos 7 dias)
+  const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const hoje = new Date();
+  const weekBars = [];
+  for (let i = 6; i >= 0; i--) {
+    const dia = new Date(hoje);
+    dia.setDate(hoje.getDate() - i);
+    const count = history.filter(h => {
+      const hd = new Date(h.date);
+      return hd.toDateString() === dia.toDateString();
+    }).length;
+    weekBars.push({ day: diasSemana[dia.getDay()], v: count, hoje: i === 0 });
+  }
+  const maxWeek = Math.max(...weekBars.map(w => w.v), 1);
+
+  // Semanas ativo (desde o primeiro drink)
+  let semanasAtivo = 1;
+  if (history.length > 0) {
+    const datas = history.map(h => new Date(h.date)).sort((a, b) => a - b);
+    const primeiro = datas[0];
+    const diff = Math.ceil((hoje - primeiro) / (1000 * 60 * 60 * 24 * 7));
+    semanasAtivo = Math.max(1, diff);
+  }
+
+  // Conquistas reais
+  const badges = [
+    { emoji: '🍹', label: 'Primeiro drink',      earned: history.length >= 1 },
+    { emoji: '🔥', label: '5 drinks feitos',     earned: history.length >= 5 },
+    { emoji: '⭐', label: '10 favoritos',        earned: favorites.length >= 10 },
+    { emoji: '🥃', label: 'Bartender Pro',       earned: history.length >= 20 },
+    { emoji: '🌍', label: 'Explorador',          earned: Object.keys(contagem).length >= 10 },
+    { emoji: '🏆', label: 'Mestre dos drinques', earned: history.length >= 50 },
+  ];
 
   const historyDrinks = history.slice(0, 5).map(h => ({
     ...drinks.find(d => d.id === h.id),
@@ -79,9 +125,9 @@ export default function PerfilScreen({ navigation }) {
             <Text style={styles.userRole}>{user?.email || 'Bartender Amador 🥃'}</Text>
             <View style={styles.levelRow}>
               <View style={styles.levelBg}>
-                <View style={styles.levelFill}/>
+                <View style={[styles.levelFill, { width: `${progressoNivel}%` }]}/>
               </View>
-              <Text style={styles.levelText}>Nível 3</Text>
+              <Text style={styles.levelText}>Nível {nivel}</Text>
             </View>
           </View>
           <TouchableOpacity style={styles.editBtn}>
@@ -94,7 +140,7 @@ export default function PerfilScreen({ navigation }) {
           {[
             { label: 'Drinks feitos', value: String(history.length || 0), emoji: '🍹' },
             { label: 'Favoritos',     value: String(favorites.length),    emoji: '❤️' },
-            { label: 'Semanas ativo', value: '3',                         emoji: '📅' },
+            { label: 'Semanas ativo', value: String(semanasAtivo),       emoji: '📅' },
           ].map(({ label, value, emoji }) => (
             <View key={label} style={styles.statCard}>
               <Text style={styles.statEmoji}>{emoji}</Text>
@@ -128,28 +174,37 @@ export default function PerfilScreen({ navigation }) {
           {/* ── ATIVIDADE ── */}
           {section === 'stats' && (
             <>
-              <View style={styles.featuredCard}>
-                <Text style={styles.featuredLabel}>✦ Drink favorito</Text>
-                <Text style={styles.featuredName}>Mojito 🍃</Text>
-                <Text style={styles.featuredSub}>Preparado 8 vezes • Nota média 5.0 ⭐</Text>
-              </View>
+              {drinkFavorito ? (
+                <View style={styles.featuredCard}>
+                  <Text style={styles.featuredLabel}>✦ Drink favorito</Text>
+                  <Text style={styles.featuredName}>{drinkFavorito.name}</Text>
+                  <Text style={styles.featuredSub}>Preparado {maxVezes} {maxVezes === 1 ? 'vez' : 'vezes'}</Text>
+                </View>
+              ) : (
+                <View style={styles.featuredCard}>
+                  <Text style={styles.featuredLabel}>✦ Drink favorito</Text>
+                  <Text style={styles.featuredName}>Nenhum ainda 🍸</Text>
+                  <Text style={styles.featuredSub}>Prepare seu primeiro drink para começar!</Text>
+                </View>
+              )}
 
               <View style={styles.card}>
                 <Text style={styles.cardTitle}>Drinks esta semana</Text>
                 <View style={styles.barChart}>
-                  {weekBars.map(({ day, v }) => (
-                    <View key={day} style={styles.barCol}>
-                      <View style={[styles.bar, { height: v === 0 ? 4 : v * 14, backgroundColor: v > 0 ? (day === 'Dom' ? colors.primary : colors.dark) : '#F0F0EC' }]}/>
-                      <Text style={[styles.barLabel, day === 'Dom' && { color: colors.primary }]}>{day}</Text>
+                  {weekBars.map(({ day, v, hoje }, idx) => (
+                    <View key={idx} style={styles.barCol}>
+                      <View style={[styles.bar, { height: v === 0 ? 4 : (v / maxWeek) * 50, backgroundColor: v > 0 ? (hoje ? colors.primary : colors.dark) : '#F0F0EC' }]}/>
+                      <Text style={[styles.barLabel, hoje && { color: colors.primary }]}>{day}</Text>
                     </View>
                   ))}
                 </View>
               </View>
 
-              <View style={styles.card}>
-                <Text style={styles.cardTitle}>Destilados mais usados</Text>
-                {destilados.map(({ name, pct, color }) => (
-                  <View key={name} style={{ marginBottom: 10 }}>
+              {destilados.length > 0 && (
+                <View style={styles.card}>
+                  <Text style={styles.cardTitle}>Destilados mais usados</Text>
+                  {destilados.map(({ name, pct, color }) => (
+                    <View key={name} style={{ marginBottom: 10 }}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
                       <Text style={styles.destName}>{name}</Text>
                       <Text style={[styles.destPct, { color }]}>{pct}%</Text>
@@ -160,6 +215,7 @@ export default function PerfilScreen({ navigation }) {
                   </View>
                 ))}
               </View>
+              )}
             </>
           )}
 
@@ -205,12 +261,12 @@ export default function PerfilScreen({ navigation }) {
 
               <View style={styles.featuredCard}>
                 <Text style={styles.featuredLabel}>✦ Próximo nível</Text>
-                <Text style={styles.featuredName}>Bartender Pro 🥃</Text>
-                <Text style={styles.featuredSub}>Prepare mais 6 drinks diferentes para desbloquear</Text>
+                <Text style={styles.featuredName}>Nível {nivel + 1} 🥃</Text>
+                <Text style={styles.featuredSub}>Prepare mais {5 - drinksNoNivel} {5 - drinksNoNivel === 1 ? 'drink' : 'drinks'} para subir de nível</Text>
                 <View style={[styles.progressBg, { marginTop: 10 }]}>
-                  <View style={[styles.progressFill, { width: '60%', backgroundColor: colors.primary }]}/>
+                  <View style={[styles.progressFill, { width: `${progressoNivel}%`, backgroundColor: colors.primary }]}/>
                 </View>
-                <Text style={[styles.featuredSub, { marginTop: 6 }]}>6 de 10 drinks únicos</Text>
+                <Text style={[styles.featuredSub, { marginTop: 6 }]}>{drinksNoNivel} de 5 drinks neste nível</Text>
               </View>
             </>
           )}
@@ -259,7 +315,7 @@ const styles = StyleSheet.create({
   userRole: { fontSize: 13, fontFamily: fonts.semiBold, color: colors.textMuted, marginTop: 2 },
   levelRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
   levelBg:   { flex: 1, height: 6, backgroundColor: '#F0F0EC', borderRadius: 3, overflow: 'hidden' },
-  levelFill: { height: '100%', width: '60%', backgroundColor: colors.primary, borderRadius: 3 },
+  levelFill: { height: '100%', backgroundColor: colors.primary, borderRadius: 3 },
   levelText: { fontSize: 10, fontFamily: fonts.extraBold, color: colors.textMuted },
   editBtn: { width: 36, height: 36, borderRadius: 10, backgroundColor: '#F5F5F2', alignItems: 'center', justifyContent: 'center' },
 
