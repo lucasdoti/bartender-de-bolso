@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, StyleSheet,
+  View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
 import { colors, fonts, radius, spacing } from '../theme';
 import AppIcon from '../components/AppIcon';
-import { glassMap } from '../components/glasses/Glasses';
+import { glassMap } from '../components/glasses';
 import drinks from '../data/drinks';
 
 export default function DrinkDetailScreen({ navigation, route }) {
@@ -15,11 +15,19 @@ export default function DrinkDetailScreen({ navigation, route }) {
   const { favorites, toggleFavorite, addToHistory } = useApp();
   const [activeTab, setActiveTab]       = useState('receita');
   const [completedSteps, setCompleted]  = useState([]);
+  const [marcadoComoFeito, setMarcado]  = useState(false);
   const GlassComponent = glassMap[drink.id];
   const isFav = favorites.includes(drink.id);
 
   const toggleStep = (num) =>
     setCompleted(prev => prev.includes(num) ? prev.filter(n => n !== num) : [...prev, num]);
+
+  const marcarComoFeito = () => {
+    if (marcadoComoFeito) return;
+    addToHistory(drink.id);
+    setMarcado(true);
+    Alert.alert('Mandou bem! 🍸', `${drink.name} foi adicionado ao seu histórico. Saúde! 🥂`);
+  };
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -150,10 +158,7 @@ export default function DrinkDetailScreen({ navigation, route }) {
                 return (
                   <TouchableOpacity
                     key={step.num}
-                    onPress={() => {
-                      toggleStep(step.num);
-                      if (!done && step.num === drink.steps.length) addToHistory(drink.id);
-                    }}
+                    onPress={() => toggleStep(step.num)}
                     activeOpacity={0.85}
                     style={[styles.stepCard, done && { backgroundColor: drink.color, borderColor: drink.accent + '44', opacity: 0.8 }]}
                   >
@@ -172,11 +177,19 @@ export default function DrinkDetailScreen({ navigation, route }) {
                 );
               })}
               {completedSteps.length === drink.steps.length && (
-                <View style={styles.doneCard}>
-                  <Text style={{ fontSize: 28 }}>🎉</Text>
-                  <Text style={styles.doneTitle}>Drink pronto!</Text>
-                  <Text style={styles.doneSub}>Agora é só aproveitar. Saúde! 🥂</Text>
-                </View>
+                marcadoComoFeito ? (
+                  <View style={styles.doneCard}>
+                    <Text style={{ fontSize: 28 }}>🎉</Text>
+                    <Text style={styles.doneTitle}>Adicionado ao histórico!</Text>
+                    <Text style={styles.doneSub}>Que tal avaliar ou favoritar? Saúde! 🥂</Text>
+                  </View>
+                ) : (
+                  <TouchableOpacity onPress={marcarComoFeito} activeOpacity={0.85} style={styles.fezBtn}>
+                    <Text style={{ fontSize: 24 }}>🍸</Text>
+                    <Text style={styles.fezBtnTitle}>Marcar como feito</Text>
+                    <Text style={styles.fezBtnSub}>Registra no seu histórico</Text>
+                  </TouchableOpacity>
+                )
               )}
             </View>
           )}
@@ -270,6 +283,9 @@ const styles = StyleSheet.create({
   stepDesc:  { fontSize: 12, fontFamily: fonts.semiBold, color: '#888', marginTop: 4, lineHeight: 18 },
 
   doneCard: { backgroundColor: '#1C1A14', borderRadius: radius.lg, padding: spacing.lg, alignItems: 'center', gap: 6 },
+  fezBtn: { backgroundColor: '#1C1A14', borderRadius: radius.lg, padding: spacing.lg, alignItems: 'center', gap: 4, borderWidth: 1, borderColor: 'rgba(255,210,80,0.2)' },
+  fezBtnTitle: { fontSize: 16, fontFamily: fonts.extraBold, color: '#FFD966', marginTop: 4 },
+  fezBtnSub: { fontSize: 12, fontFamily: fonts.semiBold, color: '#888' },
   doneTitle: { fontSize: 16, fontFamily: fonts.extraBold, color: '#FFD966', marginTop: 4 },
   doneSub:   { fontSize: 12, fontFamily: fonts.semiBold, color: '#888' },
 
