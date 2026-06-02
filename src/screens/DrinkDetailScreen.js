@@ -3,6 +3,7 @@ import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -76,6 +77,7 @@ export default function DrinkDetailScreen({ navigation, route }) {
 
   const marcarComoFeito = () => {
     if (marcadoComoFeito) return;
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     addToHistory(drink.id);
     setMarcado(true);
     Alert.alert('Mandou bem! 🍸', `${drink.name} foi adicionado ao seu histórico. Saúde! 🥂`);
@@ -130,7 +132,7 @@ export default function DrinkDetailScreen({ navigation, route }) {
           </View>
           <View style={{ alignItems: 'center', gap: 10 }}>
             <TouchableOpacity
-              onPress={() => toggleFavorite(drink.id)}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); toggleFavorite(drink.id); }}
               style={[styles.favBtn, isFav && { backgroundColor: colors.primary, borderColor: colors.primary }]}
             >
               <Text style={{ fontSize: 16 }}>{isFav ? '❤️' : '🤍'}</Text>

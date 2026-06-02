@@ -1,4 +1,5 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { colors, fonts, radius, spacing } from '../theme';
 import { glassMap } from './glasses/Glasses';
 
@@ -57,7 +58,11 @@ export const DrinkCardList = ({ drink, onPress, onFavorite, isFavorite }) => {
           <Text style={styles.metaText}>{drink.difficulty}</Text>
         </View>
       </View>
-      <TouchableOpacity onPress={onFavorite} style={styles.favBtn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+      <TouchableOpacity
+        onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onFavorite(); }}
+        style={styles.favBtn}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      >
         <Text style={{ fontSize: 18 }}>{isFavorite ? '❤️' : '🤍'}</Text>
       </TouchableOpacity>
     </TouchableOpacity>
@@ -75,7 +80,7 @@ export const DrinkCardGrid = ({ drink, onPress, onFavorite, isFavorite }) => {
     >
       <View style={[styles.gridGlass, { backgroundColor: drink.color }]}>
         <TouchableOpacity
-          onPress={onFavorite}
+          onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); onFavorite(); }}
           style={styles.gridFav}
           hitSlop={{ top: 4, bottom: 4, left: 4, right: 4 }}
         >

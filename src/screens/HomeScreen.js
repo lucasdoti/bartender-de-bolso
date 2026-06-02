@@ -3,6 +3,7 @@ import {
   View, Text, ScrollView, TextInput,
   TouchableOpacity, StyleSheet, Alert,
 } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
 import { colors, fonts, radius, spacing } from '../theme';
@@ -28,6 +29,7 @@ export default function HomeScreen({ navigation }) {
   const [search, setSearch]         = useState('');
 
   const surpriseMe = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const normalized = ingredients.map(norm);
     const canMake = drinks.filter(d =>
       (d.needs || []).length > 0 &&
@@ -132,7 +134,7 @@ export default function HomeScreen({ navigation }) {
             {moods.map(mood => (
               <TouchableOpacity
                 key={mood.id}
-                onPress={() => setActiveMood(activeMood === mood.id ? null : mood.id)}
+                onPress={() => { Haptics.selectionAsync(); setActiveMood(activeMood === mood.id ? null : mood.id); }}
                 activeOpacity={0.8}
                 style={[styles.moodChip, activeMood === mood.id && styles.moodChipActive]}
               >
