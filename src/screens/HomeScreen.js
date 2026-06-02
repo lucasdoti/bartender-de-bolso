@@ -104,7 +104,7 @@ export default function HomeScreen({ navigation }) {
         {/* CTA — MEU BAR */}
         <TouchableOpacity onPress={() => navigation.navigate('MeuBar')} activeOpacity={0.85} style={styles.ctaCard}>
           <View>
-            <Text style={styles.ctaLabel}>✦ Feature estrela</Text>
+            <Text style={styles.ctaLabel}>✦ Seu bar em mãos</Text>
             <Text style={styles.ctaTitle}>O que tenho em casa?</Text>
             <Text style={styles.ctaSub}>Selecione seus ingredientes e descubra</Text>
           </View>
