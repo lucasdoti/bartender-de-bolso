@@ -280,6 +280,18 @@ export default function PerfilScreen({ navigation }) {
 
         </View>
 
+        {/* ADMIN — visível apenas para o dono */}
+        {user?.email === 'lucas_doti@hotmail.com' && (
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => navigation.navigate('Admin')}
+            style={styles.adminBtn}
+          >
+            <Text style={styles.adminLabel}>✦ Painel do dono</Text>
+            <Text style={styles.adminTitle}>Dashboard 📊</Text>
+          </TouchableOpacity>
+        )}
+
         {/* CONFIGURAÇÕES */}
         <View style={{ paddingHorizontal: spacing.xl, marginTop: spacing.xl }}>
           <Text style={styles.sectionLabel}>Configurações</Text>
@@ -379,4 +391,8 @@ const styles = StyleSheet.create({
 
   emptySection: { alignItems: 'center', paddingVertical: 40, gap: 12 },
   emptySectionText: { fontSize: 14, fontFamily: fonts.semiBold, color: colors.textLight },
+
+  adminBtn: { marginHorizontal: spacing.xl, marginTop: spacing.xl, backgroundColor: '#120D24', borderRadius: radius.xl, padding: spacing.lg, borderWidth: 1.5, borderColor: '#2D1854' },
+  adminLabel: { fontSize: 11, fontFamily: fonts.extraBold, color: '#9B6FD4', letterSpacing: 1.2, textTransform: 'uppercase' },
+  adminTitle: { fontSize: 17, fontFamily: fonts.extraBold, color: '#fff', marginTop: 4 },
 });

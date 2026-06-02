@@ -9,6 +9,7 @@ import MeuBarScreen      from '../screens/MeuBarScreen';
 import FavoritosScreen   from '../screens/FavoritosScreen';
 import PerfilScreen      from '../screens/PerfilScreen';
 import BartenderIAScreen from '../screens/BartenderIAScreen';
+import AdminScreen       from '../screens/AdminScreen';
 
 const Tab   = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -34,6 +35,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Tabs"        component={Tabs} />
         <Stack.Screen name="DrinkDetail" component={DrinkDetailScreen} />
         <Stack.Screen name="BartenderIA" component={BartenderIAScreen} />
+        <Stack.Screen name="Admin"       component={AdminScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

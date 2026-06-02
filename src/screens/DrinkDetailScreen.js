@@ -4,6 +4,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 import { colors, fonts, radius, spacing } from '../theme';
 import AppIcon from '../components/AppIcon';
 import { glassMap } from '../components/glasses/Glasses';
@@ -41,6 +43,7 @@ export default function DrinkDetailScreen({ navigation, route }) {
   const { drinkId } = route.params;
   const drink = drinks.find(d => d.id === drinkId);
   const { favorites, toggleFavorite, addToHistory } = useApp();
+  const { user } = useAuth();
   const [activeTab, setActiveTab]      = useState('receita');
   const [completedSteps, setCompleted] = useState([]);
   const [marcadoComoFeito, setMarcado] = useState(false);
@@ -51,6 +54,11 @@ export default function DrinkDetailScreen({ navigation, route }) {
   const GlassComponent = glassMap[drink.id];
   const isFav = favorites.includes(drink.id);
   const method = drink.method || 'built';
+
+  useEffect(() => {
+    if (!user) return;
+    supabase.from('drink_views').insert({ drink_id: drinkId, user_id: user.id });
+  }, [drinkId, user?.id]);
 
   useEffect(() => {
     if (!timerActive) return;
