@@ -25,21 +25,39 @@ const filters = [
 
 const bases = ['Todos', 'Rum', 'Gin', 'Vodka', 'Tequila', 'Cachaça', 'Whisky', 'Bourbon', 'Aperol', 'Campari'];
 
+const families = [
+  { id: 'todas',          label: 'Todas',        emoji: '🍹' },
+  { id: 'negroni',        label: 'Negroni Style', emoji: '🍊', ids: [5, 38, 33, 41, 49] },
+  { id: 'sour',           label: 'Sour',          emoji: '🍋', ids: [15, 46, 48, 37, 2, 12, 51] },
+  { id: 'spritz',         label: 'Spritz',        emoji: '🥂', ids: [16, 29, 30, 24] },
+  { id: 'tropical',       label: 'Tropical',      emoji: '🌺', ids: [3, 22, 23, 18] },
+  { id: 'caipirinha',     label: 'Caipirinha',    emoji: '🍈', ids: [17, 36, 32, 20, 49] },
+  { id: 'martini',        label: 'Martini',       emoji: '🍸', ids: [8, 9, 19, 50, 52] },
+  { id: 'collins',        label: 'Collins',       emoji: '🧊', ids: [7, 27, 44, 4, 10, 31] },
+  { id: 'bourbon_stirred',label: 'Stirred',       emoji: '🥃', ids: [14, 45, 38, 35, 46] },
+  { id: 'cafe',           label: 'Café',          emoji: '☕', ids: [19, 43] },
+];
+
 export default function CardapioScreen({ navigation }) {
   const { favorites, toggleFavorite } = useApp();
-  const [filter, setFilter] = useState('todos');
-  const [base, setBase]     = useState('Todos');
-  const [search, setSearch] = useState('');
-  const [view, setView]     = useState('list');
-  const [showBases, setShowBases] = useState(false);
+  const [filter, setFilter]       = useState('todos');
+  const [base, setBase]           = useState('Todos');
+  const [family, setFamily]       = useState('todas');
+  const [search, setSearch]       = useState('');
+  const [view, setView]           = useState('list');
+  const [showBases, setShowBases]     = useState(false);
+  const [showFamilies, setShowFamilies] = useState(false);
+
+  const activeFamilyIds = families.find(f => f.id === family)?.ids;
 
   const filtered = drinks
     .filter(d => {
       const matchFilter = filter === 'todos' || d.tags.includes(filter);
       const matchBase   = base === 'Todos' || d.base === base;
+      const matchFamily = !activeFamilyIds || activeFamilyIds.includes(d.id);
       const matchSearch = d.name.toLowerCase().includes(search.toLowerCase()) ||
         d.base.toLowerCase().includes(search.toLowerCase());
-      return matchFilter && matchBase && matchSearch;
+      return matchFilter && matchBase && matchFamily && matchSearch;
     })
     .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
 
@@ -101,19 +119,36 @@ export default function CardapioScreen({ navigation }) {
         ))}
       </ScrollView>
 
-      {/* BASE FILTER */}
+      {/* BASE + FAMÍLIA FILTERS */}
       <View style={styles.baseSection}>
-        <TouchableOpacity
-          onPress={() => setShowBases(!showBases)}
-          activeOpacity={0.8}
-          style={[styles.baseToggle, base !== 'Todos' && styles.baseToggleActive]}
-        >
-          <Text style={styles.chipEmoji}>🥃</Text>
-          <Text style={[styles.baseToggleLabel, base !== 'Todos' && { color: '#FFD966' }]}>
-            Destilado: {base}
-          </Text>
-          <Text style={{ fontSize: 11, color: base !== 'Todos' ? '#B8860B' : colors.textLight }}> ⌄</Text>
-        </TouchableOpacity>
+        <View style={{ flexDirection: 'row', gap: 10 }}>
+          <TouchableOpacity
+            onPress={() => { setShowBases(!showBases); setShowFamilies(false); }}
+            activeOpacity={0.8}
+            style={[styles.baseToggle, base !== 'Todos' && styles.baseToggleActive]}
+          >
+            <Text style={styles.chipEmoji}>🥃</Text>
+            <Text style={[styles.baseToggleLabel, base !== 'Todos' && { color: '#FFD966' }]}>
+              {base === 'Todos' ? 'Destilado' : base}
+            </Text>
+            <Text style={{ fontSize: 11, color: base !== 'Todos' ? '#B8860B' : colors.textLight }}>⌄</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => { setShowFamilies(!showFamilies); setShowBases(false); }}
+            activeOpacity={0.8}
+            style={[styles.baseToggle, family !== 'todas' && styles.baseToggleActive]}
+          >
+            <Text style={styles.chipEmoji}>
+              {families.find(f => f.id === family)?.emoji ?? '🍹'}
+            </Text>
+            <Text style={[styles.baseToggleLabel, family !== 'todas' && { color: '#FFD966' }]}>
+              {family === 'todas' ? 'Família' : families.find(f => f.id === family)?.label}
+            </Text>
+            <Text style={{ fontSize: 11, color: family !== 'todas' ? '#B8860B' : colors.textLight }}>⌄</Text>
+          </TouchableOpacity>
+        </View>
+
         {showBases && (
           <View style={styles.basesGrid}>
             {bases.map(b => (
@@ -123,6 +158,22 @@ export default function CardapioScreen({ navigation }) {
                 style={[styles.baseChip, base === b && styles.baseChipActive]}
               >
                 <Text style={[styles.baseLabel, base === b && { color: '#fff' }]}>{b}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
+        {showFamilies && (
+          <View style={styles.basesGrid}>
+            {families.map(f => (
+              <TouchableOpacity
+                key={f.id}
+                onPress={() => { setFamily(f.id); setShowFamilies(false); }}
+                style={[styles.baseChip, family === f.id && styles.baseChipActive]}
+              >
+                <Text style={[styles.baseLabel, family === f.id && { color: '#fff' }]}>
+                  {f.emoji} {f.label}
+                </Text>
               </TouchableOpacity>
             ))}
           </View>
