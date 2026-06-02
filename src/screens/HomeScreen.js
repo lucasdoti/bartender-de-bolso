@@ -93,41 +93,32 @@ export default function HomeScreen({ navigation }) {
           />
         </View>
 
-        {/* CTA — SURPREENDA-ME */}
-        <TouchableOpacity onPress={surpriseMe} activeOpacity={0.85} style={[styles.ctaCard, { backgroundColor: '#0D1B2A', marginBottom: 12 }]}>
-          <View>
-            <Text style={styles.ctaLabel}>✦ Drink aleatório</Text>
-            <Text style={styles.ctaTitle}>Surpreenda-me ✨</Text>
-            <Text style={styles.ctaSub}>Um drink com o que você tem no bar</Text>
+        {/* CTA PRINCIPAL — BARTENDER IA */}
+        <TouchableOpacity onPress={() => navigation.navigate('BartenderIA')} activeOpacity={0.85} style={styles.ctaMain}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.ctaMainLabel}>✦ Inteligência artificial</Text>
+            <Text style={styles.ctaMainTitle}>Fale com o{'\n'}Bartender 💬</Text>
+            <Text style={styles.ctaMainSub}>Descreva o que quer e eu sugiro o drink perfeito</Text>
           </View>
-          <View style={[styles.ctaIcon, { backgroundColor: '#1A3A5C' }]}>
-            <Text style={{ fontSize: 26 }}>✨</Text>
-          </View>
-        </TouchableOpacity>
-
-        {/* CTA — MEU BAR */}
-        <TouchableOpacity onPress={() => navigation.navigate('MeuBar')} activeOpacity={0.85} style={styles.ctaCard}>
-          <View>
-            <Text style={styles.ctaLabel}>✦ Seu bar em mãos</Text>
-            <Text style={styles.ctaTitle}>O que tenho em casa?</Text>
-            <Text style={styles.ctaSub}>Selecione seus ingredientes e descubra</Text>
-          </View>
-          <View style={styles.ctaIcon}>
-            <Text style={{ fontSize: 26 }}>🥃</Text>
+          <View style={styles.ctaMainIcon}>
+            <Text style={{ fontSize: 36 }}>🍸</Text>
           </View>
         </TouchableOpacity>
 
-        {/* CTA — BARTENDER IA */}
-        <TouchableOpacity onPress={() => navigation.navigate('BartenderIA')} activeOpacity={0.85} style={[styles.ctaCard, { backgroundColor: '#120D24', marginTop: 12 }]}>
-          <View>
-            <Text style={[styles.ctaLabel, { color: '#9B6FD4' }]}>✦ Inteligência artificial</Text>
-            <Text style={styles.ctaTitle}>Fale com o Bartender</Text>
-            <Text style={styles.ctaSub}>Descreva o que quer e eu sugiro o drink</Text>
-          </View>
-          <View style={[styles.ctaIcon, { backgroundColor: '#2D1854' }]}>
-            <Text style={{ fontSize: 26 }}>💬</Text>
-          </View>
-        </TouchableOpacity>
+        {/* CTAs SECUNDÁRIOS — SURPREENDA-ME + MEU BAR */}
+        <View style={styles.ctaRow}>
+          <TouchableOpacity onPress={surpriseMe} activeOpacity={0.85} style={[styles.ctaSmall, { backgroundColor: '#0D1B2A' }]}>
+            <Text style={{ fontSize: 26, marginBottom: 8 }}>✨</Text>
+            <Text style={styles.ctaSmallTitle}>Surpreenda-me</Text>
+            <Text style={styles.ctaSmallSub}>Drink do momento</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => navigation.navigate('MeuBar')} activeOpacity={0.85} style={[styles.ctaSmall, { backgroundColor: '#1C1A14' }]}>
+            <Text style={{ fontSize: 26, marginBottom: 8 }}>🥃</Text>
+            <Text style={styles.ctaSmallTitle}>Meu Bar</Text>
+            <Text style={styles.ctaSmallSub}>O que tenho em casa</Text>
+          </TouchableOpacity>
+        </View>
 
         {/* MOODS */}
         <View style={styles.section}>
@@ -203,11 +194,15 @@ const styles = StyleSheet.create({
   searchWrapper: { flexDirection: 'row', alignItems: 'center', margin: spacing.xl, marginTop: spacing.lg, backgroundColor: colors.surface, borderRadius: radius.md, borderWidth: 2, borderColor: colors.border, paddingHorizontal: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 2 },
   searchIcon: { fontSize: 16, marginRight: 8 },
   searchInput: { flex: 1, paddingVertical: 13, fontSize: 14, fontFamily: fonts.bold, color: colors.text },
-  ctaCard: { marginHorizontal: spacing.xl, backgroundColor: '#1C1A14', borderRadius: radius.xl, padding: spacing.lg, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', shadowColor: '#1C1A14', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.28, shadowRadius: 16, elevation: 8 },
-  ctaLabel: { fontSize: 11, color: '#B8860B', fontFamily: fonts.extraBold, letterSpacing: 1.2, textTransform: 'uppercase' },
-  ctaTitle: { fontSize: 17, fontFamily: fonts.extraBold, color: '#fff', marginTop: 4 },
-  ctaSub: { fontSize: 12, fontFamily: fonts.semiBold, color: '#888', marginTop: 2 },
-  ctaIcon: { width: 52, height: 52, borderRadius: radius.md, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
+  ctaMain: { marginHorizontal: spacing.xl, backgroundColor: '#120D24', borderRadius: radius.xl, padding: spacing.lg, paddingVertical: 22, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#2D1854', shadowColor: '#9B6FD4', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.2, shadowRadius: 20, elevation: 8 },
+  ctaMainLabel: { fontSize: 11, color: '#9B6FD4', fontFamily: fonts.extraBold, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 6 },
+  ctaMainTitle: { fontSize: 22, fontFamily: fonts.extraBold, color: '#fff', lineHeight: 28 },
+  ctaMainSub: { fontSize: 12, fontFamily: fonts.semiBold, color: '#888', marginTop: 6 },
+  ctaMainIcon: { width: 72, height: 72, borderRadius: radius.lg, backgroundColor: '#2D1854', alignItems: 'center', justifyContent: 'center', marginLeft: 12 },
+  ctaRow: { flexDirection: 'row', marginHorizontal: spacing.xl, gap: 12, marginTop: 12 },
+  ctaSmall: { flex: 1, borderRadius: radius.xl, padding: spacing.md, paddingVertical: 18, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 10, elevation: 4 },
+  ctaSmallTitle: { fontSize: 13, fontFamily: fonts.extraBold, color: '#fff', textAlign: 'center' },
+  ctaSmallSub: { fontSize: 11, fontFamily: fonts.semiBold, color: '#888', marginTop: 3, textAlign: 'center' },
   section: { paddingHorizontal: spacing.xl, marginTop: spacing.xl },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
   sectionTitle: { fontSize: 16, fontFamily: fonts.extraBold, color: colors.text },
