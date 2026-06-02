@@ -122,7 +122,7 @@ export default function MeuBarScreen({ navigation }) {
             {perfect.map(drink => (
               <DrinkCardList key={drink.id} drink={drink}
                 isFavorite={favorites.includes(drink.id)}
-                onPress={() => navigation.navigate('Home', { screen: 'DrinkDetail', params: { drinkId: drink.id } })}
+                onPress={() => navigation.navigate('DrinkDetail', { drinkId: drink.id })}
                 onFavorite={() => toggleFavorite(drink.id)}
               />
             ))}

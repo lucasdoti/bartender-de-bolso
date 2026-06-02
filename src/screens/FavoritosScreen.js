@@ -14,7 +14,13 @@ import drinks from '../data/drinks';
 export function FavoritosScreen({ navigation }) {
   const { favorites, toggleFavorite } = useApp();
   const [sort, setSort] = useState('recentes');
-  const favDrinks = drinks.filter(d => favorites.includes(d.id));
+  const diffOrder = { Fácil: 1, Médio: 2, Difícil: 3 };
+  const favDrinks = (() => {
+    const list = drinks.filter(d => favorites.includes(d.id));
+    if (sort === 'nome')       return [...list].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+    if (sort === 'dificuldade') return [...list].sort((a, b) => (diffOrder[a.difficulty] || 0) - (diffOrder[b.difficulty] || 0));
+    return [...list].sort((a, b) => favorites.indexOf(a.id) - favorites.indexOf(b.id));
+  })();
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -32,9 +38,9 @@ export function FavoritosScreen({ navigation }) {
       {/* SORT */}
       <View style={styles.sortRow}>
         {[
-          { id: 'recentes',  label: 'Recentes'  },
-          { id: 'avaliacao', label: 'Avaliação'  },
-          { id: 'nome',      label: 'A–Z'        },
+          { id: 'recentes',     label: 'Recentes'   },
+          { id: 'nome',         label: 'A–Z'         },
+          { id: 'dificuldade',  label: 'Mais fáceis' },
         ].map(s => (
           <TouchableOpacity
             key={s.id}

@@ -11,12 +11,12 @@ import BottomNav from '../components/BottomNav';
 import drinks from '../data/drinks';
 
 const configItems = [
-  { icon: '🔔', label: 'Notificações',  sub: 'Novidades e receitas',  danger: false },
-  { icon: '🌙', label: 'Modo escuro',   sub: 'Em breve',              danger: false },
-  { icon: '🌍', label: 'Idioma',        sub: 'Português (BR)',        danger: false },
-  { icon: '⭐', label: 'Avaliar o app', sub: 'Deixe seu feedback',    danger: false },
-  { icon: '💬', label: 'Fale conosco',  sub: 'Sugestões e problemas', danger: false },
-  { icon: '🚪', label: 'Sair',          sub: '',                      danger: true  },
+  { icon: '🔔', label: 'Notificações',  sub: 'Novidades e receitas',  action: 'soon'    },
+  { icon: '🌙', label: 'Modo escuro',   sub: 'Em breve',              action: 'soon'    },
+  { icon: '🌍', label: 'Idioma',        sub: 'Português (BR)',        action: 'soon'    },
+  { icon: '⭐', label: 'Avaliar o app', sub: 'Deixe seu feedback',    action: 'review'  },
+  { icon: '💬', label: 'Fale conosco',  sub: 'Sugestões e problemas', action: 'contact' },
+  { icon: '🚪', label: 'Sair',          sub: '',                      action: 'logout', danger: true },
 ];
 
 export default function PerfilScreen({ navigation }) {
@@ -29,6 +29,13 @@ export default function PerfilScreen({ navigation }) {
       { text: 'Cancelar', style: 'cancel' },
       { text: 'Sair', style: 'destructive', onPress: () => signOut() },
     ]);
+  };
+
+  const handleConfigPress = (action) => {
+    if (action === 'logout')  return handleLogout();
+    if (action === 'soon')    return Alert.alert('Em breve', 'Essa funcionalidade está a caminho! 🚀');
+    if (action === 'review')  return Alert.alert('Avaliar o app', 'Obrigado pelo interesse! A avaliação estará disponível em breve na loja.');
+    if (action === 'contact') return Alert.alert('Fale conosco', 'Manda uma mensagem para:\ncontato@bartenderdebolso.com');
   };
 
   // ── ESTATÍSTICAS REAIS (calculadas do histórico) ──
@@ -130,7 +137,7 @@ export default function PerfilScreen({ navigation }) {
               <Text style={styles.levelText}>Nível {nivel}</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.editBtn}>
+          <TouchableOpacity style={styles.editBtn} activeOpacity={0.7} onPress={() => Alert.alert('Em breve', 'Edição de perfil chegando em breve! 🚀')}>
             <Text style={{ fontSize: 15 }}>✏️</Text>
           </TouchableOpacity>
         </View>
@@ -236,7 +243,7 @@ export default function PerfilScreen({ navigation }) {
                     <Text style={styles.histName}>{drink.name}</Text>
                     <Text style={styles.histDate}>🕐 {drink.date}</Text>
                   </View>
-                  <TouchableOpacity style={styles.arrowBtn}>
+                  <TouchableOpacity style={styles.arrowBtn} onPress={() => navigation.navigate('DrinkDetail', { drinkId: drink.id })}>
                     <Text style={styles.arrow}>›</Text>
                   </TouchableOpacity>
                 </View>
@@ -281,7 +288,7 @@ export default function PerfilScreen({ navigation }) {
               <TouchableOpacity
                 key={item.label}
                 activeOpacity={0.7}
-                onPress={item.danger ? handleLogout : undefined}
+                onPress={() => handleConfigPress(item.action)}
                 style={[styles.configItem, i < configItems.length - 1 && styles.configBorder]}
               >
                 <View style={[styles.configIcon, item.danger && { backgroundColor: '#FFF0F0' }]}>

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   View, Text, ScrollView, TextInput,
-  TouchableOpacity, StyleSheet,
+  TouchableOpacity, StyleSheet, Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
@@ -34,7 +34,11 @@ export default function HomeScreen({ navigation }) {
       (d.needs || []).every(n => normalized.includes(n))
     );
     if (canMake.length === 0) {
-      navigation.navigate('MeuBar');
+      Alert.alert(
+        'Bar vazio',
+        'Adicione ingredientes no Meu Bar para que eu possa te surpreender!',
+        [{ text: 'Ir pro Meu Bar', onPress: () => navigation.navigate('MeuBar') }, { text: 'Agora não', style: 'cancel' }]
+      );
       return;
     }
     const pick = canMake[Math.floor(Math.random() * canMake.length)];
