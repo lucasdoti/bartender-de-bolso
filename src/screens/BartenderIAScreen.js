@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ScrollView, ActivityIndicator, KeyboardAvoidingView, Platform,
+  ScrollView, KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
@@ -10,85 +10,150 @@ import { DrinkCardList } from '../components/DrinkCard';
 import AppIcon from '../components/AppIcon';
 import drinks from '../data/drinks';
 
-const ANTHROPIC_KEY = process.env.EXPO_PUBLIC_ANTHROPIC_KEY;
+// ─── MOTOR DE RECOMENDAÇÃO ────────────────────────────────────────────────────
 
-const CATALOG = drinks
-  .map(d => `${d.name} | Base: ${d.base} | ${d.difficulty} | ${d.subtitle} | Tags: ${d.tags.join(', ')}`)
-  .join('\n');
+const RULES = [
+  // Intensidade
+  { words: ['forte', 'intenso', 'encorpado', 'concentrado', 'pesado', 'robusto'], bases: ['Whisky', 'Bourbon', 'Gin', 'Campari', 'Rum'], w: 3 },
+  { words: ['leve', 'suave', 'fraco', 'delicado', 'leves'], difficulty: 'Fácil', w: 2 },
 
-const SYSTEM = `Você é Bolso, um bartender experiente, simpático e com personalidade. Você conhece este cardápio:
+  // Temperatura / clima
+  { words: ['refrescante', 'fresquinho', 'gelado', 'calor', 'verão', 'verao', 'quente'], tags: ['calor'], w: 3 },
+  { words: ['aconchegante', 'frio', 'inverno', 'quentinho', 'aquece'], tags: ['frio'], w: 3 },
 
-${CATALOG}
+  // Ocasião
+  { words: ['romântico', 'romantico', 'date', 'namorado', 'namorada', 'jantar', 'especial', 'sofisticado', 'elegante'], tags: ['date'], w: 3 },
+  { words: ['festa', 'festas', 'comemoração', 'comemoracao', 'celebração', 'celebracao', 'animado', 'balada', 'aniversário', 'aniversario'], tags: ['festas'], w: 3 },
+  { words: ['sozinho', 'sozinha', 'só', 'relaxar', 'relaxando', 'tranquilo', 'sossego', 'descanso'], tags: ['solo'], w: 3 },
 
-Regras:
-- Recomende 2 a 3 drinks do cardápio acima que melhor atendam ao pedido do cliente
-- Mencione os nomes EXATAMENTE como estão no cardápio (ex: "Negroni", "Aperol Spritz")
-- Seja caloroso e profissional, como um bartender real faria
-- Explique brevemente por que cada drink combina com o pedido
-- Responda sempre em português brasileiro
-- Máximo 130 palavras
-- Não invente drinks que não estão no cardápio`;
+  // Estilo
+  { words: ['clássico', 'classico', 'tradicional', 'atemporal'], tags: ['classico'], w: 2 },
+  { words: ['brasileiro', 'brasileira', 'brasil', 'nacional', 'cachaça', 'cachaca'], tags: ['brasil'], w: 4 },
 
-async function askBartender(message) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'x-api-key': ANTHROPIC_KEY,
-      'anthropic-version': '2023-06-01',
-    },
-    body: JSON.stringify({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 512,
-      system: SYSTEM,
-      messages: [{ role: 'user', content: message }],
-    }),
+  // Sabor
+  { words: ['amargo', 'bitter', 'aperitivo'], bases: ['Campari', 'Aperol', 'Vermute'], w: 3 },
+  { words: ['doce', 'adocicado'], bases: ['Rum', 'Aperol', 'Bourbon'], w: 2 },
+  { words: ['cítrico', 'citrico', 'azedo', 'limão', 'limao'], bases: ['Gin', 'Vodka', 'Rum', 'Tequila', 'Cachaça'], w: 2 },
+  { words: ['herbal', 'herbáceo', 'herbaceo', 'botânico', 'botanico', 'floral', 'aromático', 'aromatico'], bases: ['Gin', 'Vermute'], w: 3 },
+  { words: ['defumado', 'smoky', 'turfa', 'amadeirado'], bases: ['Whisky', 'Bourbon'], w: 3 },
+  { words: ['frutado', 'fruta', 'tropical'], bases: ['Rum', 'Vodka', 'Aperol', 'Tequila', 'Cachaça'], w: 1 },
+
+  // Referências a drinks famosos
+  { words: ['negroni'], bases: ['Campari', 'Gin', 'Vermute'], w: 5 },
+  { words: ['caipirinha'], tags: ['brasil'], bases: ['Cachaça'], w: 5 },
+  { words: ['mojito'], bases: ['Rum'], tags: ['calor'], w: 5 },
+  { words: ['margarita'], bases: ['Tequila'], w: 5 },
+  { words: ['spritz', 'aperol spritz'], bases: ['Aperol'], w: 5 },
+  { words: ['manhattan', 'boulevardier'], bases: ['Bourbon', 'Whisky'], w: 5 },
+  { words: ['old fashioned'], bases: ['Bourbon'], w: 5 },
+  { words: ['daiquiri'], bases: ['Rum'], w: 5 },
+  { words: ['martini'], bases: ['Gin', 'Vodka'], w: 5 },
+  { words: ['americano'], bases: ['Campari', 'Vermute'], w: 5 },
+
+  // Bases mencionadas diretamente
+  { words: ['whisky', 'whiskey', 'escocês', 'escoces', 'scotch'], bases: ['Whisky'], w: 4 },
+  { words: ['bourbon'], bases: ['Bourbon'], w: 4 },
+  { words: ['gin'], bases: ['Gin'], w: 4 },
+  { words: ['vodka'], bases: ['Vodka'], w: 4 },
+  { words: ['rum', 'rhum'], bases: ['Rum'], w: 4 },
+  { words: ['tequila', 'mezcal'], bases: ['Tequila'], w: 4 },
+  { words: ['aperol'], bases: ['Aperol'], w: 4 },
+  { words: ['campari'], bases: ['Campari'], w: 4 },
+  { words: ['vermute', 'vermouth'], bases: ['Vermute'], w: 4 },
+];
+
+function normalizeText(text) {
+  return text.toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+function localRecommend(input) {
+  const normalized = normalizeText(input);
+
+  // Encontra as regras ativas
+  const activeRules = RULES.filter(rule =>
+    rule.words.some(w => normalized.includes(normalizeText(w)))
+  );
+
+  // Pontua cada drink
+  const scored = drinks.map(drink => {
+    let score = 0;
+    for (const rule of activeRules) {
+      if (rule.tags) {
+        const hits = rule.tags.filter(t => drink.tags.includes(t)).length;
+        score += hits * rule.w;
+      }
+      if (rule.bases && rule.bases.includes(drink.base)) {
+        score += rule.w;
+      }
+      if (rule.difficulty && drink.difficulty === rule.difficulty) {
+        score += rule.w;
+      }
+    }
+    return { drink, score };
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const data = await res.json();
-  return data.content?.[0]?.text || '';
+
+  // Ordena e pega o top 3 com score > 0
+  const top = scored
+    .filter(s => s.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 3)
+    .map(s => s.drink);
+
+  // Fallback: drinks populares se nada foi encontrado
+  const result = top.length > 0 ? top : drinks.slice(0, 3);
+
+  // Gera mensagem baseada nas regras ativas
+  const allTags  = activeRules.flatMap(r => r.tags  || []);
+  const allBases = activeRules.flatMap(r => r.bases || []);
+
+  let intro = 'Pelo que você descreveu';
+  if (allTags.includes('calor'))    intro = 'Para refrescar e matar a sede';
+  else if (allTags.includes('frio'))     intro = 'Para aquecer e aconchegar';
+  else if (allTags.includes('date'))     intro = 'Para uma ocasião especial';
+  else if (allTags.includes('festas'))   intro = 'Para animar a festa';
+  else if (allTags.includes('solo'))     intro = 'Para um momento relaxante só seu';
+  else if (allTags.includes('brasil'))   intro = 'Para celebrar com o que o Brasil tem de melhor';
+  else if (allTags.includes('classico')) intro = 'Para quem aprecia o que é atemporal';
+  else if (allBases.includes('Whisky') || allBases.includes('Bourbon')) intro = 'Para os que gostam de intensidade e complexidade';
+  else if (allBases.includes('Gin'))     intro = 'Para os amantes do aromático e botânico';
+  else if (allBases.includes('Rum'))     intro = 'Para quem curte o charme caribenho';
+  else if (allBases.includes('Tequila')) intro = 'Para os apreciadores do agave';
+  else if (allBases.includes('Campari') || allBases.includes('Aperol')) intro = 'Para os fãs do estilo italiano aperitivo';
+
+  const fallback = top.length === 0;
+  const message = fallback
+    ? 'Não reconheci um estilo específico, mas aqui estão clássicos que raramente decepcionam:'
+    : `${intro}, aqui estão minhas indicações:\n\n${result.map(d => `• ${d.name} — ${d.subtitle}`).join('\n')}\n\nClique em qualquer card para ver a receita completa!`;
+
+  return { message, result };
 }
 
-function findRecommendedDrinks(text) {
-  return drinks.filter(d => new RegExp(d.name, 'i').test(text));
-}
+// ─── TELA ─────────────────────────────────────────────────────────────────────
 
 const EXAMPLES = [
   'Quero algo forte e concentrado, parecido com Negroni',
   'Drink leve e refrescante para o calor',
   'Algo sofisticado para uma janta especial',
-  'Drink brasileiro, com identidade',
+  'Drink brasileiro com identidade',
 ];
 
 export default function BartenderIAScreen({ navigation }) {
   const { favorites, toggleFavorite } = useApp();
-  const [input, setInput]           = useState('');
-  const [loading, setLoading]       = useState(false);
-  const [response, setResponse]     = useState(null);
+  const [input, setInput]             = useState('');
+  const [response, setResponse]       = useState(null);
   const [recommended, setRecommended] = useState([]);
-  const [error, setError]           = useState(null);
 
-  const handleSend = async () => {
-    if (!input.trim() || loading) return;
-    setLoading(true);
-    setResponse(null);
-    setRecommended([]);
-    setError(null);
-    try {
-      const text = await askBartender(input.trim());
-      setResponse(text);
-      setRecommended(findRecommendedDrinks(text));
-    } catch {
-      setError('Não consegui conectar com o bartender. Verifique sua conexão e tente novamente.');
-    } finally {
-      setLoading(false);
-    }
+  const handleSend = () => {
+    if (!input.trim()) return;
+    const { message, result } = localRecommend(input.trim());
+    setResponse(message);
+    setRecommended(result);
   };
 
   const reset = () => {
     setResponse(null);
     setRecommended([]);
-    setError(null);
     setInput('');
   };
 
@@ -110,7 +175,7 @@ export default function BartenderIAScreen({ navigation }) {
           keyboardShouldPersistTaps="handled"
         >
           {/* INTRO */}
-          {!response && !loading && !error && (
+          {!response && (
             <>
               <View style={styles.introCard}>
                 <Text style={styles.introEmoji}>🍸</Text>
@@ -128,24 +193,6 @@ export default function BartenderIAScreen({ navigation }) {
                 </TouchableOpacity>
               ))}
             </>
-          )}
-
-          {/* LOADING */}
-          {loading && (
-            <View style={styles.loadingCard}>
-              <ActivityIndicator color={colors.primary} size="large" />
-              <Text style={styles.loadingText}>O Bolso está pensando...</Text>
-            </View>
-          )}
-
-          {/* ERRO */}
-          {error && (
-            <View style={styles.errorCard}>
-              <Text style={styles.errorText}>{error}</Text>
-              <TouchableOpacity onPress={reset} style={styles.tryAgainBtn}>
-                <Text style={styles.tryAgainText}>Tentar novamente</Text>
-              </TouchableOpacity>
-            </View>
           )}
 
           {/* RESPOSTA */}
@@ -179,7 +226,7 @@ export default function BartenderIAScreen({ navigation }) {
         </ScrollView>
 
         {/* INPUT */}
-        {!response && !error && (
+        {!response && (
           <View style={styles.inputRow}>
             <TextInput
               value={input}
@@ -192,8 +239,8 @@ export default function BartenderIAScreen({ navigation }) {
             />
             <TouchableOpacity
               onPress={handleSend}
-              disabled={!input.trim() || loading}
-              style={[styles.sendBtn, (!input.trim() || loading) && styles.sendBtnDisabled]}
+              disabled={!input.trim()}
+              style={[styles.sendBtn, !input.trim() && styles.sendBtnDisabled]}
             >
               <Text style={styles.sendIcon}>↑</Text>
             </TouchableOpacity>
@@ -241,21 +288,6 @@ const styles = StyleSheet.create({
   },
   exampleText: { fontSize: 13, fontFamily: fonts.semiBold, color: colors.text, flex: 1 },
   exampleArrow: { fontSize: 18, color: colors.textLight },
-
-  loadingCard: { alignItems: 'center', paddingVertical: 80, gap: 16 },
-  loadingText: { fontSize: 14, fontFamily: fonts.semiBold, color: colors.textMuted },
-
-  errorCard: {
-    backgroundColor: '#FFF0F0', borderRadius: radius.lg,
-    padding: spacing.lg, alignItems: 'center', gap: 12,
-    borderWidth: 1, borderColor: '#FFCDD2',
-  },
-  errorText: { fontSize: 13, fontFamily: fonts.semiBold, color: '#C62828', textAlign: 'center', lineHeight: 20 },
-  tryAgainBtn: {
-    backgroundColor: '#C62828', borderRadius: radius.md,
-    paddingHorizontal: 20, paddingVertical: 10,
-  },
-  tryAgainText: { fontSize: 13, fontFamily: fonts.extraBold, color: '#fff' },
 
   responseCard: {
     backgroundColor: colors.dark, borderRadius: radius.xl,
