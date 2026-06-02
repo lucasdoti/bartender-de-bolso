@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert,
+  View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -11,6 +11,7 @@ import { colors, fonts, radius, spacing } from '../theme';
 import AppIcon from '../components/AppIcon';
 import { glassMap } from '../components/glasses/Glasses';
 import drinks from '../data/drinks';
+import drinkPhotos from '../data/drinkPhotos';
 
 const SCALES = [1, 2, 4, 6];
 
@@ -38,6 +39,27 @@ function scaleAmount(amount, scale) {
   const result = num * scale;
   const fmt = result % 1 === 0 ? result.toString() : result.toFixed(0);
   return unit ? `${fmt}${unit.startsWith('m') || unit.startsWith('g') ? '' : ' '}${unit}` : fmt;
+}
+
+function DrinkHero({ drink, GlassComponent }) {
+  const [imgError, setImgError] = useState(false);
+  const photo = drinkPhotos[drink.id];
+
+  if (photo && !imgError) {
+    return (
+      <Image
+        source={{ uri: photo }}
+        style={{ width: 110, height: 110, borderRadius: 20 }}
+        onError={() => setImgError(true)}
+        resizeMode="cover"
+      />
+    );
+  }
+  return (
+    <View style={[styles.glassBox, { backgroundColor: drink.color, borderColor: drink.accent + '22' }]}>
+      {GlassComponent && <GlassComponent size={80} />}
+    </View>
+  );
 }
 
 export default function DrinkDetailScreen({ navigation, route }) {
@@ -137,9 +159,7 @@ export default function DrinkDetailScreen({ navigation, route }) {
             >
               <Text style={{ fontSize: 16 }}>{isFav ? '❤️' : '🤍'}</Text>
             </TouchableOpacity>
-            <View style={[styles.glassBox, { backgroundColor: drink.color, borderColor: drink.accent + '22' }]}>
-              {GlassComponent && <GlassComponent size={80} />}
-            </View>
+            <DrinkHero drink={drink} GlassComponent={GlassComponent} />
           </View>
         </View>
 

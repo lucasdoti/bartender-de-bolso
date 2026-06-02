@@ -1,7 +1,31 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useState } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { colors, fonts, radius, spacing } from '../theme';
 import { glassMap } from './glasses/Glasses';
+import drinkPhotos from '../data/drinkPhotos';
+
+function DrinkThumb({ drink, size = 62, borderRadius = 12 }) {
+  const [imgError, setImgError] = useState(false);
+  const photo = drinkPhotos[drink.id];
+  const GlassComponent = glassMap[drink.id];
+
+  if (photo && !imgError) {
+    return (
+      <Image
+        source={{ uri: photo + '/preview' }}
+        style={{ width: size, height: size, borderRadius }}
+        onError={() => setImgError(true)}
+        resizeMode="cover"
+      />
+    );
+  }
+  return (
+    <View style={[styles.glassContainer, { width: size, height: size, borderRadius, backgroundColor: drink.color, borderColor: drink.accent + '22' }]}>
+      {GlassComponent && <GlassComponent size={size * 0.7} />}
+    </View>
+  );
+}
 
 // ─── DIFFICULTY DOTS ──────────────────────────────────────────────────────────
 export const DifficultyDots = ({ level }) => {
@@ -35,16 +59,13 @@ export const StarRating = ({ rating }) => (
 
 // ─── DRINK CARD (LIST) ────────────────────────────────────────────────────────
 export const DrinkCardList = ({ drink, onPress, onFavorite, isFavorite }) => {
-  const GlassComponent = glassMap[drink.id];
   return (
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.85}
       style={styles.listCard}
     >
-      <View style={[styles.glassContainer, { backgroundColor: drink.color, borderColor: drink.accent + '22' }]}>
-        {GlassComponent && <GlassComponent size={44} />}
-      </View>
+      <DrinkThumb drink={drink} size={62} borderRadius={12} />
       <View style={styles.listInfo}>
         <View style={styles.listRow}>
           <Text style={styles.drinkName}>{drink.name}</Text>
@@ -71,7 +92,6 @@ export const DrinkCardList = ({ drink, onPress, onFavorite, isFavorite }) => {
 
 // ─── DRINK CARD (GRID) ────────────────────────────────────────────────────────
 export const DrinkCardGrid = ({ drink, onPress, onFavorite, isFavorite }) => {
-  const GlassComponent = glassMap[drink.id];
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -86,7 +106,7 @@ export const DrinkCardGrid = ({ drink, onPress, onFavorite, isFavorite }) => {
         >
           <Text style={{ fontSize: 13 }}>{isFavorite ? '❤️' : '🤍'}</Text>
         </TouchableOpacity>
-        {GlassComponent && <GlassComponent size={44} />}
+        <DrinkThumb drink={drink} size={70} borderRadius={10} />
       </View>
       <View style={styles.gridInfo}>
         <Text style={styles.drinkName}>{drink.name}</Text>
