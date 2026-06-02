@@ -35,7 +35,7 @@ export default function AuthScreen() {
       if (error) {
         Alert.alert('Erro ao cadastrar', traduzErro(error.message));
       } else {
-        Alert.alert('Tudo certo! 🎉', 'Conta criada! Verifique seu email para confirmar e depois faça login.');
+        Alert.alert('Tudo certo! 🥂', 'Conta criada! Verifique seu email para confirmar e depois faça login.');
         setMode('login');
       }
     }
@@ -61,7 +61,7 @@ export default function AuthScreen() {
           <View style={styles.logoWrapper}>
             <AppIcon size={72} />
             <Text style={styles.brandName}>Bartender de Bolso</Text>
-            <Text style={styles.brandSub}>Seu bartender pessoal 🍹</Text>
+            <Text style={styles.brandSub}>Seu bartender pessoal 🥃</Text>
           </View>
 
           {/* TÍTULO */}

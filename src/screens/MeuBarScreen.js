@@ -3,6 +3,7 @@ import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { useApp } from '../context/AppContext';
 import { colors, fonts, radius, spacing } from '../theme';
 import AppIcon from '../components/AppIcon';
@@ -156,7 +157,7 @@ export default function MeuBarScreen({ navigation }) {
       )}
       {perfect.length === 0 && partial.length === 0 && (
         <View style={styles.empty}>
-          <Text style={{ fontSize: 36 }}>🥲</Text>
+          <Text style={{ fontSize: 36 }}>🫗</Text>
           <Text style={styles.emptyTitle}>Nenhum drink encontrado</Text>
           <Text style={styles.emptySub}>Adicione mais ingredientes!</Text>
         </View>
@@ -176,15 +177,15 @@ export default function MeuBarScreen({ navigation }) {
 
       <View style={styles.tabs}>
         <TouchableOpacity onPress={() => setActiveTab('bar')} activeOpacity={0.8} style={[styles.tab, activeTab === 'bar' && styles.tabActive]}>
-          <Text style={styles.tabEmoji}>🏠</Text>
+          <Ionicons name={activeTab === 'bar' ? 'wine' : 'wine-outline'} size={16} color={activeTab === 'bar' ? colors.text : colors.textLight} />
           <Text style={[styles.tabLabel, activeTab === 'bar' && styles.tabLabelActive]}>Bar Salvo</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setActiveTab('busca')} activeOpacity={0.8} style={[styles.tab, activeTab === 'busca' && styles.tabActive]}>
-          <Text style={styles.tabEmoji}>🔍</Text>
+          <Ionicons name={activeTab === 'busca' ? 'search' : 'search-outline'} size={16} color={activeTab === 'busca' ? colors.text : colors.textLight} />
           <Text style={[styles.tabLabel, activeTab === 'busca' && styles.tabLabelActive]}>Busca Rápida</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => setActiveTab('receitas')} activeOpacity={0.8} style={[styles.tab, activeTab === 'receitas' && styles.tabActive]}>
-          <Text style={styles.tabEmoji}>🧪</Text>
+          <Ionicons name={activeTab === 'receitas' ? 'document-text' : 'document-text-outline'} size={16} color={activeTab === 'receitas' ? colors.text : colors.textLight} />
           <Text style={[styles.tabLabel, activeTab === 'receitas' && styles.tabLabelActive]}>Receitas</Text>
         </TouchableOpacity>
       </View>
@@ -267,7 +268,7 @@ export default function MeuBarScreen({ navigation }) {
           {ingredients.length === 0 && (
             <View style={styles.section}>
               <View style={styles.hintCard}>
-                <Text style={{ fontSize: 28 }}>👆</Text>
+                <Ionicons name="add-circle-outline" size={28} color="#FFD966" />
                 <View style={{ flex: 1 }}>
                   <Text style={styles.hintTitle}>Seu bar está vazio</Text>
                   <Text style={styles.hintSub}>Adicione ingredientes para ver os drinks disponíveis automaticamente!</Text>
@@ -325,7 +326,7 @@ export default function MeuBarScreen({ navigation }) {
             {showResults && (
               <View style={{ gap: 12 }}>
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <Text style={styles.sectionTitle}>Resultados 🎯</Text>
+                  <Text style={styles.sectionTitle}>Resultados</Text>
                   <TouchableOpacity onPress={() => setShowResults(false)}><Text style={styles.clearBtn}>‹ Editar</Text></TouchableOpacity>
                 </View>
                 <ResultsList perfect={searchPerfect} partial={searchPartial} />
@@ -498,7 +499,6 @@ const styles = StyleSheet.create({
   tabs: { flexDirection: 'row', marginHorizontal: spacing.xl, backgroundColor: '#F0F0EC', borderRadius: radius.lg, padding: 4, gap: 4, marginBottom: spacing.md },
   tab: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, paddingVertical: 10, borderRadius: 12 },
   tabActive: { backgroundColor: colors.surface, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 },
-  tabEmoji: { fontSize: 15 },
   tabLabel: { fontSize: 13, fontFamily: fonts.extraBold, color: colors.textLight },
   tabLabelActive: { color: colors.text },
   section: { paddingHorizontal: spacing.xl, paddingBottom: spacing.md },

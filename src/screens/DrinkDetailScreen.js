@@ -290,7 +290,7 @@ export default function DrinkDetailScreen({ navigation, route }) {
               {completedSteps.length === drink.steps.length && (
                 marcadoComoFeito ? (
                   <View style={styles.doneCard}>
-                    <Text style={{ fontSize: 28 }}>🎉</Text>
+                    <Text style={{ fontSize: 28 }}>🥂</Text>
                     <Text style={styles.doneTitle}>Adicionado ao histórico!</Text>
                     <Text style={styles.doneSub}>Que tal avaliar ou favoritar? Saúde! 🥂</Text>
                   </View>

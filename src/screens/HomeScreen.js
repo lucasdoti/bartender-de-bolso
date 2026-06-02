@@ -13,10 +13,10 @@ import drinks, { ibaOrder } from '../data/drinks';
 
 const moods = [
   { id: 'calor',  label: 'Refrescante',  emoji: '☀️' },
-  { id: 'frio',   label: 'Aconchegante', emoji: '🧥' },
-  { id: 'date',   label: 'Pra Date',     emoji: '💑' },
-  { id: 'solo',   label: 'Só eu',        emoji: '🧍' },
-  { id: 'festas', label: 'Festa',        emoji: '🎉' },
+  { id: 'frio',   label: 'Aconchegante', emoji: '🍂' },
+  { id: 'date',   label: 'Pra Date',     emoji: '🥂' },
+  { id: 'solo',   label: 'Só eu',        emoji: '🌙' },
+  { id: 'festas', label: 'Festa',        emoji: '🪩' },
 ];
 
 const INGREDIENT_ALIASES = { limao_taiti: 'limao', limao_siciliano: 'limao' };
@@ -93,11 +93,11 @@ export default function HomeScreen({ navigation }) {
         <TouchableOpacity onPress={surpriseMe} activeOpacity={0.85} style={[styles.ctaCard, { backgroundColor: '#0D1B2A', marginBottom: 12 }]}>
           <View>
             <Text style={styles.ctaLabel}>✦ Drink aleatório</Text>
-            <Text style={styles.ctaTitle}>Surpreenda-me 🎲</Text>
+            <Text style={styles.ctaTitle}>Surpreenda-me ✨</Text>
             <Text style={styles.ctaSub}>Um drink com o que você tem no bar</Text>
           </View>
           <View style={[styles.ctaIcon, { backgroundColor: '#1A3A5C' }]}>
-            <Text style={{ fontSize: 26 }}>🎲</Text>
+            <Text style={{ fontSize: 26 }}>✨</Text>
           </View>
         </TouchableOpacity>
 
@@ -116,7 +116,7 @@ export default function HomeScreen({ navigation }) {
         {/* MOODS */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Qual o clima? 🎯</Text>
+            <Text style={styles.sectionTitle}>Qual o clima?</Text>
             <TouchableOpacity onPress={() => setActiveMood(null)}>
               <Text style={styles.sectionLink}>{activeMood ? 'Limpar' : 'Ver todos'}</Text>
             </TouchableOpacity>
@@ -151,7 +151,7 @@ export default function HomeScreen({ navigation }) {
 
           {filtered.length === 0 ? (
             <View style={styles.empty}>
-              <Text style={{ fontSize: 40 }}>🥲</Text>
+              <Text style={{ fontSize: 40 }}>🫗</Text>
               <Text style={styles.emptyTitle}>Nenhum drink encontrado</Text>
               <Text style={styles.emptySub}>Tente outro ingrediente!</Text>
             </View>

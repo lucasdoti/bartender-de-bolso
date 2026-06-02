@@ -1,13 +1,14 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { colors, fonts } from '../theme';
 
 const tabs = [
-  { id: 'Home',       emoji: '🏠', label: 'Início'    },
-  { id: 'Cardapio',   emoji: '📖', label: 'Cardápio'  },
-  { id: 'MeuBar',     emoji: '🥃', label: 'Meu Bar'   },
-  { id: 'Favoritos',  emoji: '❤️', label: 'Favoritos' },
-  { id: 'Perfil',     emoji: '👤', label: 'Perfil'    },
+  { id: 'Home',      icon: 'home',    label: 'Início'    },
+  { id: 'Cardapio',  icon: 'book',    label: 'Cardápio'  },
+  { id: 'MeuBar',    icon: 'wine',    label: 'Meu Bar'   },
+  { id: 'Favoritos', icon: 'heart',   label: 'Favoritos' },
+  { id: 'Perfil',    icon: 'person',  label: 'Perfil'    },
 ];
 
 export default function BottomNav({ active, navigation }) {
@@ -24,9 +25,11 @@ export default function BottomNav({ active, navigation }) {
             style={[styles.tab, isActive && styles.tabActive]}
             activeOpacity={0.7}
           >
-            <Text style={[styles.emoji, { fontSize: isActive ? 17 : 20 }]}>
-              {tab.emoji}
-            </Text>
+            <Ionicons
+              name={isActive ? tab.icon : `${tab.icon}-outline`}
+              size={20}
+              color={isActive ? '#fff' : colors.textLight}
+            />
             <Text style={[styles.label, isActive && styles.labelActive]}>
               {tab.label}
             </Text>
@@ -55,14 +58,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 3,
     paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingVertical: 6,
     borderRadius: 12,
   },
   tabActive: {
     backgroundColor: colors.dark,
-  },
-  emoji: {
-    lineHeight: 24,
   },
   label: {
     fontSize: 10,

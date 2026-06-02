@@ -12,13 +12,13 @@ import { DrinkCardList, DrinkCardGrid } from '../components/DrinkCard';
 import drinks from '../data/drinks';
 
 const filters = [
-  { id: 'todos',    label: 'Todos',      emoji: '🍹' },
+  { id: 'todos',    label: 'Todos',      emoji: '🍸' },
   { id: 'popular',  label: 'Populares',  emoji: '🔥' },
   { id: 'calor',    label: 'Pro calor',  emoji: '☀️' },
-  { id: 'frio',     label: 'Pro frio',   emoji: '🧥' },
-  { id: 'date',     label: 'Pra date',   emoji: '💑' },
-  { id: 'solo',     label: 'Só eu',      emoji: '🧍' },
-  { id: 'festas',   label: 'Festa',      emoji: '🎉' },
+  { id: 'frio',     label: 'Pro frio',   emoji: '🍂' },
+  { id: 'date',     label: 'Pra date',   emoji: '🥂' },
+  { id: 'solo',     label: 'Só eu',      emoji: '🌙' },
+  { id: 'festas',   label: 'Festa',      emoji: '🪩' },
   { id: 'classico', label: 'Clássicos',  emoji: '⭐' },
   { id: 'brasil',   label: 'Brasileiro', emoji: '🇧🇷' },
 ];
@@ -133,7 +133,7 @@ export default function CardapioScreen({ navigation }) {
 
   const EmptyState = (
     <View style={styles.empty}>
-      <Text style={{ fontSize: 40 }}>🥲</Text>
+      <Text style={{ fontSize: 40 }}>🫗</Text>
       <Text style={styles.emptyTitle}>Nenhum drink encontrado</Text>
       <Text style={styles.emptySub}>Tente outro filtro!</Text>
     </View>

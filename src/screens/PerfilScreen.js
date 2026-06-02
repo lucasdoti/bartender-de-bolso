@@ -90,7 +90,7 @@ export default function PerfilScreen({ navigation }) {
 
   // Conquistas reais
   const badges = [
-    { emoji: '🍹', label: 'Primeiro drink',      earned: history.length >= 1 },
+    { emoji: '🥂', label: 'Primeiro drink',      earned: history.length >= 1 },
     { emoji: '🔥', label: '5 drinks feitos',     earned: history.length >= 5 },
     { emoji: '⭐', label: '10 favoritos',        earned: favorites.length >= 10 },
     { emoji: '🥃', label: 'Bartender Pro',       earned: history.length >= 20 },
@@ -118,7 +118,7 @@ export default function PerfilScreen({ navigation }) {
         {/* AVATAR */}
         <View style={styles.avatarRow}>
           <View style={styles.avatar}>
-            <Text style={{ fontSize: 32 }}>🧑‍🍳</Text>
+            <Text style={{ fontSize: 32 }}>🥃</Text>
           </View>
           <View style={{ flex: 1 }}>
             <Text style={styles.userName}>{user?.user_metadata?.name || 'Bartender'}</Text>
@@ -138,7 +138,7 @@ export default function PerfilScreen({ navigation }) {
         {/* STAT CARDS */}
         <View style={styles.statsGrid}>
           {[
-            { label: 'Drinks feitos', value: String(history.length || 0), emoji: '🍹' },
+            { label: 'Drinks feitos', value: String(history.length || 0), emoji: '🥂' },
             { label: 'Favoritos',     value: String(favorites.length),    emoji: '❤️' },
             { label: 'Semanas ativo', value: String(semanasAtivo),       emoji: '📅' },
           ].map(({ label, value, emoji }) => (
@@ -223,14 +223,14 @@ export default function PerfilScreen({ navigation }) {
           {section === 'historico' && (
             historyDrinks.length === 0 ? (
               <View style={styles.emptySection}>
-                <Text style={{ fontSize: 32 }}>📭</Text>
+                <Text style={{ fontSize: 32 }}>🫗</Text>
                 <Text style={styles.emptySectionText}>Nenhum drink preparado ainda</Text>
               </View>
             ) : (
               historyDrinks.map((drink, i) => (
                 <View key={i} style={styles.histCard}>
                   <View style={[styles.histGlass, { backgroundColor: drink.color }]}>
-                    <Text style={{ fontSize: 20 }}>🍹</Text>
+                    <Text style={{ fontSize: 20 }}>🥂</Text>
                   </View>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.histName}>{drink.name}</Text>
