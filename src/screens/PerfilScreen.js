@@ -281,7 +281,7 @@ export default function PerfilScreen({ navigation }) {
         </View>
 
         {/* ADMIN — visível apenas para o dono */}
-        {user?.email === 'lucasdoti06@gmail.com' && (
+        {user?.email === 'lucas_doti@hotmail.com' && (
           <TouchableOpacity
             activeOpacity={0.85}
             onPress={() => navigation.navigate('Admin')}
