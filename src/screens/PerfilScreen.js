@@ -11,12 +11,12 @@ import BottomNav from '../components/BottomNav';
 import drinks from '../data/drinks';
 
 const configItems = [
-  { icon: '🔔', label: 'Notificações',  sub: 'Novidades e receitas',  danger: false },
-  { icon: '🌙', label: 'Modo escuro',   sub: 'Em breve',              danger: false },
-  { icon: '🌍', label: 'Idioma',        sub: 'Português (BR)',        danger: false },
-  { icon: '⭐', label: 'Avaliar o app', sub: 'Deixe seu feedback',    danger: false },
-  { icon: '💬', label: 'Fale conosco',  sub: 'Sugestões e problemas', danger: false },
-  { icon: '🚪', label: 'Sair',          sub: '',                      danger: true  },
+  { icon: '🔔', label: 'Notificações',  sub: 'Novidades e receitas',  action: 'soon'    },
+  { icon: '🌙', label: 'Modo escuro',   sub: 'Em breve',              action: 'soon'    },
+  { icon: '🌍', label: 'Idioma',        sub: 'Português (BR)',        action: 'soon'    },
+  { icon: '⭐', label: 'Avaliar o app', sub: 'Deixe seu feedback',    action: 'review'  },
+  { icon: '💬', label: 'Fale conosco',  sub: 'Sugestões e problemas', action: 'contact' },
+  { icon: '🚪', label: 'Sair',          sub: '',                      action: 'logout',  danger: true },
 ];
 
 export default function PerfilScreen({ navigation }) {
@@ -29,6 +29,13 @@ export default function PerfilScreen({ navigation }) {
       { text: 'Cancelar', style: 'cancel' },
       { text: 'Sair', style: 'destructive', onPress: () => signOut() },
     ]);
+  };
+
+  const handleConfigPress = (action) => {
+    if (action === 'logout')  return handleLogout();
+    if (action === 'soon')    return Alert.alert('Em breve', 'Essa funcionalidade está a caminho! 🚀');
+    if (action === 'review')  return Alert.alert('Avaliar o app', 'Obrigado pelo interesse! A avaliação estará disponível em breve na loja.');
+    if (action === 'contact') return Alert.alert('Fale conosco', 'Manda uma mensagem para:\ncontato@bartenderdebolso.com');
   };
 
   // ── ESTATÍSTICAS REAIS (calculadas do histórico) ──
@@ -273,6 +280,18 @@ export default function PerfilScreen({ navigation }) {
 
         </View>
 
+        {/* ADMIN — visível apenas para o dono */}
+        {user?.email === 'lucasdoti06@gmail.com' && (
+          <TouchableOpacity
+            activeOpacity={0.85}
+            onPress={() => navigation.navigate('Admin')}
+            style={styles.adminBtn}
+          >
+            <Text style={styles.adminLabel}>✦ Painel do dono</Text>
+            <Text style={styles.adminTitle}>Dashboard 📊</Text>
+          </TouchableOpacity>
+        )}
+
         {/* CONFIGURAÇÕES */}
         <View style={{ paddingHorizontal: spacing.xl, marginTop: spacing.xl }}>
           <Text style={styles.sectionLabel}>Configurações</Text>
@@ -281,7 +300,7 @@ export default function PerfilScreen({ navigation }) {
               <TouchableOpacity
                 key={item.label}
                 activeOpacity={0.7}
-                onPress={item.danger ? handleLogout : undefined}
+                onPress={() => handleConfigPress(item.action)}
                 style={[styles.configItem, i < configItems.length - 1 && styles.configBorder]}
               >
                 <View style={[styles.configIcon, item.danger && { backgroundColor: '#FFF0F0' }]}>
@@ -372,4 +391,8 @@ const styles = StyleSheet.create({
 
   emptySection: { alignItems: 'center', paddingVertical: 40, gap: 12 },
   emptySectionText: { fontSize: 14, fontFamily: fonts.semiBold, color: colors.textLight },
+
+  adminBtn: { marginHorizontal: spacing.xl, marginTop: spacing.xl, backgroundColor: '#120D24', borderRadius: radius.xl, padding: spacing.lg, borderWidth: 1.5, borderColor: '#2D1854' },
+  adminLabel: { fontSize: 11, fontFamily: fonts.extraBold, color: '#9B6FD4', letterSpacing: 1.2, textTransform: 'uppercase' },
+  adminTitle: { fontSize: 17, fontFamily: fonts.extraBold, color: '#fff', marginTop: 4 },
 });

@@ -8,49 +8,35 @@ import DrinkDetailScreen from '../screens/DrinkDetailScreen';
 import MeuBarScreen      from '../screens/MeuBarScreen';
 import FavoritosScreen   from '../screens/FavoritosScreen';
 import PerfilScreen      from '../screens/PerfilScreen';
+import BartenderIAScreen from '../screens/BartenderIAScreen';
+import AdminScreen       from '../screens/AdminScreen';
 
 const Tab   = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-function HomeStack() {
+function Tabs() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="HomeMain"    component={HomeScreen} />
-      <Stack.Screen name="DrinkDetail" component={DrinkDetailScreen} />
-    </Stack.Navigator>
-  );
-}
-
-function CardapioStack() {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="CardapioList" component={CardapioScreen} />
-      <Stack.Screen name="DrinkDetail"  component={DrinkDetailScreen} />
-    </Stack.Navigator>
-  );
-}
-
-function FavoritosStack() {
-  return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="FavoritosList" component={FavoritosScreen} />
-      <Stack.Screen name="DrinkDetail"   component={DrinkDetailScreen} />
-    </Stack.Navigator>
+    <Tab.Navigator
+      screenOptions={{ headerShown: false, tabBarStyle: { display: 'none' } }}
+    >
+      <Tab.Screen name="Home"      component={HomeScreen} />
+      <Tab.Screen name="Cardapio"  component={CardapioScreen} />
+      <Tab.Screen name="MeuBar"    component={MeuBarScreen} />
+      <Tab.Screen name="Favoritos" component={FavoritosScreen} />
+      <Tab.Screen name="Perfil"    component={PerfilScreen} />
+    </Tab.Navigator>
   );
 }
 
 export default function AppNavigator() {
   return (
     <NavigationContainer>
-      <Tab.Navigator
-        screenOptions={{ headerShown: false, tabBarStyle: { display: 'none' } }}
-      >
-        <Tab.Screen name="Home"       component={HomeStack} />
-        <Tab.Screen name="Cardapio"   component={CardapioStack} />
-        <Tab.Screen name="MeuBar"     component={MeuBarScreen} />
-        <Tab.Screen name="Favoritos"  component={FavoritosStack} />
-        <Tab.Screen name="Perfil"     component={PerfilScreen} />
-      </Tab.Navigator>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Tabs"        component={Tabs} />
+        <Stack.Screen name="DrinkDetail" component={DrinkDetailScreen} />
+        <Stack.Screen name="BartenderIA" component={BartenderIAScreen} />
+        <Stack.Screen name="Admin"       component={AdminScreen} />
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }
