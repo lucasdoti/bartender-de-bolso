@@ -5,8 +5,15 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
 import { colors, fonts, radius, spacing } from '../theme';
+import drinks from '../data/drinks';
+import ingredientCategories from '../data/ingredients';
 
 const ACCENT = '#9B6FD4';
+
+const allIngredients = ingredientCategories.flatMap(c => c.items);
+function ingredientName(id) {
+  return allIngredients.find(i => i.id === id)?.label ?? id;
+}
 
 export default function AdminScreen({ navigation }) {
   const [stats, setStats] = useState(null);
@@ -49,7 +56,10 @@ export default function AdminScreen({ navigation }) {
   }
 
   const topDrinkKey = { makes: 'top_makes', favorites: 'top_favorites', views: 'top_views' }[topTab];
-  const topList = stats?.[topDrinkKey] || [];
+  const topList = (stats?.[topDrinkKey] || []).map(d => ({
+    ...d,
+    name: drinks.find(dr => dr.id === d.drink_id)?.name ?? `Drink #${d.drink_id}`,
+  }));
   const maxTopVal = Math.max(...topList.map(d => d.count), 1);
 
   const dailyActivity = stats?.daily_activity || [];
@@ -151,7 +161,7 @@ export default function AdminScreen({ navigation }) {
             {stats.top_ingredients.map((ing, i) => (
               <View key={ing.ingredient_id ?? i} style={styles.rankRow}>
                 <Text style={styles.rankNum}>{i + 1}</Text>
-                <Text style={[styles.rankName, { flex: 1 }]}>{ing.name}</Text>
+                <Text style={[styles.rankName, { flex: 1 }]}>{ingredientName(ing.ingredient_id)}</Text>
                 <Text style={styles.rankCount}>{ing.count}</Text>
               </View>
             ))}
