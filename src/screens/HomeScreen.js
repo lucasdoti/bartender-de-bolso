@@ -117,6 +117,18 @@ export default function HomeScreen({ navigation }) {
           </View>
         </TouchableOpacity>
 
+        {/* CTA — BARTENDER IA */}
+        <TouchableOpacity onPress={() => navigation.navigate('BartenderIA')} activeOpacity={0.85} style={[styles.ctaCard, { backgroundColor: '#120D24', marginTop: 12 }]}>
+          <View>
+            <Text style={[styles.ctaLabel, { color: '#9B6FD4' }]}>✦ Inteligência artificial</Text>
+            <Text style={styles.ctaTitle}>Fale com o Bartender</Text>
+            <Text style={styles.ctaSub}>Descreva o que quer e eu sugiro o drink</Text>
+          </View>
+          <View style={[styles.ctaIcon, { backgroundColor: '#2D1854' }]}>
+            <Text style={{ fontSize: 26 }}>💬</Text>
+          </View>
+        </TouchableOpacity>
+
         {/* MOODS */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
