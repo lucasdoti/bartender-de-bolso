@@ -13,7 +13,7 @@ function DrinkThumb({ drink, size = 62, borderRadius = 12 }) {
   if (photo && !imgError) {
     return (
       <Image
-        source={{ uri: photo + '/preview' }}
+        source={{ uri: photo }}
         style={{ width: size, height: size, borderRadius }}
         onError={() => setImgError(true)}
         resizeMode="cover"
