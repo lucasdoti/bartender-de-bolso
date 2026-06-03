@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Image,
+  Modal, Pressable, Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -41,18 +42,36 @@ function scaleAmount(amount, scale) {
   return unit ? `${fmt}${unit.startsWith('m') || unit.startsWith('g') ? '' : ' '}${unit}` : fmt;
 }
 
+const { width: SW, height: SH } = Dimensions.get('window');
+
 function DrinkHero({ drink, GlassComponent }) {
   const [imgError, setImgError] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
   const photo = drinkPhotos[drink.id];
 
   if (photo && !imgError) {
     return (
-      <Image
-        source={{ uri: photo }}
-        style={{ width: 110, height: 110, borderRadius: 20 }}
-        onError={() => setImgError(true)}
-        resizeMode="cover"
-      />
+      <>
+        <TouchableOpacity onPress={() => setFullscreen(true)} activeOpacity={0.9}>
+          <Image
+            source={{ uri: photo }}
+            style={{ width: 110, height: 110, borderRadius: 20 }}
+            onError={() => setImgError(true)}
+            resizeMode="cover"
+          />
+        </TouchableOpacity>
+
+        <Modal visible={fullscreen} transparent animationType="fade" statusBarTranslucent>
+          <Pressable style={heroStyles.backdrop} onPress={() => setFullscreen(false)}>
+            <Image
+              source={{ uri: photo }}
+              style={{ width: SW, height: SW }}
+              resizeMode="cover"
+            />
+            <Text style={heroStyles.hint}>Toque para fechar</Text>
+          </Pressable>
+        </Modal>
+      </>
     );
   }
   return (
@@ -61,6 +80,21 @@ function DrinkHero({ drink, GlassComponent }) {
     </View>
   );
 }
+
+const heroStyles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.92)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+  },
+  hint: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.4)',
+    fontFamily: fonts.semiBold,
+  },
+});
 
 export default function DrinkDetailScreen({ navigation, route }) {
   const { drinkId } = route.params;
