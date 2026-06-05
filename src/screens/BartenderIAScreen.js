@@ -10,9 +10,7 @@ import { DrinkCardList } from '../components/DrinkCard';
 import AppIcon from '../components/AppIcon';
 import drinks from '../data/drinks';
 
-// ─── FAMÍLIAS DE DRINKS ───────────────────────────────────────────────────────
-// Agrupa drinks por perfil de sabor e estrutura.
-// "Parecido com Negroni" → família inteira (Boulevardier, Americano, Rabo de Galo…)
+// ─── FAMÍLIAS ────────────────────────────────────────────────────────────────
 const FAMILIES = {
   negroni:         { ids: [5, 38, 33, 41, 49],        desc: 'estilo Negroni — amargo, encorpado, aperitivo' },
   sour:            { ids: [15, 46, 48, 37, 2, 12, 51], desc: 'família Sour — espirituoso + cítrico + doce' },
@@ -25,110 +23,178 @@ const FAMILIES = {
   cafe:            { ids: [19, 43],                      desc: 'drinks com café' },
 };
 
-// Mapeia nomes de drinks para sua família — permite "parecido com X" funcionar
 const SIMILAR_TO = {
-  'negroni':          'negroni',
-  'americano':        'negroni',
-  'boulevardier':     'negroni',
-  'garibaldi':        'negroni',
-  'rabo de galo':     'negroni',
-  'aperol spritz':    'spritz',
-  'spritz':           'spritz',
-  'mimosa':           'spritz',
+  'negroni':           'negroni',
+  'americano':         'negroni',
+  'boulevardier':      'negroni',
+  'garibaldi':         'negroni',
+  'rabo de galo':      'negroni',
+  'aperol spritz':     'spritz',
+  'spritz':            'spritz',
+  'mimosa':            'spritz',
   'negroni sbagliato': 'spritz',
-  'caipirinha':       'caipirinha',
-  'caipiroska':       'caipirinha',
-  'old fashioned':    'bourbon_stirred',
-  'manhattan':        'bourbon_stirred',
-  'boulevardier':     'bourbon_stirred',
-  'mint julep':       'bourbon_stirred',
-  'new york sour':    'bourbon_stirred',
-  'martini':          'martini',
-  'dry martini':      'martini',
-  'cosmopolitan':     'martini',
-  'espresso martini': 'martini',
-  'daiquiri':         'sour',
-  'whisky sour':      'sour',
-  'pisco sour':       'sour',
-  'margarita':        'sour',
-  "bee's knees":      'sour',
-  'piña colada':      'tropical',
-  'mai tai':          'tropical',
-  'gin tônica':       'collins',
-  'gin tonica':       'collins',
-  'tom collins':      'collins',
-  'mojito':           'collins',
+  'french 75':         'spritz',
+  'caipirinha':        'caipirinha',
+  'caipiroska':        'caipirinha',
+  'batida':            'tropical',
+  'old fashioned':     'bourbon_stirred',
+  'manhattan':         'bourbon_stirred',
+  'boulevardier':      'bourbon_stirred',
+  'mint julep':        'bourbon_stirred',
+  'new york sour':     'bourbon_stirred',
+  'martini':           'martini',
+  'dry martini':       'martini',
+  'cosmopolitan':      'martini',
+  'cosmo':             'martini',
+  'espresso martini':  'cafe',
+  'daiquiri':          'sour',
+  'whisky sour':       'sour',
+  'pisco sour':        'sour',
+  'margarita':         'sour',
+  "bee's knees":       'sour',
+  'clover club':       'sour',
+  'pina colada':       'tropical',
+  'piña colada':       'tropical',
+  'mai tai':           'tropical',
+  'gin tonica':        'collins',
+  'gin tônica':        'collins',
+  'tom collins':       'collins',
+  'mojito':            'collins',
+  'moscow mule':       'collins',
 };
 
-// ─── REGRAS DE KEYWORDS ──────────────────────────────────────────────────────
-// w = peso; family = família de drinks a boostar; tags/bases = filtros diretos
+// ─── REGRAS ──────────────────────────────────────────────────────────────────
 const RULES = [
   // Intensidade
   { words: ['forte', 'intenso', 'encorpado', 'concentrado', 'pesado', 'robusto', 'potente'], bases: ['Whisky', 'Bourbon', 'Gin', 'Campari', 'Rum'], w: 3 },
-  { words: ['leve', 'suave', 'fraco', 'delicado', 'tranquilo'], difficulty: 'Fácil', w: 2 },
+  { words: ['leve', 'suave', 'fraco', 'delicado', 'baixo teor', 'menos alcool', 'pouco alcool'], difficulty: 'Fácil', w: 2 },
   { words: ['spirit forward', 'puro', 'sem mistura', 'sem suco'], bases: ['Whisky', 'Bourbon', 'Gin', 'Campari'], w: 3 },
 
-  // Temperatura / clima
-  { words: ['refrescante', 'fresquinho', 'gelado', 'calor', 'verão', 'verao', 'quente', 'frescor'], tags: ['calor'], w: 3 },
-  { words: ['aconchegante', 'frio', 'inverno', 'quentinho', 'aquece'], tags: ['frio'], w: 3 },
+  // Clima / temperatura
+  { words: ['refrescante', 'fresquinho', 'gelado', 'calor', 'verao', 'verão', 'quente', 'frescor', 'churrasco', 'churras', 'piscina', 'praia', 'tarde de sol'], tags: ['calor'], w: 3 },
+  { words: ['aconchegante', 'frio', 'inverno', 'quentinho', 'aquece', 'friozinho', 'cobertor'], tags: ['frio'], w: 3 },
 
   // Ocasião
-  { words: ['romântico', 'romantico', 'date', 'namorado', 'namorada', 'jantar', 'especial', 'sofisticado', 'elegante', 'chique'], tags: ['date'], w: 3 },
-  { words: ['festa', 'festas', 'comemoração', 'comemoracao', 'celebração', 'celebracao', 'animado', 'balada', 'aniversário', 'aniversario'], tags: ['festas'], w: 3 },
-  { words: ['sozinho', 'sozinha', 'só', 'relaxar', 'relaxando', 'tranquilo', 'sossego', 'descanso'], tags: ['solo'], w: 3 },
+  { words: ['romantico', 'romantico', 'date', 'namorado', 'namorada', 'jantar', 'especial', 'sofisticado', 'elegante', 'chique', 'impressionar', 'surpreender', 'conquista'], tags: ['date'], w: 3 },
+  { words: ['festa', 'festas', 'comemoracao', 'comemoração', 'celebracao', 'celebração', 'animado', 'balada', 'aniversario', 'aniversário', 'galera', 'turma', 'amigos', 'grupo'], tags: ['festas'], w: 3 },
+  { words: ['sozinho', 'sozinha', 'so eu', 'só eu', 'relaxar', 'relaxando', 'tranquilo', 'sossego', 'descanso', 'serie', 'netflix', 'em casa', 'fim de dia'], tags: ['solo'], w: 3 },
+  { words: ['ressaca', 'cansado', 'cansada', 'de leve hoje', 'nao exagerar', 'não exagerar'], tags: ['solo'], difficulty: 'Fácil', w: 3 },
 
-  // Estilo geral
-  { words: ['clássico', 'classico', 'tradicional', 'atemporal', 'ícone', 'icone'], tags: ['classico'], w: 2 },
-  { words: ['brasileiro', 'brasileira', 'brasil', 'nacional', 'cachaça', 'cachaca'], tags: ['brasil'], w: 4 },
+  // Preparo / facilidade
+  { words: ['rapido', 'rapida', 'pratico', 'pratica', 'simples de fazer', 'sem trabalho', 'sem muito preparo', 'iniciante', 'nunca fiz', 'primeira vez', 'comecando'], difficulty: 'Fácil', w: 3 },
+  { words: ['sem coqueteleira', 'sem shaker', 'sem equipamento', 'so com copo', 'sem utensilios'], method: 'built', w: 4 },
+  { words: ['mexido', 'so mexer', 'no copo', 'on the rocks', 'stirred'], method: 'stirred', w: 3 },
+
+  // Estilo
+  { words: ['classico', 'clássico', 'tradicional', 'atemporal', 'icone', 'ícone'], tags: ['classico'], w: 2 },
+  { words: ['brasileiro', 'brasileira', 'brasil', 'nacional', 'cachaca', 'cachaça'], tags: ['brasil'], w: 4 },
   { words: ['italiano', 'italia', 'aperitivo', 'aperitif'], family: 'negroni', w: 3 },
-  { words: ['tropical', 'caribenho', 'caribe', 'verão tropical'], family: 'tropical', w: 3 },
+  { words: ['tropical', 'caribenho', 'caribe'], family: 'tropical', w: 3 },
+  { words: ['popular', 'famoso', 'mais pedido', 'mais conhecido', 'todo mundo conhece'], tags: ['popular'], w: 2 },
 
   // Sabor / perfil
-  { words: ['amargo', 'bitter', 'bittersweet', 'amargos', 'amargura'], family: 'negroni', bases: ['Campari', 'Aperol', 'Vermute'], w: 3 },
-  { words: ['doce', 'adocicado', 'dulce'], bases: ['Rum', 'Aperol', 'Bourbon'], w: 2 },
-  { words: ['cítrico', 'citrico', 'azedo', 'limão', 'limao', 'cítrica'], family: 'sour', bases: ['Gin', 'Vodka', 'Rum', 'Tequila', 'Cachaça'], w: 2 },
-  { words: ['herbal', 'herbáceo', 'herbaceo', 'botânico', 'botanico', 'floral', 'aromático', 'aromatico', 'juniper'], bases: ['Gin', 'Vermute'], w: 3 },
-  { words: ['defumado', 'smoky', 'turfa', 'amadeirado', 'carvalho'], bases: ['Whisky', 'Bourbon'], w: 3 },
+  { words: ['amargo', 'bitter', 'bittersweet', 'amargura'], family: 'negroni', bases: ['Campari', 'Aperol', 'Vermute'], w: 3 },
+  { words: ['doce', 'adocicado', 'dulce', 'docinho', 'suave doce'], bases: ['Rum', 'Aperol', 'Bourbon'], w: 2 },
+  { words: ['citrico', 'cítrico', 'azedo', 'limao', 'limão', 'citrica', 'acido', 'ácido'], family: 'sour', bases: ['Gin', 'Vodka', 'Rum', 'Tequila', 'Cachaça'], w: 2 },
+  { words: ['herbal', 'herbaceo', 'herbáceo', 'botanico', 'botânico', 'floral', 'aromatico', 'aromático', 'juniper'], bases: ['Gin', 'Vermute'], w: 3 },
+  { words: ['defumado', 'smoky', 'turfa', 'amadeirado', 'carvalho', 'oak'], bases: ['Whisky', 'Bourbon'], w: 3 },
   { words: ['frutado', 'fruta', 'frutas'], bases: ['Rum', 'Vodka', 'Aperol', 'Tequila', 'Cachaça'], w: 1 },
-  { words: ['café', 'cafe', 'espresso', 'coffee'], family: 'cafe', w: 4 },
-  { words: ['cremoso', 'cremosa', 'encorpado'], bases: ['Rum', 'Bourbon'], w: 2 },
-  { words: ['borbulhante', 'espumante', 'com gás', 'com gas', 'prosecco', 'champagne', 'cava'], family: 'spritz', w: 3 },
+  { words: ['cafe', 'café', 'espresso', 'coffee', 'cafezinho'], family: 'cafe', w: 4 },
+  { words: ['cremoso', 'cremosa'], bases: ['Rum', 'Bourbon'], w: 2 },
+  { words: ['borbulhante', 'espumante', 'com gas', 'com gás', 'prosecco', 'champagne', 'cava', 'espumoso'], family: 'spritz', w: 3 },
+  { words: ['gengibre', 'picante', 'apimentado'], bases: ['Vodka', 'Whisky', 'Rum'], w: 2 },
+  { words: ['hortela', 'hortelã', 'menta', 'mentol'], family: 'collins', bases: ['Rum', 'Gin'], w: 3 },
+  { words: ['coco', 'colada'], family: 'tropical', bases: ['Rum', 'Cachaça'], w: 2 },
+  { words: ['maracuja', 'maracujá', 'passion fruit'], bases: ['Vodka', 'Cachaça', 'Rum'], w: 2 },
+  { words: ['morango', 'framboesa', 'berry', 'frutas vermelhas'], bases: ['Vodka', 'Gin', 'Rum'], w: 2 },
 
-  // Referências diretas a drinks — dispara família + base
-  { words: ['negroni'],          family: 'negroni',         bases: ['Campari', 'Gin', 'Vermute'],   w: 5 },
-  { words: ['boulevardier'],     family: 'negroni',         bases: ['Bourbon', 'Campari'],          w: 5 },
-  { words: ['americano'],        family: 'negroni',         bases: ['Campari', 'Vermute'],          w: 5 },
-  { words: ['caipirinha'],       family: 'caipirinha',      tags: ['brasil'],                        w: 5 },
-  { words: ['mojito'],           family: 'collins',         bases: ['Rum'], tags: ['calor'],         w: 5 },
-  { words: ['margarita'],        family: 'sour',            bases: ['Tequila'],                      w: 5 },
-  { words: ['spritz', 'aperol spritz'], family: 'spritz',   bases: ['Aperol'],                       w: 5 },
-  { words: ['manhattan'],        family: 'bourbon_stirred', bases: ['Bourbon'],                      w: 5 },
-  { words: ['old fashioned'],    family: 'bourbon_stirred', bases: ['Bourbon'],                      w: 5 },
-  { words: ['daiquiri'],         family: 'sour',            bases: ['Rum'],                          w: 5 },
-  { words: ['martini'],          family: 'martini',         bases: ['Gin', 'Vodka'],                 w: 5 },
-  { words: ['cosmopolitan', 'cosmo'], family: 'martini',    bases: ['Vodka'],                        w: 5 },
-  { words: ['espresso martini'], family: 'cafe',            bases: ['Vodka'],                        w: 5 },
-  { words: ['whisky sour'],      family: 'sour',            bases: ['Whisky'],                       w: 5 },
-  { words: ['pisco sour'],       family: 'sour',            bases: ['Pisco'],                        w: 5 },
-  { words: ['piña colada', 'pina colada'], family: 'tropical', bases: ['Rum'],                      w: 5 },
-  { words: ['gin tônica', 'gin tonica', 'gin and tonic'], family: 'collins', bases: ['Gin'],        w: 5 },
-  { words: ['rabo de galo'],     family: 'negroni',         tags: ['brasil'],                        w: 5 },
-  { words: ['penicillin'],                                  bases: ['Whisky'],                       w: 5 },
-  { words: ['french 75'],        family: 'spritz',          bases: ['Gin'],                          w: 5 },
-  { words: ['new york sour'],    family: 'bourbon_stirred', bases: ['Bourbon'],                      w: 5 },
+  // Drinks específicos
+  { words: ['negroni'],                    family: 'negroni',         bases: ['Campari', 'Gin', 'Vermute'],   w: 5 },
+  { words: ['boulevardier'],               family: 'negroni',         bases: ['Bourbon', 'Campari'],          w: 5 },
+  { words: ['americano'],                  family: 'negroni',         bases: ['Campari', 'Vermute'],          w: 5 },
+  { words: ['caipirinha'],                 family: 'caipirinha',      tags: ['brasil'],                       w: 5 },
+  { words: ['mojito'],                     family: 'collins',         bases: ['Rum'], tags: ['calor'],        w: 5 },
+  { words: ['margarita'],                  family: 'sour',            bases: ['Tequila'],                     w: 5 },
+  { words: ['spritz', 'aperol spritz'],    family: 'spritz',          bases: ['Aperol'],                      w: 5 },
+  { words: ['manhattan'],                  family: 'bourbon_stirred', bases: ['Bourbon'],                     w: 5 },
+  { words: ['old fashioned'],              family: 'bourbon_stirred', bases: ['Bourbon'],                     w: 5 },
+  { words: ['daiquiri'],                   family: 'sour',            bases: ['Rum'],                         w: 5 },
+  { words: ['martini'],                    family: 'martini',         bases: ['Gin', 'Vodka'],                w: 5 },
+  { words: ['cosmopolitan', 'cosmo'],      family: 'martini',         bases: ['Vodka'],                       w: 5 },
+  { words: ['espresso martini'],           family: 'cafe',            bases: ['Vodka'],                       w: 5 },
+  { words: ['whisky sour'],                family: 'sour',            bases: ['Whisky'],                      w: 5 },
+  { words: ['pisco sour'],                 family: 'sour',            bases: ['Pisco'],                       w: 5 },
+  { words: ['pina colada', 'piña colada'], family: 'tropical',        bases: ['Rum'],                         w: 5 },
+  { words: ['gin tonica', 'gin tônica', 'gin and tonic'], family: 'collins', bases: ['Gin'],                 w: 5 },
+  { words: ['rabo de galo'],               family: 'negroni',         tags: ['brasil'],                       w: 5 },
+  { words: ['penicillin'],                                            bases: ['Whisky'],                      w: 5 },
+  { words: ['french 75'],                  family: 'spritz',          bases: ['Gin'],                         w: 5 },
+  { words: ['new york sour'],              family: 'bourbon_stirred', bases: ['Bourbon'],                     w: 5 },
+  { words: ['moscow mule', 'moscow'],      family: 'collins',         bases: ['Vodka'],                       w: 5 },
+  { words: ['mai tai'],                    family: 'tropical',        bases: ['Rum'],                         w: 5 },
+  { words: ['bee knees', 'bees knees'],   family: 'sour',            bases: ['Gin'],                         w: 5 },
 
-  // Bases mencionadas diretamente
-  { words: ['whisky', 'whiskey', 'escocês', 'escoces', 'scotch'], bases: ['Whisky'], w: 4 },
-  { words: ['bourbon', 'americano whiskey'], bases: ['Bourbon'], w: 4 },
-  { words: ['gin'], bases: ['Gin'], w: 4 },
-  { words: ['vodka'], bases: ['Vodka'], w: 4 },
-  { words: ['rum', 'rhum'], bases: ['Rum'], w: 4 },
-  { words: ['tequila', 'mezcal'], bases: ['Tequila'], w: 4 },
-  { words: ['aperol'], bases: ['Aperol'], w: 4 },
-  { words: ['campari'], bases: ['Campari'], w: 4 },
-  { words: ['vermute', 'vermouth'], bases: ['Vermute'], w: 4 },
-  { words: ['pisco'], bases: ['Pisco'], w: 4 },
+  // Bases diretas
+  { words: ['whisky', 'whiskey', 'escoces', 'escocês', 'scotch'], bases: ['Whisky'], w: 4 },
+  { words: ['bourbon'],                                              bases: ['Bourbon'], w: 4 },
+  { words: ['gin'],                                                  bases: ['Gin'], w: 4 },
+  { words: ['vodka'],                                                bases: ['Vodka'], w: 4 },
+  { words: ['rum', 'rhum'],                                          bases: ['Rum'], w: 4 },
+  { words: ['tequila', 'mezcal'],                                    bases: ['Tequila'], w: 4 },
+  { words: ['aperol'],                                               bases: ['Aperol'], w: 4 },
+  { words: ['campari'],                                              bases: ['Campari'], w: 4 },
+  { words: ['vermute', 'vermouth'],                                  bases: ['Vermute'], w: 4 },
+  { words: ['pisco'],                                                bases: ['Pisco'], w: 4 },
+  { words: ['cachaca', 'cachaça'],                                   bases: ['Cachaça'], w: 4 },
 ];
+
+// Padrões de negação — extrai o que vem após "sem", "não quero", etc.
+const NEGATION_PATTERNS = [
+  /\bsem\s+(\w+(?:\s\w+)?)/g,
+  /\bn[aã]o\s+(?:quero|gosto\s+de|curto|seja)\s+(\w+(?:(?:\s+\w+){0,2})?)/g,
+  /\bnada\s+de\s+(\w+(?:\s\w+)?)/g,
+  /\bevitar?\s+(\w+(?:\s\w+)?)/g,
+  /\bdetesto\s+(\w+(?:\s\w+)?)/g,
+  /\bodeio\s+(\w+(?:\s\w+)?)/g,
+];
+
+// Ingredientes mencionados no texto → needs IDs dos drinks
+const INGREDIENT_WORDS = {
+  'rum':       ['rum'],
+  'rhum':      ['rum'],
+  'gin':       ['gin'],
+  'vodka':     ['vodka'],
+  'tequila':   ['tequila'],
+  'mezcal':    ['tequila'],
+  'cachaca':   ['cachaca'],
+  'cachaça':   ['cachaca'],
+  'whisky':    ['whisky'],
+  'whiskey':   ['whisky'],
+  'scotch':    ['whisky'],
+  'bourbon':   ['bourbon'],
+  'campari':   ['campari'],
+  'aperol':    ['aperol'],
+  'vermute':   ['vermute'],
+  'vermouth':  ['vermute'],
+  'limao':     ['limao_taiti', 'limao_siciliano'],
+  'laranja':   ['laranja', 'sumo_laranja'],
+  'hortela':   ['hortela'],
+  'hortelã':   ['hortela'],
+  'menta':     ['hortela'],
+  'gengibre':  ['gengibre'],
+  'cafe':      ['cafe'],
+  'cafe':      ['cafe'],
+  'espresso':  ['cafe'],
+  'coco':      ['creme_coco', 'leite_coco'],
+  'maracuja':  ['maracuja', 'xarope_maracuja'],
+  'morango':   ['morango', 'xarope_morango'],
+  'framboesa': ['xarope_framboesa'],
+  'mel':       ['mel', 'xarope_mel'],
+  'prosecco':  ['prosecco'],
+  'angostura': ['angostura'],
+};
+
+const POPULAR_FALLBACK = [5, 15, 2, 16, 17, 8, 14, 33, 3, 7];
 
 // ─── MOTOR ───────────────────────────────────────────────────────────────────
 
@@ -136,9 +202,12 @@ function normalizeText(text) {
   return text.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 }
 
-// Detecta "parecido com X", "tipo X", "estilo X", "como o X" e retorna família de X
+function abvNumber(drink) {
+  return parseInt(drink.abv?.replace('%', '') || '0', 10);
+}
+
 function detectSimilarTo(normalized) {
-  const similarPatterns = [
+  const patterns = [
     /parecido com (.+)/,
     /parecida com (.+)/,
     /tipo (.+)/,
@@ -150,34 +219,65 @@ function detectSimilarTo(normalized) {
     /inspirado (?:no|na|em) (.+)/,
     /no estilo (?:do|da|de)? ?(.+)/,
   ];
-
-  const families = new Set();
-  for (const pattern of similarPatterns) {
+  const result = new Set();
+  for (const pattern of patterns) {
     const match = normalized.match(pattern);
     if (match) {
       const ref = normalizeText(match[1].trim().replace(/[.,!?]$/, ''));
       for (const [key, family] of Object.entries(SIMILAR_TO)) {
         if (ref.includes(normalizeText(key)) || normalizeText(key).includes(ref)) {
-          if (family) families.add(family);
+          result.add(family);
         }
       }
     }
   }
-  return [...families];
+  return [...result];
 }
 
-function localRecommend(input) {
+function extractNegatedTerms(normalized) {
+  const terms = new Set();
+  for (const pattern of NEGATION_PATTERNS) {
+    pattern.lastIndex = 0;
+    let match;
+    while ((match = pattern.exec(normalized)) !== null) {
+      terms.add(normalizeText(match[1].trim()));
+    }
+  }
+  return [...terms];
+}
+
+function extractIngredientNeeds(normalized) {
+  const needs = new Set();
+  for (const [word, ids] of Object.entries(INGREDIENT_WORDS)) {
+    if (normalized.includes(normalizeText(word))) {
+      ids.forEach(id => needs.add(id));
+    }
+  }
+  return [...needs];
+}
+
+function localRecommend(input, userBar = []) {
   const normalized = normalizeText(input);
 
-  // Detecta referências do tipo "parecido com X"
-  const similarFamilies = detectSimilarTo(normalized);
+  const similarFamilies    = detectSimilarTo(normalized);
+  const negatedTerms       = extractNegatedTerms(normalized);
+  const mentionedIngredients = extractIngredientNeeds(normalized);
 
-  // Encontra as regras ativas por keyword
+  // Regras que batem com o texto E não estão negadas
   const activeRules = RULES.filter(rule =>
-    rule.words.some(w => normalized.includes(normalizeText(w)))
+    rule.words.some(w => normalized.includes(normalizeText(w))) &&
+    !rule.words.some(w => negatedTerms.some(neg =>
+      normalizeText(w).includes(neg) || neg.includes(normalizeText(w))
+    ))
   );
 
-  // Coleta famílias das regras ativas
+  // Regras explicitamente negadas pelo usuário
+  const negatedRules = RULES.filter(rule =>
+    rule.words.some(w => negatedTerms.some(neg =>
+      normalizeText(w).includes(neg) || neg.includes(normalizeText(w))
+    ))
+  );
+
   const activeFamilyNames = new Set([
     ...activeRules.filter(r => r.family).map(r => r.family),
     ...similarFamilies,
@@ -187,102 +287,132 @@ function localRecommend(input) {
     [...activeFamilyNames].flatMap(name => FAMILIES[name]?.ids || [])
   );
 
-  // Pontua cada drink
+  const wantsStrong = /\b(forte|intenso|potente|encorpado|pesado|robusto)\b/.test(normalized);
+  const wantsLight  = /\b(leve|suave|fraco|delicado|baixo teor)\b/.test(normalized);
+
   const scored = drinks.map(drink => {
     let score = 0;
+    const drinkAbv = abvNumber(drink);
 
-    // Pontuação por família (estrutural similarity)
-    if (activeFamilyIds.has(drink.id)) {
-      score += 4;
+    // Família
+    if (activeFamilyIds.has(drink.id)) score += 4;
+
+    // "Parecido com X" — peso extra
+    for (const fam of similarFamilies) {
+      if (FAMILIES[fam]?.ids.includes(drink.id)) score += 5;
     }
 
-    // Pontuação por "parecido com" — peso extra para drinks da mesma família do drink referenciado
-    if (similarFamilies.length > 0) {
-      for (const familyName of similarFamilies) {
-        if (FAMILIES[familyName]?.ids.includes(drink.id)) {
-          score += 5;
-        }
-      }
-    }
-
-    // Pontuação pelas regras (tags, bases, dificuldade)
+    // Regras positivas
     for (const rule of activeRules) {
-      if (rule.tags) {
-        const hits = rule.tags.filter(t => drink.tags.includes(t)).length;
-        score += hits * rule.w;
-      }
-      if (rule.bases && rule.bases.includes(drink.base)) {
-        score += rule.w;
-      }
-      if (rule.difficulty && drink.difficulty === rule.difficulty) {
-        score += rule.w;
+      if (rule.tags)       score += rule.tags.filter(t => drink.tags.includes(t)).length * rule.w;
+      if (rule.bases && rule.bases.includes(drink.base))     score += rule.w;
+      if (rule.difficulty && drink.difficulty === rule.difficulty) score += rule.w;
+      if (rule.method && drink.method === rule.method)       score += rule.w;
+    }
+
+    // Penalidade por negação
+    for (const rule of negatedRules) {
+      if (rule.bases && rule.bases.includes(drink.base))     score -= rule.w * 2;
+      if (rule.tags)       score -= rule.tags.filter(t => drink.tags.includes(t)).length * rule.w * 2;
+      if (rule.family && FAMILIES[rule.family]?.ids.includes(drink.id)) score -= 4;
+    }
+
+    // Ingredientes mencionados na query
+    if (mentionedIngredients.length > 0) {
+      const drinkNeeds = drink.needs || [];
+      score += mentionedIngredients.filter(n => drinkNeeds.includes(n)).length * 2;
+    }
+
+    // Bar do usuário — prioriza o que já tem em casa
+    if (userBar.length > 0) {
+      const drinkNeeds = drink.needs || [];
+      if (drinkNeeds.length > 0) {
+        const hasAll  = drinkNeeds.every(n => userBar.includes(n));
+        const hasSome = drinkNeeds.some(n => userBar.includes(n));
+        if (hasAll)       score += 3;
+        else if (hasSome) score += 1;
       }
     }
+
+    // ABV como refinamento de força
+    if (wantsStrong) score += Math.max(0, drinkAbv - 18) * 0.4;
+    if (wantsLight)  score += Math.max(0, 16 - drinkAbv) * 0.4;
 
     return { drink, score };
   });
 
-  // Top 3 com score > 0
   const top = scored
     .filter(s => s.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, 3)
     .map(s => s.drink);
 
-  // Fallback se nada encontrado
-  const result = top.length > 0 ? top : [drinks[4], drinks[0], drinks[14]];
+  // Fallback aleatório entre os populares
+  if (top.length === 0) {
+    const fallback = [...POPULAR_FALLBACK]
+      .sort(() => Math.random() - 0.5)
+      .slice(0, 3)
+      .map(id => drinks.find(d => d.id === id))
+      .filter(Boolean);
+    return {
+      message: 'Não reconheci um estilo específico, mas aqui estão clássicos que raramente decepcionam:',
+      result: fallback,
+    };
+  }
 
-  // Gera mensagem contextualizada
-  const allTags   = activeRules.flatMap(r => r.tags  || []);
-  const allBases  = activeRules.flatMap(r => r.bases || []);
-  const allFams   = [...activeFamilyNames];
+  // Mensagem contextualizada
+  const allTags  = activeRules.flatMap(r => r.tags  || []);
+  const allBases = activeRules.flatMap(r => r.bases || []);
+  const allFams  = [...activeFamilyNames];
 
   let intro = 'Pelo que você descreveu';
   if (similarFamilies.length > 0) {
     const famDesc = FAMILIES[similarFamilies[0]]?.desc;
     intro = famDesc ? `Para quem curte o ${famDesc}` : 'Para um gosto parecido com o que você pediu';
-  } else if (allTags.includes('calor'))    intro = 'Para refrescar e matar a sede';
-  else if (allTags.includes('frio'))       intro = 'Para aquecer e aconchegar';
-  else if (allTags.includes('date'))       intro = 'Para uma ocasião especial';
-  else if (allTags.includes('festas'))     intro = 'Para animar a festa';
-  else if (allTags.includes('solo'))       intro = 'Para um momento relaxante só seu';
-  else if (allTags.includes('brasil'))     intro = 'Para celebrar com o que o Brasil tem de melhor';
-  else if (allTags.includes('classico'))   intro = 'Para quem aprecia o que é atemporal';
-  else if (allFams.includes('negroni'))    intro = 'Para os amantes do amargo e do aperitivo italiano';
-  else if (allFams.includes('bourbon_stirred')) intro = 'Para quem aprecia o bourbon encorpado e clássico';
-  else if (allFams.includes('spritz'))     intro = 'Para algo leve, borbulhante e descomplicado';
-  else if (allFams.includes('cafe'))       intro = 'Para quem quer o sabor do café no copo';
+  } else if (allTags.includes('calor'))             intro = 'Para refrescar e matar a sede';
+  else if (allTags.includes('frio'))                intro = 'Para aquecer e aconchegar';
+  else if (allTags.includes('date'))                intro = 'Para uma ocasião especial';
+  else if (allTags.includes('festas'))              intro = 'Para animar a galera';
+  else if (allTags.includes('solo'))                intro = 'Para um momento relaxante só seu';
+  else if (allTags.includes('brasil'))              intro = 'Para celebrar com o que o Brasil tem de melhor';
+  else if (allTags.includes('classico'))            intro = 'Para quem aprecia o que é atemporal';
+  else if (allFams.includes('negroni'))             intro = 'Para os amantes do amargo e do aperitivo italiano';
+  else if (allFams.includes('bourbon_stirred'))     intro = 'Para quem aprecia o bourbon encorpado e clássico';
+  else if (allFams.includes('spritz'))              intro = 'Para algo leve, borbulhante e descomplicado';
+  else if (allFams.includes('cafe'))                intro = 'Para quem quer o sabor do café no copo';
   else if (allBases.includes('Whisky') || allBases.includes('Bourbon')) intro = 'Para os que gostam de intensidade e complexidade';
-  else if (allBases.includes('Gin'))       intro = 'Para os amantes do aromático e botânico';
-  else if (allBases.includes('Rum'))       intro = 'Para quem curte o charme caribenho';
-  else if (allBases.includes('Tequila'))   intro = 'Para os apreciadores do agave';
+  else if (allBases.includes('Gin'))                intro = 'Para os amantes do aromático e botânico';
+  else if (allBases.includes('Rum'))                intro = 'Para quem curte o charme caribenho';
+  else if (allBases.includes('Tequila'))            intro = 'Para os apreciadores do agave';
 
-  const fallback = top.length === 0;
-  const message = fallback
-    ? 'Não reconheci um estilo específico, mas aqui estão clássicos que raramente decepcionam:'
-    : `${intro}, aqui estão minhas indicações:\n\n${result.map(d => `• ${d.name} — ${d.subtitle}`).join('\n')}\n\nClique em qualquer card para ver a receita completa!`;
+  const extras = [];
+  if (negatedRules.length > 0) extras.push('levando em conta o que você não quer');
+  if (userBar.length > 0)      extras.push('priorizando o que você tem no bar');
+  const extrasStr = extras.length > 0 ? ` (${extras.join(' e ')})` : '';
 
-  return { message, result };
+  const message = `${intro}${extrasStr}, aqui estão minhas indicações:\n\n${top.map(d => `• ${d.name} — ${d.subtitle}`).join('\n')}\n\nClique em qualquer card para ver a receita completa!`;
+
+  return { message, result: top };
 }
 
 // ─── TELA ─────────────────────────────────────────────────────────────────────
 
 const EXAMPLES = [
-  'Quero algo parecido com Negroni, mas diferente',
-  'Drink leve e refrescante para o calor',
+  'Algo refrescante para o calor, sem gin',
+  'Parecido com Negroni, mas diferente',
+  'Drink leve pra fazer em casa sem coqueteleira',
   'Algo sofisticado para uma janta especial',
-  'Drink brasileiro com identidade',
 ];
 
 export default function BartenderIAScreen({ navigation }) {
-  const { favorites, toggleFavorite } = useApp();
-  const [input, setInput]             = useState('');
-  const [response, setResponse]       = useState(null);
+  const { favorites, toggleFavorite, ingredients: userBar } = useApp();
+  const [input, setInput]           = useState('');
+  const [response, setResponse]     = useState(null);
   const [recommended, setRecommended] = useState([]);
 
   const handleSend = () => {
     if (!input.trim()) return;
-    const { message, result } = localRecommend(input.trim());
+    const { message, result } = localRecommend(input.trim(), userBar);
     setResponse(message);
     setRecommended(result);
   };
@@ -316,7 +446,7 @@ export default function BartenderIAScreen({ navigation }) {
                 <Text style={styles.introEmoji}>🍸</Text>
                 <Text style={styles.introTitle}>Olá! Eu sou o Bolso</Text>
                 <Text style={styles.introSub}>
-                  Me conta o que você está com vontade de tomar. Algo mais forte? Refrescante? Parecido com algum drink que você já provou? Eu indico o ideal pra você.
+                  Me conta o que você está com vontade de tomar. Algo mais forte? Refrescante? Parecido com algum drink que você já provou? Posso até usar o que você tem no bar!
                 </Text>
               </View>
 
