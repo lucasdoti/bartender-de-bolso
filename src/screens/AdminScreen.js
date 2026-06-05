@@ -15,17 +15,44 @@ function ingredientName(id) {
   return allIngredients.find(i => i.id === id)?.label ?? id;
 }
 
+function timeAgo(dateStr) {
+  if (!dateStr) return '–';
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const min  = Math.floor(diff / 60000);
+  const h    = Math.floor(min / 60);
+  const d    = Math.floor(h / 24);
+  if (min < 2)   return 'agora';
+  if (min < 60)  return `${min}m atrás`;
+  if (h < 24)    return `${h}h atrás`;
+  if (d === 1)   return 'ontem';
+  if (d < 7)     return `${d}d atrás`;
+  return new Date(dateStr).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+}
+
+function userHandle(email = '') {
+  return email.split('@')[0];
+}
+
 export default function AdminScreen({ navigation }) {
-  const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [topTab, setTopTab] = useState('makes');
+  const [stats, setStats]               = useState(null);
+  const [userList, setUserList]         = useState([]);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [loading, setLoading]           = useState(true);
+  const [error, setError]               = useState(null);
+  const [topTab, setTopTab]             = useState('makes');
+  const [showUsers, setShowUsers]       = useState(false);
 
   useEffect(() => {
     (async () => {
-      const { data, error: err } = await supabase.rpc('get_admin_stats');
-      if (err) setError(err.message);
-      else setStats(data);
+      const [statsRes, usersRes, activityRes] = await Promise.all([
+        supabase.rpc('get_admin_stats'),
+        supabase.rpc('get_user_list'),
+        supabase.rpc('get_recent_activity', { limit_n: 30 }),
+      ]);
+      if (statsRes.error) { setError(statsRes.error.message); setLoading(false); return; }
+      setStats(statsRes.data);
+      setUserList(usersRes.data || []);
+      setRecentActivity(activityRes.data || []);
       setLoading(false);
     })();
   }, []);
@@ -65,13 +92,6 @@ export default function AdminScreen({ navigation }) {
   const dailyActivity = stats?.daily_activity || [];
   const maxDaily = Math.max(...dailyActivity.map(d => d.count), 1);
 
-  const summaryCards = [
-    { label: 'Usuários',   value: stats?.total_users     ?? '–', emoji: '👤' },
-    { label: 'Preparo',    value: stats?.total_makes     ?? '–', emoji: '🥃' },
-    { label: 'Favoritos',  value: stats?.total_favorites ?? '–', emoji: '❤️' },
-    { label: 'Visitas',    value: stats?.total_views     ?? '–', emoji: '👁️' },
-  ];
-
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
@@ -90,16 +110,60 @@ export default function AdminScreen({ navigation }) {
 
         {/* SUMMARY CARDS */}
         <View style={styles.summaryGrid}>
-          {summaryCards.map(({ label, value, emoji }) => (
-            <View key={label} style={styles.summaryCard}>
+          {[
+            { label: 'Usuários',  value: stats?.total_users     ?? '–', emoji: '👤', onPress: () => setShowUsers(v => !v), active: showUsers },
+            { label: 'Preparo',   value: stats?.total_makes     ?? '–', emoji: '🥃' },
+            { label: 'Favoritos', value: stats?.total_favorites ?? '–', emoji: '❤️' },
+            { label: 'Visitas',   value: stats?.total_views     ?? '–', emoji: '👁️' },
+          ].map(({ label, value, emoji, onPress, active }) => (
+            <TouchableOpacity
+              key={label}
+              onPress={onPress}
+              activeOpacity={onPress ? 0.75 : 1}
+              style={[styles.summaryCard, active && styles.summaryCardActive]}
+            >
               <Text style={styles.summaryEmoji}>{emoji}</Text>
               <Text style={styles.summaryValue}>{value}</Text>
               <Text style={styles.summaryLabel}>{label}</Text>
-            </View>
+              {onPress && (
+                <Text style={[styles.summaryChevron, active && { color: ACCENT }]}>
+                  {active ? '▲' : '▼'}
+                </Text>
+              )}
+            </TouchableOpacity>
           ))}
         </View>
 
-        {/* DAILY ACTIVITY CHART (last 30 days) */}
+        {/* LISTA DE USUÁRIOS — expansível */}
+        {showUsers && (
+          <View style={[styles.section, { marginTop: spacing.xl }]}>
+            <Text style={styles.sectionTitle}>👤 Usuários cadastrados</Text>
+            {userList.length === 0 ? (
+              <Text style={styles.emptyText}>Sem dados ainda</Text>
+            ) : (
+              userList.map((u, i) => (
+                <View key={u.user_id ?? i} style={styles.userRow}>
+                  <View style={styles.userAvatar}>
+                    <Text style={styles.userAvatarText}>{userHandle(u.email)[0]?.toUpperCase()}</Text>
+                  </View>
+                  <View style={{ flex: 1, minWidth: 0 }}>
+                    <Text style={styles.userEmail} numberOfLines={1}>{u.email}</Text>
+                    <View style={styles.userMeta}>
+                      <Text style={styles.userMetaText}>🥃 {u.total_makes ?? 0}</Text>
+                      <Text style={styles.userMetaText}>❤️ {u.total_favorites ?? 0}</Text>
+                      {u.last_make && (
+                        <Text style={styles.userMetaText}>⏱ {timeAgo(u.last_make)}</Text>
+                      )}
+                    </View>
+                  </View>
+                  <Text style={styles.userJoined}>{timeAgo(u.joined_at)}</Text>
+                </View>
+              ))
+            )}
+          </View>
+        )}
+
+        {/* DAILY ACTIVITY CHART */}
         <View style={[styles.section, { marginTop: spacing.xl }]}>
           <Text style={styles.sectionTitle}>Atividade — últimos 30 dias</Text>
           <View style={styles.barChart}>
@@ -122,9 +186,9 @@ export default function AdminScreen({ navigation }) {
           <Text style={styles.sectionTitle}>Top drinks</Text>
           <View style={styles.tabRow}>
             {[
-              { id: 'makes',     label: 'Feitos'     },
-              { id: 'favorites', label: 'Favoritos'  },
-              { id: 'views',     label: 'Vistos'     },
+              { id: 'makes',     label: 'Feitos'    },
+              { id: 'favorites', label: 'Favoritos' },
+              { id: 'views',     label: 'Vistos'    },
             ].map(t => (
               <TouchableOpacity
                 key={t.id}
@@ -151,6 +215,28 @@ export default function AdminScreen({ navigation }) {
                 <Text style={styles.rankCount}>{d.count}</Text>
               </View>
             ))
+          )}
+        </View>
+
+        {/* ATIVIDADE RECENTE — quem fez qual drink */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>🕐 Atividade recente</Text>
+          {recentActivity.length === 0 ? (
+            <Text style={styles.emptyText}>Sem atividade ainda</Text>
+          ) : (
+            recentActivity.map((a, i) => {
+              const drinkName = drinks.find(d => d.id === a.drink_id)?.name ?? `Drink #${a.drink_id}`;
+              return (
+                <View key={i} style={styles.activityRow}>
+                  <Text style={styles.activityIcon}>🥃</Text>
+                  <Text style={styles.activityText} numberOfLines={1}>
+                    <Text style={styles.activityUser}>{userHandle(a.email)}</Text>
+                    {' fez '}<Text style={{ color: '#ccc' }}>{drinkName}</Text>
+                  </Text>
+                  <Text style={styles.activityTime}>{timeAgo(a.made_at)}</Text>
+                </View>
+              );
+            })
           )}
         </View>
 
@@ -188,17 +274,19 @@ const styles = StyleSheet.create({
 
   summaryGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: spacing.xl, gap: 10 },
   summaryCard: { width: '47%', backgroundColor: '#1A1A1A', borderRadius: radius.lg, padding: 16, alignItems: 'center', borderWidth: 1, borderColor: '#2A2A2A' },
+  summaryCardActive: { borderColor: ACCENT, backgroundColor: '#1E1530' },
   summaryEmoji: { fontSize: 24 },
   summaryValue: { fontSize: 26, fontFamily: fonts.black, color: '#fff', marginTop: 4 },
   summaryLabel: { fontSize: 10, fontFamily: fonts.extraBold, color: '#888', marginTop: 2, textTransform: 'uppercase', letterSpacing: 0.8 },
+  summaryChevron: { fontSize: 9, color: '#555', marginTop: 4 },
 
   section: { marginHorizontal: spacing.xl, marginTop: spacing.lg, backgroundColor: '#1A1A1A', borderRadius: radius.xl, padding: spacing.lg, borderWidth: 1, borderColor: '#2A2A2A' },
   sectionTitle: { fontSize: 14, fontFamily: fonts.extraBold, color: '#fff', marginBottom: 14 },
+  emptyText: { fontSize: 13, fontFamily: fonts.semiBold, color: '#555', textAlign: 'center', paddingVertical: 16 },
 
   barChart: { flexDirection: 'row', alignItems: 'flex-end', height: 64, gap: 2 },
   barCol: { flex: 1, alignItems: 'center', justifyContent: 'flex-end', height: '100%' },
   bar: { width: '100%', borderRadius: 2 },
-  emptyText: { fontSize: 13, fontFamily: fonts.semiBold, color: '#555', textAlign: 'center', paddingVertical: 16 },
 
   tabRow: { flexDirection: 'row', gap: 8, marginBottom: 14 },
   tabChip: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 50, borderWidth: 1.5, borderColor: '#333', backgroundColor: '#111' },
@@ -212,4 +300,20 @@ const styles = StyleSheet.create({
   rankBarBg: { height: 4, backgroundColor: '#2A2A2A', borderRadius: 2, overflow: 'hidden' },
   rankBarFill: { height: '100%', backgroundColor: ACCENT, borderRadius: 2 },
   rankCount: { fontSize: 13, fontFamily: fonts.extraBold, color: '#fff', minWidth: 28, textAlign: 'right' },
+
+  // Usuários
+  userRow: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 },
+  userAvatar: { width: 36, height: 36, borderRadius: 18, backgroundColor: ACCENT + '33', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  userAvatarText: { fontSize: 15, fontFamily: fonts.extraBold, color: ACCENT },
+  userEmail: { fontSize: 13, fontFamily: fonts.bold, color: '#ddd' },
+  userMeta: { flexDirection: 'row', gap: 10, marginTop: 3 },
+  userMetaText: { fontSize: 11, fontFamily: fonts.semiBold, color: '#666' },
+  userJoined: { fontSize: 11, fontFamily: fonts.semiBold, color: '#555', flexShrink: 0 },
+
+  // Atividade recente
+  activityRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
+  activityIcon: { fontSize: 16, flexShrink: 0 },
+  activityText: { flex: 1, fontSize: 13, fontFamily: fonts.semiBold, color: '#888' },
+  activityUser: { fontFamily: fonts.extraBold, color: ACCENT },
+  activityTime: { fontSize: 11, fontFamily: fonts.semiBold, color: '#555', flexShrink: 0 },
 });
