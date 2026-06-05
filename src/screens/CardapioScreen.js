@@ -62,7 +62,7 @@ export default function CardapioScreen({ navigation }) {
     .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
 
   const ListHeader = (
-    <>
+    <View>
       {/* HEADER */}
       <View style={styles.header}>
         <View>
@@ -170,7 +170,7 @@ export default function CardapioScreen({ navigation }) {
         ))}
       </ScrollView>
 
-    </>
+    </View>
   );
 
   const EmptyState = (
@@ -185,6 +185,7 @@ export default function CardapioScreen({ navigation }) {
     <SafeAreaView style={styles.safe} edges={['top']}>
       {view === 'list' ? (
         <FlatList
+          key="list"
           data={filtered}
           keyExtractor={d => String(d.id)}
           ListHeaderComponent={ListHeader}
@@ -204,6 +205,7 @@ export default function CardapioScreen({ navigation }) {
         />
       ) : (
         <FlatList
+          key="grid"
           data={filtered}
           keyExtractor={d => String(d.id)}
           numColumns={2}
