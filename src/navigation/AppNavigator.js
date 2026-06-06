@@ -10,6 +10,7 @@ import FavoritosScreen   from '../screens/FavoritosScreen';
 import PerfilScreen      from '../screens/PerfilScreen';
 import BartenderIAScreen from '../screens/BartenderIAScreen';
 import AdminScreen       from '../screens/AdminScreen';
+import FestaScreen       from '../screens/FestaScreen';
 
 const Tab   = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -23,6 +24,7 @@ function Tabs() {
       <Tab.Screen name="Cardapio"  component={CardapioScreen} />
       <Tab.Screen name="MeuBar"    component={MeuBarScreen} />
       <Tab.Screen name="Favoritos" component={FavoritosScreen} />
+      <Tab.Screen name="Festa"     component={FestaScreen} />
       <Tab.Screen name="Perfil"    component={PerfilScreen} />
     </Tab.Navigator>
   );

@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import * as Haptics from 'expo-haptics';
 import { colors, fonts } from '../theme';
 
 const tabs = [
@@ -8,6 +9,7 @@ const tabs = [
   { id: 'Cardapio',  icon: 'book',    label: 'Cardápio'  },
   { id: 'MeuBar',    icon: 'wine',    label: 'Meu Bar'   },
   { id: 'Favoritos', icon: 'heart',   label: 'Favoritos' },
+  { id: 'Festa',     icon: 'people',  label: 'Festa'     },
   { id: 'Perfil',    icon: 'person',  label: 'Perfil'    },
 ];
 
@@ -21,7 +23,10 @@ export default function BottomNav({ active, navigation }) {
         return (
           <TouchableOpacity
             key={tab.id}
-            onPress={() => navigation.navigate(tab.id)}
+            onPress={() => {
+              if (!isActive) Haptics.selectionAsync();
+              navigation.navigate(tab.id);
+            }}
             style={[styles.tab, isActive && styles.tabActive]}
             activeOpacity={0.7}
           >
