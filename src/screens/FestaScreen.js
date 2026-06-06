@@ -5,6 +5,7 @@ import {
   KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import { supabase } from '../lib/supabase';
 import { fonts, radius, spacing } from '../theme';
@@ -12,6 +13,7 @@ import drinks from '../data/drinks';
 
 const ACCENT = '#D4456F';
 const MEDALS = ['🥇', '🥈', '🥉'];
+const STORAGE_KEY = 'festa_session';
 
 function generateCode() {
   return Math.random().toString(36).substring(2, 8).toUpperCase();
@@ -28,9 +30,9 @@ function timeAgo(dateStr) {
   return `${Math.floor(h / 24)}d atrás`;
 }
 
-// phase: 'idle' | 'creating' | 'joining' | 'active' | 'picking'
+// phase: 'idle' | 'loading' | 'creating' | 'joining' | 'active' | 'picking'
 export default function FestaScreen({ navigation }) {
-  const [phase, setPhase]             = useState('idle');
+  const [phase, setPhase]             = useState('loading');
   const [partyCode, setPartyCode]     = useState('');
   const [partyId, setPartyId]         = useState(null);
   const [partyName, setPartyName]     = useState('');
@@ -44,11 +46,35 @@ export default function FestaScreen({ navigation }) {
   const [confirmLeave, setConfirmLeave] = useState(false);
   const channelRef = useRef(null);
 
+  // Restaurar sessão ao abrir
   useEffect(() => {
+    (async () => {
+      try {
+        const raw = await AsyncStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const session = JSON.parse(raw);
+          setPartyId(session.partyId);
+          setPartyCode(session.partyCode);
+          setPartyName(session.partyName);
+          setDisplayName(session.displayName);
+          await loadPartyData(session.partyId);
+          subscribeToParty(session.partyId);
+          setPhase('active');
+          return;
+        }
+      } catch (_) {}
+      setPhase('idle');
+    })();
     return () => {
       if (channelRef.current) supabase.removeChannel(channelRef.current);
     };
   }, []);
+
+  const saveSession = (data) =>
+    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data)).catch(() => {});
+
+  const clearSession = () =>
+    AsyncStorage.removeItem(STORAGE_KEY).catch(() => {});
 
   const loadPartyData = async (pid) => {
     const [membersRes, logsRes] = await Promise.all([
@@ -99,6 +125,7 @@ export default function FestaScreen({ navigation }) {
       setPartyCode(code);
       await loadPartyData(party.id);
       subscribeToParty(party.id);
+      saveSession({ partyId: party.id, partyCode: code, partyName: partyName.trim(), displayName: displayName.trim() });
       setPhase('active');
       try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch (_) {}
     } catch (e) {
@@ -139,6 +166,7 @@ export default function FestaScreen({ navigation }) {
       setPartyName(party.name);
       await loadPartyData(party.id);
       subscribeToParty(party.id);
+      saveSession({ partyId: party.id, partyCode: party.code, partyName: party.name, displayName: displayName.trim() });
       setPhase('active');
       try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch (_) {}
     } catch (e) {
@@ -149,6 +177,7 @@ export default function FestaScreen({ navigation }) {
 
   const doLeave = () => {
     if (channelRef.current) supabase.removeChannel(channelRef.current);
+    clearSession();
     setPhase('idle');
     setPartyId(null);
     setPartyCode('');
@@ -173,6 +202,17 @@ export default function FestaScreen({ navigation }) {
     await supabase.from('party_drinks').insert(payload);
     await loadPartyData(partyId);
   };
+
+  // ─── LOADING ─────────────────────────────────────────────────────────────────
+  if (phase === 'loading') {
+    return (
+      <SafeAreaView style={styles.safe} edges={['top']}>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <ActivityIndicator size="large" color={ACCENT} />
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   // ─── IDLE ────────────────────────────────────────────────────────────────────
   if (phase === 'idle') {
@@ -358,7 +398,10 @@ export default function FestaScreen({ navigation }) {
 
         {/* HEADER */}
         <View style={styles.partyHeader}>
-          <View style={{ flex: 1 }}>
+          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.headerBack}>
+            <Text style={styles.headerBackText}>‹</Text>
+          </TouchableOpacity>
+          <View style={{ flex: 1, marginLeft: 10 }}>
             <Text style={styles.partyLabel}>🎉 MODO FESTA</Text>
             <Text style={styles.partyTitle} numberOfLines={1}>{partyName || 'Festa'}</Text>
           </View>
@@ -497,6 +540,8 @@ const styles = StyleSheet.create({
 
   // ── Active header ──
   partyHeader: { flexDirection: 'row', alignItems: 'center', padding: spacing.xl, paddingBottom: spacing.md },
+  headerBack:     { width: 34, height: 34, borderRadius: 10, backgroundColor: '#1A1A1A', alignItems: 'center', justifyContent: 'center' },
+  headerBackText: { fontSize: 22, color: '#fff', lineHeight: 26 },
   partyLabel:  { fontSize: 11, fontFamily: fonts.extraBold, color: ACCENT, letterSpacing: 1.2, textTransform: 'uppercase' },
   partyTitle:  { fontSize: 24, fontFamily: fonts.displayBold, color: '#fff', marginTop: 2 },
   codeBox:     { backgroundColor: '#1E1E1E', borderRadius: radius.md, padding: 12, alignItems: 'center', borderWidth: 1.5, borderColor: '#333' },
