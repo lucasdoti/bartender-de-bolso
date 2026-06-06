@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  ScrollView, FlatList, Modal, ActivityIndicator, Alert,
+  ScrollView, FlatList, ActivityIndicator,
   KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -28,6 +28,7 @@ function timeAgo(dateStr) {
   return `${Math.floor(h / 24)}d atrás`;
 }
 
+// phase: 'idle' | 'creating' | 'joining' | 'active' | 'picking'
 export default function FestaScreen({ navigation }) {
   const [phase, setPhase]             = useState('idle');
   const [partyCode, setPartyCode]     = useState('');
@@ -38,8 +39,9 @@ export default function FestaScreen({ navigation }) {
   const [members, setMembers]         = useState([]);
   const [drinkLogs, setDrinkLogs]     = useState([]);
   const [loading, setLoading]         = useState(false);
-  const [pickerVisible, setPickerVisible] = useState(false);
+  const [errorMsg, setErrorMsg]       = useState('');
   const [drinkSearch, setDrinkSearch] = useState('');
+  const [confirmLeave, setConfirmLeave] = useState(false);
   const channelRef = useRef(null);
 
   useEffect(() => {
@@ -58,23 +60,26 @@ export default function FestaScreen({ navigation }) {
   };
 
   const subscribeToParty = (pid) => {
-    const ch = supabase
-      .channel(`party:${pid}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'party_drinks',  filter: `party_id=eq.${pid}` }, () => loadPartyData(pid))
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'party_members', filter: `party_id=eq.${pid}` }, () => loadPartyData(pid))
-      .subscribe();
-    channelRef.current = ch;
+    try {
+      const ch = supabase
+        .channel(`party:${pid}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'party_drinks',  filter: `party_id=eq.${pid}` }, () => loadPartyData(pid))
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'party_members', filter: `party_id=eq.${pid}` }, () => loadPartyData(pid))
+        .subscribe();
+      channelRef.current = ch;
+    } catch (_) {}
   };
 
   const createParty = async () => {
     if (!partyName.trim() || !displayName.trim()) {
-      Alert.alert('Preencha todos os campos');
+      setErrorMsg('Preencha todos os campos.');
       return;
     }
+    setErrorMsg('');
     setLoading(true);
     try {
-      const { data: authData, error: authErr } = await supabase.auth.getUser();
-      if (authErr || !authData?.user) throw new Error('Você precisa estar logado para criar uma festa.');
+      const { data: authData } = await supabase.auth.getUser();
+      if (!authData?.user) throw new Error('Você precisa estar logado para criar uma festa.');
       const user = authData.user;
       const code = generateCode();
 
@@ -83,60 +88,50 @@ export default function FestaScreen({ navigation }) {
         .insert({ name: partyName.trim(), code, created_by: user.id })
         .select()
         .single();
-      if (partyErr) throw new Error(partyErr.message || JSON.stringify(partyErr));
+      if (partyErr) throw new Error(partyErr.message);
 
       const { error: memberErr } = await supabase
         .from('party_members')
         .insert({ party_id: party.id, user_id: user.id, display_name: displayName.trim() });
-      if (memberErr) throw new Error(memberErr.message || JSON.stringify(memberErr));
+      if (memberErr) throw new Error(memberErr.message);
 
       setPartyId(party.id);
       setPartyCode(code);
       await loadPartyData(party.id);
       subscribeToParty(party.id);
       setPhase('active');
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch (_) {}
     } catch (e) {
-      Alert.alert('Erro ao criar festa', e.message ?? 'Erro desconhecido. As tabelas foram criadas no Supabase?');
+      setErrorMsg(e.message || 'Erro desconhecido. Tente novamente.');
     }
     setLoading(false);
   };
 
   const joinParty = async () => {
     if (!codeInput.trim() || !displayName.trim()) {
-      Alert.alert('Preencha todos os campos');
+      setErrorMsg('Preencha todos os campos.');
       return;
     }
+    setErrorMsg('');
     setLoading(true);
     try {
-      const { data: authData, error: authErr } = await supabase.auth.getUser();
-      if (authErr || !authData?.user) throw new Error('Você precisa estar logado para entrar em uma festa.');
+      const { data: authData } = await supabase.auth.getUser();
+      if (!authData?.user) throw new Error('Você precisa estar logado para entrar em uma festa.');
       const user = authData.user;
       const code = codeInput.trim().toUpperCase();
 
       const { data: party, error: partyErr } = await supabase
-        .from('parties')
-        .select()
-        .eq('code', code)
-        .single();
-      if (partyErr || !party) {
-        Alert.alert('Festa não encontrada', 'Verifique o código e tente novamente.');
-        setLoading(false);
-        return;
-      }
+        .from('parties').select().eq('code', code).single();
+      if (partyErr || !party) throw new Error('Festa não encontrada. Verifique o código.');
 
       const { data: existing } = await supabase
-        .from('party_members')
-        .select()
-        .eq('party_id', party.id)
-        .eq('user_id', user.id)
-        .maybeSingle();
+        .from('party_members').select().eq('party_id', party.id).eq('user_id', user.id).maybeSingle();
 
       if (!existing) {
         const { error: memberErr } = await supabase
           .from('party_members')
           .insert({ party_id: party.id, user_id: user.id, display_name: displayName.trim() });
-        if (memberErr) throw new Error(memberErr.message || JSON.stringify(memberErr));
+        if (memberErr) throw new Error(memberErr.message);
       }
 
       setPartyId(party.id);
@@ -145,74 +140,39 @@ export default function FestaScreen({ navigation }) {
       await loadPartyData(party.id);
       subscribeToParty(party.id);
       setPhase('active');
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch (_) {}
     } catch (e) {
-      Alert.alert('Erro ao entrar na festa', e.message ?? 'Erro desconhecido.');
+      setErrorMsg(e.message || 'Erro desconhecido. Tente novamente.');
     }
     setLoading(false);
   };
 
-  const leaveParty = () => {
-    Alert.alert('Sair da festa?', 'Você pode voltar a qualquer hora com o código.', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Sair', style: 'destructive', onPress: () => {
-          if (channelRef.current) supabase.removeChannel(channelRef.current);
-          setPhase('idle');
-          setPartyId(null);
-          setPartyCode('');
-          setPartyName('');
-          setDisplayName('');
-          setCodeInput('');
-          setMembers([]);
-          setDrinkLogs([]);
-        },
-      },
-    ]);
+  const doLeave = () => {
+    if (channelRef.current) supabase.removeChannel(channelRef.current);
+    setPhase('idle');
+    setPartyId(null);
+    setPartyCode('');
+    setPartyName('');
+    setDisplayName('');
+    setCodeInput('');
+    setMembers([]);
+    setDrinkLogs([]);
+    setConfirmLeave(false);
+    setErrorMsg('');
   };
 
   const logDrink = async (drinkId) => {
-    setPickerVisible(false);
     setDrinkSearch('');
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setPhase('active');
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch (_) {}
     const { data: authData } = await supabase.auth.getUser();
-    const user = authData?.user;
-    if (!user) return;
-    const { error } = await supabase
-      .from('party_drinks')
-      .insert({ party_id: partyId, user_id: user.id, drink_id: drinkId });
-    if (error) Alert.alert('Erro', error.message);
+    if (!authData?.user) return;
+    await supabase.from('party_drinks')
+      .insert({ party_id: partyId, user_id: authData.user.id, drink_id: drinkId });
+    await loadPartyData(partyId);
   };
 
-  const getMemberName = (uid) => members.find(m => m.user_id === uid)?.display_name ?? '?';
-
-  const leaderboard = Object.entries(
-    drinkLogs.reduce((acc, log) => {
-      acc[log.user_id] = (acc[log.user_id] || 0) + 1;
-      return acc;
-    }, {})
-  )
-    .map(([uid, count]) => ({ userId: uid, name: getMemberName(uid), count }))
-    .sort((a, b) => b.count - a.count);
-
-  const maxCount = Math.max(...leaderboard.map(l => l.count), 1);
-
-  const topDrinkEntry = Object.entries(
-    drinkLogs.reduce((acc, log) => {
-      acc[log.drink_id] = (acc[log.drink_id] || 0) + 1;
-      return acc;
-    }, {})
-  ).sort(([, a], [, b]) => b - a)[0];
-  const topDrinkName = topDrinkEntry
-    ? (drinks.find(d => d.id === Number(topDrinkEntry[0]))?.name ?? `#${topDrinkEntry[0]}`)
-    : null;
-
-  const filteredDrinks = drinks.filter(d =>
-    d.name.toLowerCase().includes(drinkSearch.toLowerCase()) ||
-    d.base.toLowerCase().includes(drinkSearch.toLowerCase())
-  );
-
-  // ─── IDLE ───────────────────────────────────────────────────────────────────
+  // ─── IDLE ────────────────────────────────────────────────────────────────────
   if (phase === 'idle') {
     return (
       <SafeAreaView style={styles.safe} edges={['top']}>
@@ -225,12 +185,10 @@ export default function FestaScreen({ navigation }) {
           <Text style={styles.idleSub}>
             Crie ou entre em uma festa e veja quem bebe mais — com ranking ao vivo!
           </Text>
-
-          <TouchableOpacity style={styles.primaryBtn} onPress={() => setPhase('creating')} activeOpacity={0.85}>
+          <TouchableOpacity style={styles.primaryBtn} onPress={() => { setErrorMsg(''); setPhase('creating'); }} activeOpacity={0.85}>
             <Text style={styles.primaryBtnText}>🥳  Criar festa</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity style={styles.secondaryBtn} onPress={() => setPhase('joining')} activeOpacity={0.85}>
+          <TouchableOpacity style={styles.secondaryBtn} onPress={() => { setErrorMsg(''); setPhase('joining'); }} activeOpacity={0.85}>
             <Text style={styles.secondaryBtnText}>🔑  Entrar com código</Text>
           </TouchableOpacity>
         </ScrollView>
@@ -238,14 +196,14 @@ export default function FestaScreen({ navigation }) {
     );
   }
 
-  // ─── FORM (create / join) ────────────────────────────────────────────────────
+  // ─── FORM ────────────────────────────────────────────────────────────────────
   if (phase === 'creating' || phase === 'joining') {
     const isCreating = phase === 'creating';
     return (
       <SafeAreaView style={styles.safe} edges={['top']}>
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={{ flex: 1 }}>
           <ScrollView contentContainerStyle={styles.formContent} keyboardShouldPersistTaps="handled">
-            <TouchableOpacity onPress={() => setPhase('idle')} style={styles.backRow}>
+            <TouchableOpacity onPress={() => { setErrorMsg(''); setPhase('idle'); }} style={styles.backRow}>
               <Text style={styles.backRowText}>‹ Voltar</Text>
             </TouchableOpacity>
 
@@ -290,6 +248,8 @@ export default function FestaScreen({ navigation }) {
               />
             </View>
 
+            {errorMsg ? <Text style={styles.errorMsg}>{errorMsg}</Text> : null}
+
             <TouchableOpacity
               style={[styles.primaryBtn, loading && { opacity: 0.6 }]}
               onPress={isCreating ? createParty : joinParty}
@@ -307,10 +267,77 @@ export default function FestaScreen({ navigation }) {
     );
   }
 
+  // ─── DRINK PICKER ────────────────────────────────────────────────────────────
+  if (phase === 'picking') {
+    const filtered = drinks.filter(d =>
+      d.name.toLowerCase().includes(drinkSearch.toLowerCase()) ||
+      d.base.toLowerCase().includes(drinkSearch.toLowerCase())
+    );
+    return (
+      <SafeAreaView style={styles.safe} edges={['top']}>
+        <View style={styles.pickerHeader}>
+          <TouchableOpacity onPress={() => { setDrinkSearch(''); setPhase('active'); }}>
+            <Text style={styles.navBackText}>‹ Cancelar</Text>
+          </TouchableOpacity>
+          <Text style={styles.pickerTitle}>Qual drink você tomou?</Text>
+        </View>
+        <View style={styles.pickerSearchRow}>
+          <Text style={{ fontSize: 16, marginRight: 8 }}>🔍</Text>
+          <TextInput
+            value={drinkSearch}
+            onChangeText={setDrinkSearch}
+            placeholder="Buscar drink ou destilado..."
+            placeholderTextColor="#444"
+            style={styles.pickerSearchInput}
+            autoFocus
+          />
+        </View>
+        <FlatList
+          data={filtered}
+          keyExtractor={d => String(d.id)}
+          contentContainerStyle={{ paddingBottom: 40 }}
+          keyboardShouldPersistTaps="handled"
+          renderItem={({ item }) => (
+            <TouchableOpacity style={styles.drinkItem} onPress={() => logDrink(item.id)} activeOpacity={0.75}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.drinkItemName}>{item.name}</Text>
+                <Text style={styles.drinkItemSub}>{item.base} · {item.abv}</Text>
+              </View>
+              <Text style={{ fontSize: 18, color: ACCENT }}>＋</Text>
+            </TouchableOpacity>
+          )}
+          ItemSeparatorComponent={() => <View style={{ height: 1, backgroundColor: '#1E1E1E' }} />}
+        />
+      </SafeAreaView>
+    );
+  }
+
   // ─── ACTIVE ──────────────────────────────────────────────────────────────────
+  const getMemberName = (uid) => members.find(m => m.user_id === uid)?.display_name ?? '?';
+
+  const leaderboard = Object.entries(
+    drinkLogs.reduce((acc, log) => {
+      acc[log.user_id] = (acc[log.user_id] || 0) + 1;
+      return acc;
+    }, {})
+  ).map(([uid, count]) => ({ userId: uid, name: getMemberName(uid), count }))
+   .sort((a, b) => b.count - a.count);
+
+  const maxCount = leaderboard.length > 0 ? Math.max(...leaderboard.map(l => l.count)) : 1;
+
+  const topDrinkEntry = Object.entries(
+    drinkLogs.reduce((acc, log) => {
+      acc[log.drink_id] = (acc[log.drink_id] || 0) + 1;
+      return acc;
+    }, {})
+  ).sort(([, a], [, b]) => b - a)[0];
+  const topDrinkName = topDrinkEntry
+    ? (drinks.find(d => d.id === Number(topDrinkEntry[0]))?.name ?? `#${topDrinkEntry[0]}`)
+    : null;
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 130 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
 
         {/* HEADER */}
         <View style={styles.partyHeader}>
@@ -339,6 +366,11 @@ export default function FestaScreen({ navigation }) {
             <Text style={styles.statLabel}>Mais pedido</Text>
           </View>
         </View>
+
+        {/* REGISTRAR DRINK — botão inline */}
+        <TouchableOpacity style={styles.registerBtn} onPress={() => setPhase('picking')} activeOpacity={0.85}>
+          <Text style={styles.registerBtnText}>＋  Registrar drink</Text>
+        </TouchableOpacity>
 
         {/* LEADERBOARD */}
         <View style={styles.section}>
@@ -383,56 +415,26 @@ export default function FestaScreen({ navigation }) {
           )}
         </View>
 
-        <TouchableOpacity style={styles.leaveBtn} onPress={leaveParty} activeOpacity={0.7}>
-          <Text style={styles.leaveBtnText}>Sair da festa</Text>
-        </TouchableOpacity>
+        {/* SAIR */}
+        {confirmLeave ? (
+          <View style={styles.confirmBox}>
+            <Text style={styles.confirmText}>Sair da festa? Você pode voltar com o código.</Text>
+            <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
+              <TouchableOpacity style={styles.confirmCancel} onPress={() => setConfirmLeave(false)}>
+                <Text style={styles.confirmCancelText}>Cancelar</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.confirmLeave} onPress={doLeave}>
+                <Text style={styles.confirmLeaveText}>Sair</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        ) : (
+          <TouchableOpacity style={styles.leaveBtn} onPress={() => setConfirmLeave(true)} activeOpacity={0.7}>
+            <Text style={styles.leaveBtnText}>Sair da festa</Text>
+          </TouchableOpacity>
+        )}
 
       </ScrollView>
-
-      {/* FAB */}
-      <TouchableOpacity style={styles.fab} onPress={() => setPickerVisible(true)} activeOpacity={0.85}>
-        <Text style={styles.fabText}>＋  Registrar drink</Text>
-      </TouchableOpacity>
-
-      {/* DRINK PICKER */}
-      <Modal visible={pickerVisible} animationType="slide" onRequestClose={() => setPickerVisible(false)}>
-        <SafeAreaView style={[styles.safe, { flex: 1 }]} edges={['top']}>
-          <View style={styles.pickerHeader}>
-            <Text style={styles.pickerTitle}>Qual drink você tomou?</Text>
-            <TouchableOpacity onPress={() => { setPickerVisible(false); setDrinkSearch(''); }}>
-              <Text style={{ fontSize: 22, color: '#888' }}>✕</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.pickerSearchRow}>
-            <Text style={{ fontSize: 16, marginRight: 8 }}>🔍</Text>
-            <TextInput
-              value={drinkSearch}
-              onChangeText={setDrinkSearch}
-              placeholder="Buscar drink ou destilado..."
-              placeholderTextColor="#444"
-              style={styles.pickerSearchInput}
-            />
-          </View>
-          <FlatList
-            data={filteredDrinks}
-            keyExtractor={d => String(d.id)}
-            contentContainerStyle={{ paddingBottom: 40 }}
-            keyboardShouldPersistTaps="handled"
-            renderItem={({ item }) => (
-              <TouchableOpacity style={styles.drinkItem} onPress={() => logDrink(item.id)} activeOpacity={0.75}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.drinkItemName}>{item.name}</Text>
-                  <Text style={styles.drinkItemSub}>{item.base} · {item.abv}</Text>
-                </View>
-                <Text style={{ fontSize: 18, color: ACCENT }}>＋</Text>
-              </TouchableOpacity>
-            )}
-            ItemSeparatorComponent={() => <View style={{ height: 1, backgroundColor: '#1E1E1E' }} />}
-          />
-        </SafeAreaView>
-      </Modal>
-
-      <BottomNav active="Festa" navigation={navigation} />
     </SafeAreaView>
   );
 }
@@ -443,10 +445,10 @@ const styles = StyleSheet.create({
   navBackText: { fontSize: 16, fontFamily: fonts.bold, color: '#888' },
 
   // ── Idle ──
-  idleContent: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl, paddingBottom: 100 },
-  idleEmoji:  { fontSize: 72, marginBottom: 16 },
-  idleTitle:  { fontSize: 30, fontFamily: fonts.displayBold, color: '#fff', marginBottom: 10 },
-  idleSub:    { fontSize: 14, fontFamily: fonts.semiBold, color: '#888', textAlign: 'center', lineHeight: 22, marginBottom: 40 },
+  idleContent: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl, paddingBottom: 60 },
+  idleEmoji:   { fontSize: 72, marginBottom: 16 },
+  idleTitle:   { fontSize: 30, fontFamily: fonts.displayBold, color: '#fff', marginBottom: 10 },
+  idleSub:     { fontSize: 14, fontFamily: fonts.semiBold, color: '#888', textAlign: 'center', lineHeight: 22, marginBottom: 40 },
 
   primaryBtn:     { backgroundColor: ACCENT, borderRadius: radius.lg, paddingVertical: 16, paddingHorizontal: 32, alignItems: 'center', width: '100%', marginBottom: 14 },
   primaryBtnText: { fontSize: 16, fontFamily: fonts.extraBold, color: '#fff' },
@@ -454,7 +456,7 @@ const styles = StyleSheet.create({
   secondaryBtnText: { fontSize: 16, fontFamily: fonts.extraBold, color: '#ccc' },
 
   // ── Form ──
-  formContent: { flexGrow: 1, padding: spacing.xl, paddingBottom: 100 },
+  formContent: { flexGrow: 1, padding: spacing.xl, paddingBottom: 60 },
   backRow:     { marginBottom: 24 },
   backRowText: { fontSize: 16, fontFamily: fonts.bold, color: '#888' },
   formTitle:   { fontSize: 26, fontFamily: fonts.displayBold, color: '#fff', marginBottom: 28 },
@@ -462,20 +464,34 @@ const styles = StyleSheet.create({
   fieldLabel:  { fontSize: 12, fontFamily: fonts.extraBold, color: '#888', letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 8 },
   fieldInput:  { backgroundColor: '#1A1A1A', borderRadius: radius.md, borderWidth: 1.5, borderColor: '#2A2A2A', paddingHorizontal: 16, paddingVertical: 14, fontSize: 15, fontFamily: fonts.bold, color: '#fff' },
   codeInputStyle: { letterSpacing: 6, textTransform: 'uppercase', fontSize: 20, textAlign: 'center' },
+  errorMsg:    { fontSize: 13, fontFamily: fonts.bold, color: '#FF5A5A', marginBottom: 16, textAlign: 'center' },
+
+  // ── Picker ──
+  pickerHeader:    { flexDirection: 'row', alignItems: 'center', gap: 16, padding: spacing.xl, paddingBottom: spacing.md },
+  pickerTitle:     { fontSize: 16, fontFamily: fonts.extraBold, color: '#fff', flex: 1 },
+  pickerSearchRow: { flexDirection: 'row', alignItems: 'center', marginHorizontal: spacing.xl, marginBottom: 12, backgroundColor: '#1A1A1A', borderRadius: radius.md, borderWidth: 1.5, borderColor: '#2A2A2A', paddingHorizontal: 14 },
+  pickerSearchInput: { flex: 1, paddingVertical: 12, fontSize: 14, fontFamily: fonts.bold, color: '#fff' },
+  drinkItem:       { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.xl, paddingVertical: 14 },
+  drinkItemName:   { fontSize: 14, fontFamily: fonts.bold, color: '#ddd' },
+  drinkItemSub:    { fontSize: 11, fontFamily: fonts.semiBold, color: '#555', marginTop: 2 },
 
   // ── Active header ──
   partyHeader: { flexDirection: 'row', alignItems: 'center', padding: spacing.xl, paddingBottom: spacing.md },
   partyLabel:  { fontSize: 11, fontFamily: fonts.extraBold, color: ACCENT, letterSpacing: 1.2, textTransform: 'uppercase' },
   partyTitle:  { fontSize: 24, fontFamily: fonts.displayBold, color: '#fff', marginTop: 2 },
   codeBox:     { backgroundColor: '#1E1E1E', borderRadius: radius.md, padding: 12, alignItems: 'center', borderWidth: 1.5, borderColor: '#333' },
-  codeBoxLabel:{ fontSize: 9, fontFamily: fonts.extraBold, color: '#555', letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 4 },
-  codeBoxValue:{ fontSize: 18, fontFamily: fonts.black, color: ACCENT, letterSpacing: 3 },
+  codeBoxLabel: { fontSize: 9, fontFamily: fonts.extraBold, color: '#555', letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 4 },
+  codeBoxValue: { fontSize: 18, fontFamily: fonts.black, color: ACCENT, letterSpacing: 3 },
 
   // ── Stats ──
   statsRow: { flexDirection: 'row', marginHorizontal: spacing.xl, gap: 10, marginBottom: spacing.md },
-  statCard:  { flex: 1, backgroundColor: '#1A1A1A', borderRadius: radius.md, padding: 12, alignItems: 'center', borderWidth: 1, borderColor: '#2A2A2A' },
+  statCard: { flex: 1, backgroundColor: '#1A1A1A', borderRadius: radius.md, padding: 12, alignItems: 'center', borderWidth: 1, borderColor: '#2A2A2A' },
   statValue: { fontSize: 16, fontFamily: fonts.black, color: '#fff', marginBottom: 2 },
   statLabel: { fontSize: 10, fontFamily: fonts.semiBold, color: '#555', textTransform: 'uppercase', letterSpacing: 0.5 },
+
+  // ── Register button ──
+  registerBtn:     { marginHorizontal: spacing.xl, marginBottom: 14, backgroundColor: ACCENT, borderRadius: radius.lg, paddingVertical: 14, alignItems: 'center', shadowColor: ACCENT, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 12, elevation: 8 },
+  registerBtnText: { fontSize: 15, fontFamily: fonts.extraBold, color: '#fff' },
 
   // ── Sections ──
   section:      { marginHorizontal: spacing.xl, marginBottom: 14, backgroundColor: '#1A1A1A', borderRadius: radius.xl, padding: spacing.lg, borderWidth: 1, borderColor: '#2A2A2A' },
@@ -487,7 +503,7 @@ const styles = StyleSheet.create({
   rankMedal:  { fontSize: 20, width: 28, textAlign: 'center' },
   rankName:   { fontSize: 13, fontFamily: fonts.bold, color: '#ddd', marginBottom: 5 },
   rankBarBg:  { height: 4, backgroundColor: '#2A2A2A', borderRadius: 2, overflow: 'hidden' },
-  rankBarFill:{ height: '100%', backgroundColor: ACCENT, borderRadius: 2 },
+  rankBarFill: { height: '100%', backgroundColor: ACCENT, borderRadius: 2 },
   rankCount:  { fontSize: 13, fontFamily: fonts.extraBold, color: '#fff', minWidth: 40, textAlign: 'right' },
 
   // ── Feed ──
@@ -497,19 +513,13 @@ const styles = StyleSheet.create({
   feedName:  { fontFamily: fonts.extraBold, color: ACCENT },
   feedTime:  { fontSize: 11, fontFamily: fonts.semiBold, color: '#444', flexShrink: 0 },
 
+  // ── Leave ──
   leaveBtn:     { marginHorizontal: spacing.xl, marginTop: 8, paddingVertical: 14, borderRadius: radius.md, backgroundColor: '#1A1A1A', borderWidth: 1, borderColor: '#2A2A2A', alignItems: 'center' },
   leaveBtnText: { fontSize: 13, fontFamily: fonts.extraBold, color: '#555' },
-
-  // ── FAB ──
-  fab:     { position: 'absolute', bottom: 90, alignSelf: 'center', backgroundColor: ACCENT, borderRadius: 50, paddingHorizontal: 28, paddingVertical: 16, shadowColor: ACCENT, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.5, shadowRadius: 16, elevation: 12 },
-  fabText: { fontSize: 15, fontFamily: fonts.extraBold, color: '#fff' },
-
-  // ── Picker modal ──
-  pickerHeader:    { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: spacing.xl, paddingBottom: spacing.md },
-  pickerTitle:     { fontSize: 18, fontFamily: fonts.extraBold, color: '#fff' },
-  pickerSearchRow: { flexDirection: 'row', alignItems: 'center', marginHorizontal: spacing.xl, marginBottom: 12, backgroundColor: '#1A1A1A', borderRadius: radius.md, borderWidth: 1.5, borderColor: '#2A2A2A', paddingHorizontal: 14 },
-  pickerSearchInput:{ flex: 1, paddingVertical: 12, fontSize: 14, fontFamily: fonts.bold, color: '#fff' },
-  drinkItem:       { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.xl, paddingVertical: 14 },
-  drinkItemName:   { fontSize: 14, fontFamily: fonts.bold, color: '#ddd' },
-  drinkItemSub:    { fontSize: 11, fontFamily: fonts.semiBold, color: '#555', marginTop: 2 },
+  confirmBox:   { marginHorizontal: spacing.xl, marginTop: 8, padding: spacing.lg, backgroundColor: '#1A1A1A', borderRadius: radius.lg, borderWidth: 1, borderColor: '#333' },
+  confirmText:  { fontSize: 13, fontFamily: fonts.semiBold, color: '#ccc', textAlign: 'center' },
+  confirmCancel:     { flex: 1, paddingVertical: 12, borderRadius: radius.md, backgroundColor: '#2A2A2A', alignItems: 'center' },
+  confirmCancelText: { fontSize: 13, fontFamily: fonts.extraBold, color: '#888' },
+  confirmLeave:      { flex: 1, paddingVertical: 12, borderRadius: radius.md, backgroundColor: '#3D1A1A', alignItems: 'center' },
+  confirmLeaveText:  { fontSize: 13, fontFamily: fonts.extraBold, color: '#FF5A5A' },
 });
