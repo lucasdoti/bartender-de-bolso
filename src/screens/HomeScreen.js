@@ -122,6 +122,18 @@ export default function HomeScreen({ navigation }) {
           </TouchableOpacity>
         </View>
 
+        {/* MODO FESTA */}
+        <TouchableOpacity onPress={() => navigation.navigate('Festa')} activeOpacity={0.85} style={styles.ctaFesta}>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.ctaFestaLabel}>✦ Novo</Text>
+            <Text style={styles.ctaFestaTitle}>Modo Festa 🎉</Text>
+            <Text style={styles.ctaFestaSub}>Compare quem bebeu mais com os amigos</Text>
+          </View>
+          <View style={styles.ctaFestaIcon}>
+            <Text style={{ fontSize: 32 }}>🏆</Text>
+          </View>
+        </TouchableOpacity>
+
         {/* MOODS */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
@@ -205,6 +217,11 @@ const styles = StyleSheet.create({
   ctaSmall: { flex: 1, borderRadius: radius.xl, padding: spacing.md, paddingVertical: 18, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 10, elevation: 4 },
   ctaSmallTitle: { fontSize: 13, fontFamily: fonts.extraBold, color: '#fff', textAlign: 'center' },
   ctaSmallSub: { fontSize: 11, fontFamily: fonts.semiBold, color: '#888', marginTop: 3, textAlign: 'center' },
+  ctaFesta: { marginHorizontal: spacing.xl, marginTop: 12, backgroundColor: '#14201A', borderRadius: radius.xl, padding: spacing.lg, paddingVertical: 20, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#1F3D2E', shadowColor: '#2ECC71', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.15, shadowRadius: 16, elevation: 6 },
+  ctaFestaLabel: { fontSize: 11, color: '#2ECC71', fontFamily: fonts.extraBold, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 4 },
+  ctaFestaTitle: { fontSize: 20, fontFamily: fonts.extraBold, color: '#fff', lineHeight: 26 },
+  ctaFestaSub: { fontSize: 12, fontFamily: fonts.semiBold, color: '#888', marginTop: 4 },
+  ctaFestaIcon: { width: 60, height: 60, borderRadius: radius.lg, backgroundColor: '#1F3D2E', alignItems: 'center', justifyContent: 'center', marginLeft: 12 },
   section: { paddingHorizontal: spacing.xl, marginTop: spacing.xl },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
   sectionTitle: { fontSize: 16, fontFamily: fonts.extraBold, color: colors.text },

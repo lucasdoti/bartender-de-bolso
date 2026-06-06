@@ -9,7 +9,6 @@ import * as Haptics from 'expo-haptics';
 import { supabase } from '../lib/supabase';
 import { fonts, radius, spacing } from '../theme';
 import drinks from '../data/drinks';
-import BottomNav from '../components/BottomNav';
 
 const ACCENT = '#D4456F';
 const MEDALS = ['🥇', '🥈', '🥉'];
@@ -211,6 +210,9 @@ export default function FestaScreen({ navigation }) {
   if (phase === 'idle') {
     return (
       <SafeAreaView style={styles.safe} edges={['top']}>
+        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.navBack}>
+          <Text style={styles.navBackText}>‹ Voltar</Text>
+        </TouchableOpacity>
         <ScrollView contentContainerStyle={styles.idleContent} showsVerticalScrollIndicator={false}>
           <Text style={styles.idleEmoji}>🎉</Text>
           <Text style={styles.idleTitle}>Modo Festa</Text>
@@ -226,7 +228,6 @@ export default function FestaScreen({ navigation }) {
             <Text style={styles.secondaryBtnText}>🔑  Entrar com código</Text>
           </TouchableOpacity>
         </ScrollView>
-        <BottomNav active="Festa" navigation={navigation} />
       </SafeAreaView>
     );
   }
@@ -296,7 +297,6 @@ export default function FestaScreen({ navigation }) {
             </TouchableOpacity>
           </ScrollView>
         </KeyboardAvoidingView>
-        <BottomNav active="Festa" navigation={navigation} />
       </SafeAreaView>
     );
   }
@@ -433,6 +433,8 @@ export default function FestaScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#0D0D0D' },
+  navBack: { paddingHorizontal: spacing.xl, paddingTop: spacing.md, paddingBottom: 4 },
+  navBackText: { fontSize: 16, fontFamily: fonts.bold, color: '#888' },
 
   // ── Idle ──
   idleContent: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl, paddingBottom: 100 },

@@ -9,7 +9,6 @@ const tabs = [
   { id: 'Cardapio',  icon: 'book',    label: 'Cardápio'  },
   { id: 'MeuBar',    icon: 'wine',    label: 'Meu Bar'   },
   { id: 'Favoritos', icon: 'heart',   label: 'Favoritos' },
-  { id: 'Festa',     icon: 'people',  label: 'Festa'     },
   { id: 'Perfil',    icon: 'person',  label: 'Perfil'    },
 ];
 
@@ -60,10 +59,9 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   tab: {
-    flex: 1,
     alignItems: 'center',
     gap: 3,
-    paddingHorizontal: 4,
+    paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
   },

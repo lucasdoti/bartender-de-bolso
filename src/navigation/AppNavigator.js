@@ -24,7 +24,6 @@ function Tabs() {
       <Tab.Screen name="Cardapio"  component={CardapioScreen} />
       <Tab.Screen name="MeuBar"    component={MeuBarScreen} />
       <Tab.Screen name="Favoritos" component={FavoritosScreen} />
-      <Tab.Screen name="Festa"     component={FestaScreen} />
       <Tab.Screen name="Perfil"    component={PerfilScreen} />
     </Tab.Navigator>
   );
@@ -38,6 +37,7 @@ export default function AppNavigator() {
         <Stack.Screen name="DrinkDetail" component={DrinkDetailScreen} />
         <Stack.Screen name="BartenderIA" component={BartenderIAScreen} />
         <Stack.Screen name="Admin"       component={AdminScreen} />
+        <Stack.Screen name="Festa"       component={FestaScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
