@@ -73,7 +73,9 @@ export default function FestaScreen({ navigation }) {
     }
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: authData, error: authErr } = await supabase.auth.getUser();
+      if (authErr || !authData?.user) throw new Error('Você precisa estar logado para criar uma festa.');
+      const user = authData.user;
       const code = generateCode();
 
       const { data: party, error: partyErr } = await supabase
@@ -81,12 +83,12 @@ export default function FestaScreen({ navigation }) {
         .insert({ name: partyName.trim(), code, created_by: user.id })
         .select()
         .single();
-      if (partyErr) throw partyErr;
+      if (partyErr) throw new Error(partyErr.message || JSON.stringify(partyErr));
 
       const { error: memberErr } = await supabase
         .from('party_members')
         .insert({ party_id: party.id, user_id: user.id, display_name: displayName.trim() });
-      if (memberErr) throw memberErr;
+      if (memberErr) throw new Error(memberErr.message || JSON.stringify(memberErr));
 
       setPartyId(party.id);
       setPartyCode(code);
@@ -95,7 +97,7 @@ export default function FestaScreen({ navigation }) {
       setPhase('active');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (e) {
-      Alert.alert('Erro ao criar festa', e.message);
+      Alert.alert('Erro ao criar festa', e.message ?? 'Erro desconhecido. As tabelas foram criadas no Supabase?');
     }
     setLoading(false);
   };
@@ -107,7 +109,9 @@ export default function FestaScreen({ navigation }) {
     }
     setLoading(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: authData, error: authErr } = await supabase.auth.getUser();
+      if (authErr || !authData?.user) throw new Error('Você precisa estar logado para entrar em uma festa.');
+      const user = authData.user;
       const code = codeInput.trim().toUpperCase();
 
       const { data: party, error: partyErr } = await supabase
@@ -132,7 +136,7 @@ export default function FestaScreen({ navigation }) {
         const { error: memberErr } = await supabase
           .from('party_members')
           .insert({ party_id: party.id, user_id: user.id, display_name: displayName.trim() });
-        if (memberErr) throw memberErr;
+        if (memberErr) throw new Error(memberErr.message || JSON.stringify(memberErr));
       }
 
       setPartyId(party.id);
@@ -143,7 +147,7 @@ export default function FestaScreen({ navigation }) {
       setPhase('active');
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     } catch (e) {
-      Alert.alert('Erro ao entrar na festa', e.message);
+      Alert.alert('Erro ao entrar na festa', e.message ?? 'Erro desconhecido.');
     }
     setLoading(false);
   };
@@ -171,7 +175,9 @@ export default function FestaScreen({ navigation }) {
     setPickerVisible(false);
     setDrinkSearch('');
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: authData } = await supabase.auth.getUser();
+    const user = authData?.user;
+    if (!user) return;
     const { error } = await supabase
       .from('party_drinks')
       .insert({ party_id: partyId, user_id: user.id, drink_id: drinkId });
