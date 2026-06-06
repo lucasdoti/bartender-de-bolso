@@ -13,7 +13,7 @@ import drinks from '../data/drinks';
 // ─── FAMÍLIAS ────────────────────────────────────────────────────────────────
 const FAMILIES = {
   negroni:         { ids: [5, 38, 33, 41, 49],        desc: 'estilo Negroni — amargo, encorpado, aperitivo' },
-  sour:            { ids: [15, 46, 48, 37, 2, 12, 51], desc: 'família Sour — espirituoso + cítrico + doce' },
+  sour:            { ids: [15, 46, 48, 37, 2, 12, 51, 53], desc: 'família Sour — espirituoso + cítrico + doce' },
   spritz:          { ids: [16, 29, 30, 24],             desc: 'estilo Spritz — leve, borbulhante, italiano' },
   tropical:        { ids: [3, 22, 23, 18],              desc: 'tropical — rum, coco e frutas' },
   caipirinha:      { ids: [17, 36, 32, 20, 49],         desc: 'família Caipirinha — cachaça e frutas' },
@@ -53,6 +53,7 @@ const SIMILAR_TO = {
   'margarita':         'sour',
   "bee's knees":       'sour',
   'clover club':       'sour',
+  'fitzgerald':        'sour',
   'pina colada':       'tropical',
   'piña colada':       'tropical',
   'mai tai':           'tropical',
@@ -133,6 +134,7 @@ const RULES = [
   { words: ['moscow mule', 'moscow'],      family: 'collins',         bases: ['Vodka'],                       w: 5 },
   { words: ['mai tai'],                    family: 'tropical',        bases: ['Rum'],                         w: 5 },
   { words: ['bee knees', 'bees knees'],   family: 'sour',            bases: ['Gin'],                         w: 5 },
+  { words: ['fitzgerald'],               family: 'sour',            bases: ['Gin'],                         w: 5 },
 
   // Bases diretas
   { words: ['whisky', 'whiskey', 'escoces', 'escocês', 'scotch'], bases: ['Whisky'], w: 4 },

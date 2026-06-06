@@ -1733,6 +1733,40 @@ export const drinks = [
     needs: ['gin', 'triplesec', 'limao', 'gelo'],
     method: 'shaken',
   },
+  {
+    id: 53,
+    name: 'Fitzgerald',
+    subtitle: 'O Gin Sour com Alma',
+    base: 'Gin',
+    category: 'Contemporâneo',
+    origin: 'EUA 🇺🇸',
+    year: '1990',
+    time: '4 min',
+    difficulty: 'Fácil',
+    abv: '20%',
+    calories: 155,
+    color: '#FFFDE7',
+    accent: '#8D6E63',
+    tags: ['date', 'classico', 'solo'],
+    ingredients: [
+      { amount: '60ml',     name: 'Gin',                    tip: 'London Dry funciona muito bem' },
+      { amount: '22ml',     name: 'Suco de limão siciliano', tip: 'Sempre fresco' },
+      { amount: '22ml',     name: 'Xarope simples',          tip: 'Ver receita em Xaropes' },
+      { amount: '2 dashs',  name: 'Angostura',               tip: 'Não exagere — só 2 dashs' },
+      { amount: 'Q.B.',     name: 'Gelo',                    tip: 'Para bater' },
+    ],
+    steps: [
+      { num: 1, title: 'Monte',  desc: 'Combine 60ml de gin, 22ml de suco de limão siciliano, 22ml de xarope simples e 2 dashs de Angostura na coqueteleira com gelo.' },
+      { num: 2, title: 'Bata',   desc: 'Bata por 12 segundos até a coqueteleira gelar bem.' },
+      { num: 3, title: 'Coe',    desc: 'Coe duplo em uma taça coupe gelada.' },
+      { num: 4, title: 'Decore', desc: 'Decore com uma rodela de limão siciliano.' },
+    ],
+    history: 'Criado por Dale DeGroff no Rainbow Room em Nova York nos anos 90. DeGroff, um dos bartenders mais influentes da história, queria um sour mais complexo — e a Angostura foi a resposta.',
+    famous: 'Dale DeGroff',
+    funFact: 'Dale DeGroff é conhecido como "King Cocktail" e foi o responsável por reviver a cultura dos coquetéis clássicos nos EUA nos anos 80 e 90.',
+    needs: ['gin', 'limao_siciliano', 'xarope_simples', 'angostura', 'gelo'],
+    method: 'shaken',
+  },
 ];
 
 // Ordem de popularidade baseada no ranking IBA (Unforgettables → Contemporary Classics → regionais)
@@ -1789,6 +1823,7 @@ export const ibaOrder = [
   18, // Batida de Coco
   24, // Clericot
   23, // Piña Verde
+  53, // Fitzgerald
 ];
 
 export default drinks;
