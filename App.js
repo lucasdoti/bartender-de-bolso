@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
@@ -52,6 +52,11 @@ function Root() {
   ) : (
     <AuthScreen />
   );
+}
+
+// Trava orientação portrait na versão web
+if (Platform.OS === 'web' && typeof window !== 'undefined') {
+  window.screen?.orientation?.lock?.('portrait').catch(() => {});
 }
 
 export default function App() {
