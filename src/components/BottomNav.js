@@ -60,9 +60,10 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   tab: {
+    flex: 1,
     alignItems: 'center',
     gap: 3,
-    paddingHorizontal: 12,
+    paddingHorizontal: 4,
     paddingVertical: 6,
     borderRadius: 12,
   },
