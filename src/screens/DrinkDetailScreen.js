@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert,
+  View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Image,
+  Modal, Pressable, Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
@@ -10,6 +12,7 @@ import { colors, fonts, radius, spacing } from '../theme';
 import AppIcon from '../components/AppIcon';
 import { glassMap } from '../components/glasses/Glasses';
 import drinks from '../data/drinks';
+import drinkPhotos from '../data/drinkPhotos';
 
 const SCALES = [1, 2, 4, 6];
 
@@ -38,6 +41,60 @@ function scaleAmount(amount, scale) {
   const fmt = result % 1 === 0 ? result.toString() : result.toFixed(0);
   return unit ? `${fmt}${unit.startsWith('m') || unit.startsWith('g') ? '' : ' '}${unit}` : fmt;
 }
+
+const { width: SW, height: SH } = Dimensions.get('window');
+
+function DrinkHero({ drink, GlassComponent }) {
+  const [imgError, setImgError] = useState(false);
+  const [fullscreen, setFullscreen] = useState(false);
+  const photo = drinkPhotos[drink.id];
+
+  if (photo && !imgError) {
+    return (
+      <>
+        <TouchableOpacity onPress={() => setFullscreen(true)} activeOpacity={0.9}>
+          <Image
+            source={{ uri: photo }}
+            style={{ width: 110, height: 110, borderRadius: 20 }}
+            onError={() => setImgError(true)}
+            resizeMode="cover"
+          />
+        </TouchableOpacity>
+
+        <Modal visible={fullscreen} transparent animationType="fade" statusBarTranslucent>
+          <Pressable style={heroStyles.backdrop} onPress={() => setFullscreen(false)}>
+            <Image
+              source={{ uri: photo }}
+              style={{ width: SW, height: SW }}
+              resizeMode="cover"
+            />
+            <Text style={heroStyles.hint}>Toque para fechar</Text>
+          </Pressable>
+        </Modal>
+      </>
+    );
+  }
+  return (
+    <View style={[styles.glassBox, { backgroundColor: drink.color, borderColor: drink.accent + '22' }]}>
+      {GlassComponent && <GlassComponent size={80} />}
+    </View>
+  );
+}
+
+const heroStyles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.92)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+  },
+  hint: {
+    fontSize: 12,
+    color: 'rgba(255,255,255,0.4)',
+    fontFamily: fonts.semiBold,
+  },
+});
 
 export default function DrinkDetailScreen({ navigation, route }) {
   const { drinkId } = route.params;
@@ -76,6 +133,7 @@ export default function DrinkDetailScreen({ navigation, route }) {
 
   const marcarComoFeito = () => {
     if (marcadoComoFeito) return;
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     addToHistory(drink.id);
     setMarcado(true);
     Alert.alert('Mandou bem! 🍸', `${drink.name} foi adicionado ao seu histórico. Saúde! 🥂`);
@@ -130,14 +188,12 @@ export default function DrinkDetailScreen({ navigation, route }) {
           </View>
           <View style={{ alignItems: 'center', gap: 10 }}>
             <TouchableOpacity
-              onPress={() => toggleFavorite(drink.id)}
+              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); toggleFavorite(drink.id); }}
               style={[styles.favBtn, isFav && { backgroundColor: colors.primary, borderColor: colors.primary }]}
             >
               <Text style={{ fontSize: 16 }}>{isFav ? '❤️' : '🤍'}</Text>
             </TouchableOpacity>
-            <View style={[styles.glassBox, { backgroundColor: drink.color, borderColor: drink.accent + '22' }]}>
-              {GlassComponent && <GlassComponent size={80} />}
-            </View>
+            <DrinkHero drink={drink} GlassComponent={GlassComponent} />
           </View>
         </View>
 

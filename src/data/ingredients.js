@@ -76,6 +76,22 @@ export const ingredientCategories = [
       { id: 'gelo',        label: 'Gelo',            emoji: '🧊' },
     ],
   },
+  {
+    cat: 'Xaropes',
+    emoji: '🍯',
+    items: [
+      { id: 'xarope_simples',    label: 'Xarope Simples',       emoji: '🍯' },
+      { id: 'xarope_agave',      label: 'Xarope de Agave',      emoji: '🌵' },
+      { id: 'xarope_mel',        label: 'Xarope de Mel',        emoji: '🍯' },
+      { id: 'xarope_gengibre',   label: 'Xarope de Gengibre',   emoji: '🫚' },
+      { id: 'xarope_framboesa',  label: 'Xarope de Framboesa',  emoji: '🫐' },
+      { id: 'xarope_sabugueiro', label: 'Xarope de Sabugueiro', emoji: '🌸' },
+      { id: 'xarope_lavanda',    label: 'Xarope de Lavanda',    emoji: '💜' },
+      { id: 'xarope_maracuja',   label: 'Xarope de Maracujá',   emoji: '🌺' },
+      { id: 'xarope_morango',    label: 'Xarope de Morango',    emoji: '🍓' },
+      { id: 'granadina',         label: 'Granadina',            emoji: '🔴' },
+    ],
+  },
 ];
 
 export default ingredientCategories;

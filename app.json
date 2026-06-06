@@ -3,6 +3,9 @@
     "name": "Bartender de Bolso",
     "slug": "bartender-de-bolso-v2",
     "version": "1.0.0",
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -28,7 +31,8 @@
       "output": "single"
     },
     "plugins": [
-      "expo-font"
+      "expo-font",
+      "expo-updates"
     ]
   }
 }

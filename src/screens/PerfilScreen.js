@@ -16,7 +16,7 @@ const configItems = [
   { icon: '🌍', label: 'Idioma',        sub: 'Português (BR)',        action: 'soon'    },
   { icon: '⭐', label: 'Avaliar o app', sub: 'Deixe seu feedback',    action: 'review'  },
   { icon: '💬', label: 'Fale conosco',  sub: 'Sugestões e problemas', action: 'contact' },
-  { icon: '🚪', label: 'Sair',          sub: '',                      action: 'logout',  danger: true },
+  { icon: '🚪', label: 'Sair',          sub: '',                      action: 'logout', danger: true },
 ];
 
 export default function PerfilScreen({ navigation }) {
@@ -137,7 +137,7 @@ export default function PerfilScreen({ navigation }) {
               <Text style={styles.levelText}>Nível {nivel}</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.editBtn}>
+          <TouchableOpacity style={styles.editBtn} activeOpacity={0.7} onPress={() => Alert.alert('Em breve', 'Edição de perfil chegando em breve! 🚀')}>
             <Text style={{ fontSize: 15 }}>✏️</Text>
           </TouchableOpacity>
         </View>
@@ -243,7 +243,7 @@ export default function PerfilScreen({ navigation }) {
                     <Text style={styles.histName}>{drink.name}</Text>
                     <Text style={styles.histDate}>🕐 {drink.date}</Text>
                   </View>
-                  <TouchableOpacity style={styles.arrowBtn}>
+                  <TouchableOpacity style={styles.arrowBtn} onPress={() => navigation.navigate('DrinkDetail', { drinkId: drink.id })}>
                     <Text style={styles.arrow}>›</Text>
                   </TouchableOpacity>
                 </View>

@@ -25,14 +25,14 @@ export function AppProvider({ children }) {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [favs, bar, hist] = await Promise.all([
+      const [favs, bar, hist] = await Promise.allSettled([
         supabase.from('favorites').select('drink_id').eq('user_id', user.id),
         supabase.from('my_bar').select('ingredient_id').eq('user_id', user.id),
         supabase.from('history').select('drink_id, made_at').eq('user_id', user.id).order('made_at', { ascending: false }),
       ]);
-      if (favs.data) setFavorites(favs.data.map(f => f.drink_id));
-      if (bar.data)  setIngredients(bar.data.map(b => b.ingredient_id));
-      if (hist.data) setHistory(hist.data.map(h => ({ id: h.drink_id, date: h.made_at })));
+      if (favs.status === 'fulfilled' && favs.value.data)  setFavorites(favs.value.data.map(f => f.drink_id));
+      if (bar.status === 'fulfilled' && bar.value.data)    setIngredients(bar.value.data.map(b => b.ingredient_id));
+      if (hist.status === 'fulfilled' && hist.value.data)  setHistory(hist.value.data.map(h => ({ id: h.drink_id, date: h.made_at })));
     } catch (e) {
       console.log('Erro ao carregar dados:', e);
     }
