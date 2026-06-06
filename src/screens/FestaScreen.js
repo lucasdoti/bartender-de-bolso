@@ -161,14 +161,16 @@ export default function FestaScreen({ navigation }) {
     setErrorMsg('');
   };
 
-  const logDrink = async (drinkId) => {
+  const logDrink = async (drinkId, customName = null) => {
     setDrinkSearch('');
     setPhase('active');
     try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch (_) {}
     const { data: authData } = await supabase.auth.getUser();
     if (!authData?.user) return;
-    await supabase.from('party_drinks')
-      .insert({ party_id: partyId, user_id: authData.user.id, drink_id: drinkId });
+    const payload = { party_id: partyId, user_id: authData.user.id };
+    if (customName) payload.custom_name = customName;
+    else payload.drink_id = drinkId;
+    await supabase.from('party_drinks').insert(payload);
     await loadPartyData(partyId);
   };
 
@@ -273,6 +275,7 @@ export default function FestaScreen({ navigation }) {
       d.name.toLowerCase().includes(drinkSearch.toLowerCase()) ||
       d.base.toLowerCase().includes(drinkSearch.toLowerCase())
     );
+    const showCustom = drinkSearch.trim().length >= 2;
     return (
       <SafeAreaView style={styles.safe} edges={['top']}>
         <View style={styles.pickerHeader}>
@@ -286,12 +289,27 @@ export default function FestaScreen({ navigation }) {
           <TextInput
             value={drinkSearch}
             onChangeText={setDrinkSearch}
-            placeholder="Buscar drink ou destilado..."
+            placeholder="Buscar ou digitar nome do drink..."
             placeholderTextColor="#444"
             style={styles.pickerSearchInput}
             autoFocus
           />
         </View>
+
+        {/* Opção de drink customizado */}
+        {showCustom && (
+          <TouchableOpacity
+            style={styles.customDrinkBtn}
+            onPress={() => logDrink(null, drinkSearch.trim())}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.customDrinkText}>
+              ＋ Adicionar "<Text style={{ color: '#fff' }}>{drinkSearch.trim()}</Text>"
+            </Text>
+            <Text style={styles.customDrinkSub}>Não está no cardápio</Text>
+          </TouchableOpacity>
+        )}
+
         <FlatList
           data={filtered}
           keyExtractor={d => String(d.id)}
@@ -327,13 +345,12 @@ export default function FestaScreen({ navigation }) {
 
   const topDrinkEntry = Object.entries(
     drinkLogs.reduce((acc, log) => {
-      acc[log.drink_id] = (acc[log.drink_id] || 0) + 1;
+      const key = log.custom_name || drinks.find(d => d.id === log.drink_id)?.name || `#${log.drink_id}`;
+      acc[key] = (acc[key] || 0) + 1;
       return acc;
     }, {})
   ).sort(([, a], [, b]) => b - a)[0];
-  const topDrinkName = topDrinkEntry
-    ? (drinks.find(d => d.id === Number(topDrinkEntry[0]))?.name ?? `#${topDrinkEntry[0]}`)
-    : null;
+  const topDrinkName = topDrinkEntry ? topDrinkEntry[0] : null;
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -400,7 +417,7 @@ export default function FestaScreen({ navigation }) {
             <Text style={styles.emptyText}>Sem atividade ainda</Text>
           ) : (
             drinkLogs.slice(0, 20).map((log, i) => {
-              const name = drinks.find(d => d.id === log.drink_id)?.name ?? `Drink #${log.drink_id}`;
+              const name = log.custom_name || drinks.find(d => d.id === log.drink_id)?.name || `Drink #${log.drink_id}`;
               return (
                 <View key={log.id ?? i} style={styles.feedRow}>
                   <Text style={styles.feedEmoji}>🍹</Text>
@@ -471,6 +488,9 @@ const styles = StyleSheet.create({
   pickerTitle:     { fontSize: 16, fontFamily: fonts.extraBold, color: '#fff', flex: 1 },
   pickerSearchRow: { flexDirection: 'row', alignItems: 'center', marginHorizontal: spacing.xl, marginBottom: 12, backgroundColor: '#1A1A1A', borderRadius: radius.md, borderWidth: 1.5, borderColor: '#2A2A2A', paddingHorizontal: 14 },
   pickerSearchInput: { flex: 1, paddingVertical: 12, fontSize: 14, fontFamily: fonts.bold, color: '#fff' },
+  customDrinkBtn:  { marginHorizontal: spacing.xl, marginBottom: 8, backgroundColor: '#1E1530', borderRadius: radius.md, padding: 14, borderWidth: 1.5, borderColor: ACCENT + '66' },
+  customDrinkText: { fontSize: 14, fontFamily: fonts.extraBold, color: ACCENT },
+  customDrinkSub:  { fontSize: 11, fontFamily: fonts.semiBold, color: '#555', marginTop: 3 },
   drinkItem:       { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.xl, paddingVertical: 14 },
   drinkItemName:   { fontSize: 14, fontFamily: fonts.bold, color: '#ddd' },
   drinkItemSub:    { fontSize: 11, fontFamily: fonts.semiBold, color: '#555', marginTop: 2 },
