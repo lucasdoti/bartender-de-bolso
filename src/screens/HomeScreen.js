@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   View, Text, ScrollView, TextInput,
-  TouchableOpacity, StyleSheet, Alert,
+  TouchableOpacity, StyleSheet,
 } from 'react-native';
 import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -29,21 +29,32 @@ export default function HomeScreen({ navigation }) {
   const [search, setSearch]         = useState('');
 
   const surpriseMe = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch (_) {}
     const normalized = ingredients.map(norm);
-    const canMake = drinks.filter(d =>
-      (d.needs || []).length > 0 &&
-      (d.needs || []).every(n => normalized.includes(n))
-    );
-    if (canMake.length === 0) {
-      Alert.alert(
-        'Bar vazio',
-        'Adicione ingredientes no Meu Bar para que eu possa te surpreender!',
-        [{ text: 'Ir pro Meu Bar', onPress: () => navigation.navigate('MeuBar') }, { text: 'Agora não', style: 'cancel' }]
-      );
+
+    if (normalized.length === 0) {
+      navigation.navigate('MeuBar');
       return;
     }
-    const pick = canMake[Math.floor(Math.random() * canMake.length)];
+
+    // Score drinks by ingredient overlap — pick best match even if not 100%
+    const scored = drinks
+      .filter(d => (d.needs || []).length > 0)
+      .map(d => {
+        const needs = d.needs || [];
+        const matched = needs.filter(n => normalized.includes(n)).length;
+        return { drink: d, matched, ratio: matched / needs.length };
+      })
+      .filter(s => s.matched > 0)
+      .sort((a, b) => b.ratio - a.ratio || b.matched - a.matched);
+
+    if (scored.length === 0) {
+      navigation.navigate('MeuBar');
+      return;
+    }
+
+    const candidates = scored.slice(0, 5);
+    const pick = candidates[Math.floor(Math.random() * candidates.length)].drink;
     navigation.navigate('DrinkDetail', { drinkId: pick.id });
   };
 

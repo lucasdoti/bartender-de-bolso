@@ -392,7 +392,19 @@ function localRecommend(input, userBar = []) {
   if (userBar.length > 0)      extras.push('priorizando o que você tem no bar');
   const extrasStr = extras.length > 0 ? ` (${extras.join(' e ')})` : '';
 
-  const message = `${intro}${extrasStr}, aqui estão minhas indicações:\n\n${top.map(d => `• ${d.name} — ${d.subtitle}`).join('\n')}\n\nClique em qualquer card para ver a receita completa!`;
+  const tagLabels = { calor: 'refrescante', frio: 'aconchegante', date: 'para ocasiões especiais', festas: 'para festas', solo: 'para relaxar', brasil: 'brasileiro', classico: 'clássico', popular: 'popular' };
+
+  const drinkLines = top.map(d => {
+    const reasons = [];
+    if (activeRules.some(r => r.bases?.includes(d.base))) reasons.push(`leva ${d.base}`);
+    const matchedTags = d.tags.filter(t => allTags.includes(t));
+    if (matchedTags.length > 0) reasons.push(matchedTags.slice(0, 2).map(t => tagLabels[t] || t).join(', '));
+    if (userBar.length > 0 && (d.needs || []).every(n => userBar.includes(n))) reasons.push('você tem os ingredientes');
+    const reasonStr = reasons.length > 0 ? ` (${reasons.slice(0, 2).join(', ')})` : '';
+    return `• ${d.name}${reasonStr} — ${d.subtitle}`;
+  });
+
+  const message = `${intro}${extrasStr}, aqui estão minhas indicações:\n\n${drinkLines.join('\n')}\n\nClique em qualquer card para ver a receita completa!`;
 
   return { message, result: top };
 }

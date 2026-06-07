@@ -12,7 +12,8 @@ import { DrinkCardList, DrinkCardGrid } from '../components/DrinkCard';
 import drinks from '../data/drinks';
 
 const filters = [
-  { id: 'todos',    label: 'Todos',      emoji: '🍸' },
+  { id: 'todos',    label: 'Todos',       emoji: '🍸' },
+  { id: 'tenho',   label: 'Posso fazer',  emoji: '✅' },
   { id: 'popular',  label: 'Populares',  emoji: '🔥' },
   { id: 'calor',    label: 'Pro calor',  emoji: '☀️' },
   { id: 'frio',     label: 'Pro frio',   emoji: '🍂' },
@@ -38,8 +39,11 @@ const families = [
   { id: 'cafe',           label: 'Café',          emoji: '☕', ids: [19, 43] },
 ];
 
+const INGREDIENT_ALIASES = { limao_taiti: 'limao', limao_siciliano: 'limao' };
+function normIng(id) { return INGREDIENT_ALIASES[id] || id; }
+
 export default function CardapioScreen({ navigation }) {
-  const { favorites, toggleFavorite } = useApp();
+  const { favorites, toggleFavorite, ingredients } = useApp();
   const [filter, setFilter]       = useState('todos');
   const [base, setBase]           = useState('Todos');
   const [family, setFamily]       = useState('todas');
@@ -49,14 +53,22 @@ export default function CardapioScreen({ navigation }) {
   const [showFamilies, setShowFamilies] = useState(false);
 
   const activeFamilyIds = families.find(f => f.id === family)?.ids;
+  const normalizedBar = ingredients.map(normIng);
 
   const filtered = drinks
     .filter(d => {
-      const matchFilter = filter === 'todos' || d.tags.includes(filter);
+      const matchFilter =
+        filter === 'todos' ? true
+        : filter === 'tenho'
+          ? (d.needs || []).length > 0 && (d.needs || []).every(n => normalizedBar.includes(n))
+          : d.tags.includes(filter);
       const matchBase   = base === 'Todos' || d.base === base;
       const matchFamily = !activeFamilyIds || activeFamilyIds.includes(d.id);
-      const matchSearch = d.name.toLowerCase().includes(search.toLowerCase()) ||
-        d.base.toLowerCase().includes(search.toLowerCase());
+      const q = search.toLowerCase();
+      const matchSearch = q === '' ? true :
+        d.name.toLowerCase().includes(q) ||
+        d.base.toLowerCase().includes(q) ||
+        d.ingredients.some(ing => ing.name.toLowerCase().includes(q));
       return matchFilter && matchBase && matchFamily && matchSearch;
     })
     .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
@@ -81,7 +93,7 @@ export default function CardapioScreen({ navigation }) {
           <TextInput
             value={search}
             onChangeText={setSearch}
-            placeholder="Buscar drink..."
+            placeholder="Buscar drink ou ingrediente..."
             placeholderTextColor={colors.textLight}
             style={styles.searchInput}
           />

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { View, ActivityIndicator, Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
@@ -24,6 +24,7 @@ import { AppProvider } from './src/context/AppContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import AuthScreen from './src/screens/AuthScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
+import OfflineBanner from './src/components/OfflineBanner';
 
 const Loader = () => (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FAFAF8' }}>
@@ -54,6 +55,11 @@ function Root() {
   );
 }
 
+// Trava orientação portrait na versão web
+if (Platform.OS === 'web' && typeof window !== 'undefined') {
+  window.screen?.orientation?.lock?.('portrait').catch(() => {});
+}
+
 export default function App() {
   const [fontsLoaded, fontError] = useFonts({
     Nunito_400Regular,
@@ -79,6 +85,7 @@ export default function App() {
         <AuthProvider>
           <StatusBar style="dark" backgroundColor="#FAFAF8" />
           <Root />
+          <OfflineBanner />
         </AuthProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
