@@ -60,10 +60,10 @@ const styles = StyleSheet.create({
   },
   tab: {
     alignItems: 'center',
-    gap: 3,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 12,
+    minWidth: 56,
   },
   tabActive: {
     backgroundColor: colors.dark,
@@ -72,6 +72,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: fonts.extraBold,
     color: colors.textLight,
+    marginTop: 3,
   },
   labelActive: {
     color: '#fff',
