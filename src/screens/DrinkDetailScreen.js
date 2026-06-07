@@ -10,6 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { colors, fonts, radius, spacing } from '../theme';
 import AppIcon from '../components/AppIcon';
+import BottomNav from '../components/BottomNav';
 import { glassMap } from '../components/glasses/Glasses';
 import drinks from '../data/drinks';
 import drinkPhotos from '../data/drinkPhotos';
@@ -158,7 +159,7 @@ export default function DrinkDetailScreen({ navigation, route }) {
   };
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.safe} edges={['top']}>
       {/* TOP NAV */}
       <View style={styles.topNav}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
@@ -437,6 +438,7 @@ export default function DrinkDetailScreen({ navigation, route }) {
 
         </View>
       </ScrollView>
+      <BottomNav navigation={navigation} />
     </SafeAreaView>
   );
 }
