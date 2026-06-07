@@ -25,8 +25,9 @@ function norm(id) { return INGREDIENT_ALIASES[id] || id; }
 
 export default function HomeScreen({ navigation }) {
   const { favorites, toggleFavorite, ingredients } = useApp();
-  const [activeMood, setActiveMood] = useState(null);
-  const [search, setSearch]         = useState('');
+  const [activeMood, setActiveMood]   = useState(null);
+  const [search, setSearch]           = useState('');
+  const [surprisePick, setSurprisePick] = useState(null);
 
   const surpriseMe = () => {
     try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch (_) {}
@@ -37,7 +38,6 @@ export default function HomeScreen({ navigation }) {
       return;
     }
 
-    // Score drinks by ingredient overlap — pick best match even if not 100%
     const scored = drinks
       .filter(d => (d.needs || []).length > 0)
       .map(d => {
@@ -54,8 +54,20 @@ export default function HomeScreen({ navigation }) {
     }
 
     const candidates = scored.slice(0, 5);
-    const pick = candidates[Math.floor(Math.random() * candidates.length)].drink;
-    navigation.navigate('DrinkDetail', { drinkId: pick.id });
+    const { drink: pick, ratio } = candidates[Math.floor(Math.random() * candidates.length)];
+
+    if (ratio === 1) {
+      setSurprisePick(null);
+      navigation.navigate('DrinkDetail', { drinkId: pick.id });
+    } else {
+      const missing = (pick.needs || [])
+        .filter(n => !normalized.includes(n))
+        .map(n => {
+          const ing = pick.ingredients?.find(i => i.id === n);
+          return ing ? ing.name : n;
+        });
+      setSurprisePick({ drink: pick, missing });
+    }
   };
 
   const filtered = drinks
@@ -132,6 +144,31 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.ctaSmallSub}>O que tenho em casa</Text>
           </TouchableOpacity>
         </View>
+
+        {/* FALTA SÓ ISSO — resultado parcial do Surpreenda-me */}
+        {surprisePick && (
+          <View style={styles.surpriseCard}>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.surpriseLabel}>✨ Que tal este drink?</Text>
+              <Text style={styles.surpriseName}>{surprisePick.drink.name}</Text>
+              <Text style={styles.surpriseMissing}>
+                Falta só: {surprisePick.missing.join(', ')}
+              </Text>
+            </View>
+            <View style={styles.surpriseActions}>
+              <TouchableOpacity
+                onPress={() => { setSurprisePick(null); navigation.navigate('DrinkDetail', { drinkId: surprisePick.drink.id }); }}
+                style={styles.surpriseBtn}
+                activeOpacity={0.85}
+              >
+                <Text style={styles.surpriseBtnText}>Ver receita →</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setSurprisePick(null)} style={styles.surpriseDismiss} activeOpacity={0.7}>
+                <Text style={styles.surpriseDismissText}>✕</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
 
         {/* MODO FESTA */}
         <TouchableOpacity onPress={() => navigation.navigate('Festa')} activeOpacity={0.85} style={styles.ctaFesta}>
@@ -228,6 +265,16 @@ const styles = StyleSheet.create({
   ctaSmall: { flex: 1, borderRadius: radius.xl, padding: spacing.md, paddingVertical: 18, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 10, elevation: 4 },
   ctaSmallTitle: { fontSize: 13, fontFamily: fonts.extraBold, color: '#fff', textAlign: 'center' },
   ctaSmallSub: { fontSize: 11, fontFamily: fonts.semiBold, color: '#888', marginTop: 3, textAlign: 'center' },
+  surpriseCard: { marginHorizontal: spacing.xl, marginTop: 12, backgroundColor: '#0D1B2A', borderRadius: radius.xl, padding: spacing.lg, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#1E3550' },
+  surpriseLabel: { fontSize: 11, color: '#FFD966', fontFamily: fonts.extraBold, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4 },
+  surpriseName: { fontSize: 18, fontFamily: fonts.extraBold, color: '#fff' },
+  surpriseMissing: { fontSize: 12, fontFamily: fonts.semiBold, color: '#C0392B', marginTop: 4 },
+  surpriseActions: { alignItems: 'flex-end', gap: 8, marginLeft: 12 },
+  surpriseBtn: { backgroundColor: '#FFD966', borderRadius: radius.md, paddingVertical: 8, paddingHorizontal: 14 },
+  surpriseBtnText: { fontSize: 12, fontFamily: fonts.extraBold, color: '#1C1A14' },
+  surpriseDismiss: { width: 28, height: 28, borderRadius: 8, backgroundColor: 'rgba(255,255,255,0.08)', alignItems: 'center', justifyContent: 'center' },
+  surpriseDismissText: { fontSize: 11, color: '#888', fontFamily: fonts.extraBold },
+
   ctaFesta: { marginHorizontal: spacing.xl, marginTop: 12, backgroundColor: '#14201A', borderRadius: radius.xl, padding: spacing.lg, paddingVertical: 20, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#1F3D2E', shadowColor: '#2ECC71', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.15, shadowRadius: 16, elevation: 6 },
   ctaFestaLabel: { fontSize: 11, color: '#2ECC71', fontFamily: fonts.extraBold, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 4 },
   ctaFestaTitle: { fontSize: 20, fontFamily: fonts.extraBold, color: '#fff', lineHeight: 26 },

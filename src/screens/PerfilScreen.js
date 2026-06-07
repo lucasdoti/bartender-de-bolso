@@ -11,12 +11,13 @@ import BottomNav from '../components/BottomNav';
 import drinks from '../data/drinks';
 
 const configItems = [
-  { icon: '🔔', label: 'Notificações',  sub: 'Novidades e receitas',  action: 'soon'    },
-  { icon: '🌙', label: 'Modo escuro',   sub: 'Em breve',              action: 'soon'    },
-  { icon: '🌍', label: 'Idioma',        sub: 'Português (BR)',        action: 'soon'    },
-  { icon: '⭐', label: 'Avaliar o app', sub: 'Deixe seu feedback',    action: 'review'  },
-  { icon: '💬', label: 'Fale conosco',  sub: 'Sugestões e problemas', action: 'contact' },
-  { icon: '🚪', label: 'Sair',          sub: '',                      action: 'logout', danger: true },
+  { icon: '🔔', label: 'Notificações',          sub: 'Novidades e receitas',  action: 'soon'    },
+  { icon: '🌙', label: 'Modo escuro',           sub: 'Em breve',              action: 'soon'    },
+  { icon: '🌍', label: 'Idioma',               sub: 'Português (BR)',        action: 'soon'    },
+  { icon: '⭐', label: 'Avaliar o app',         sub: 'Deixe seu feedback',    action: 'review'  },
+  { icon: '💬', label: 'Fale conosco',          sub: 'Sugestões e problemas', action: 'contact' },
+  { icon: '📋', label: 'Política de privacidade', sub: 'Seus dados e LGPD',  action: 'privacy' },
+  { icon: '🚪', label: 'Sair',                 sub: '',                      action: 'logout', danger: true },
 ];
 
 export default function PerfilScreen({ navigation }) {
@@ -36,6 +37,7 @@ export default function PerfilScreen({ navigation }) {
     if (action === 'soon')    return Alert.alert('Em breve', 'Essa funcionalidade está a caminho! 🚀');
     if (action === 'review')  return Alert.alert('Avaliar o app', 'Obrigado pelo interesse! A avaliação estará disponível em breve na loja.');
     if (action === 'contact') return Alert.alert('Fale conosco', 'Manda uma mensagem para:\ncontato@bartenderdebolso.com');
+    if (action === 'privacy') return navigation.navigate('PrivacyPolicy');
   };
 
   // ── ESTATÍSTICAS REAIS (calculadas do histórico) ──
@@ -105,7 +107,7 @@ export default function PerfilScreen({ navigation }) {
     { emoji: '🏆', label: 'Mestre dos drinques', earned: history.length >= 50 },
   ];
 
-  const historyDrinks = history.slice(0, 5).map(h => ({
+  const historyDrinks = history.map(h => ({
     ...drinks.find(d => d.id === h.id),
     date: new Date(h.date).toLocaleDateString('pt-BR', { weekday: 'short', hour: '2-digit', minute: '2-digit' }),
   })).filter(Boolean);

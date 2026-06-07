@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { colors, fonts, radius, spacing } from '../theme';
 import AppIcon from '../components/AppIcon';
+import PrivacyPolicyScreen from './PrivacyPolicyScreen';
 
 export default function AuthScreen() {
   const { signIn, signUp } = useAuth();
@@ -15,6 +16,11 @@ export default function AuthScreen() {
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading]   = useState(false);
+  const [showPolicy, setShowPolicy] = useState(false);
+
+  if (showPolicy) {
+    return <PrivacyPolicyScreen navigation={{ goBack: () => setShowPolicy(false) }} />;
+  }
 
   const handleSubmit = async () => {
     if (!email || !password || (mode === 'signup' && !name)) {
@@ -143,6 +149,15 @@ export default function AuthScreen() {
             </TouchableOpacity>
           </View>
 
+          {/* POLÍTICA DE PRIVACIDADE */}
+          <Text style={styles.privacyNote}>
+            Ao usar o app você concorda com a nossa{' '}
+            <Text style={styles.privacyLink} onPress={() => setShowPolicy(true)}>
+              Política de Privacidade
+            </Text>
+            . Conteúdo para maiores de 18 anos.
+          </Text>
+
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -180,4 +195,7 @@ const styles = StyleSheet.create({
   switchRow: { flexDirection: 'row', justifyContent: 'center', gap: 6, marginTop: spacing.xl },
   switchText: { fontSize: 14, fontFamily: fonts.semiBold, color: colors.textMuted },
   switchLink: { fontSize: 14, fontFamily: fonts.extraBold, color: colors.primary },
+
+  privacyNote: { fontSize: 12, fontFamily: fonts.semiBold, color: colors.textLight, textAlign: 'center', marginTop: spacing.lg, lineHeight: 18 },
+  privacyLink: { fontSize: 12, fontFamily: fonts.extraBold, color: colors.primary },
 });

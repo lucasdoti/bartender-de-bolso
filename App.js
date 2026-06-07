@@ -24,6 +24,7 @@ import { AppProvider } from './src/context/AppContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import AuthScreen from './src/screens/AuthScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
+import AgeGateScreen from './src/screens/AgeGateScreen';
 import OfflineBanner from './src/components/OfflineBanner';
 
 const Loader = () => (
@@ -34,13 +35,24 @@ const Loader = () => (
 
 function Root() {
   const { session, loading } = useAuth();
-  const [onboardingDone, setOnboardingDone] = useState(null);
+  const [ageConfirmed,    setAgeConfirmed]    = useState(null);
+  const [onboardingDone,  setOnboardingDone]  = useState(null);
 
   useEffect(() => {
-    AsyncStorage.getItem('onboarding_done').then(val => setOnboardingDone(!!val));
+    Promise.all([
+      AsyncStorage.getItem('age_confirmed'),
+      AsyncStorage.getItem('onboarding_done'),
+    ]).then(([age, onb]) => {
+      setAgeConfirmed(!!age);
+      setOnboardingDone(!!onb);
+    });
   }, []);
 
-  if (loading || onboardingDone === null) return <Loader />;
+  if (loading || ageConfirmed === null || onboardingDone === null) return <Loader />;
+
+  if (!ageConfirmed) {
+    return <AgeGateScreen onConfirm={() => setAgeConfirmed(true)} />;
+  }
 
   if (!onboardingDone) {
     return <OnboardingScreen onDone={() => setOnboardingDone(true)} />;
