@@ -24,6 +24,7 @@ import { AppProvider } from './src/context/AppContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import AuthScreen from './src/screens/AuthScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
+import OfflineBanner from './src/components/OfflineBanner';
 
 const Loader = () => (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FAFAF8' }}>
@@ -84,6 +85,7 @@ export default function App() {
         <AuthProvider>
           <StatusBar style="dark" backgroundColor="#FAFAF8" />
           <Root />
+          <OfflineBanner />
         </AuthProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
 import { supabase } from '../lib/supabase';
-import { fonts, radius, spacing } from '../theme';
+import { colors, fonts, radius, spacing } from '../theme';
 import drinks from '../data/drinks';
 
 const ACCENT = '#D4456F';
@@ -260,7 +260,7 @@ export default function FestaScreen({ navigation }) {
                   value={partyName}
                   onChangeText={setPartyName}
                   placeholder="Ex: Casamento da Ana 🎊"
-                  placeholderTextColor="#444"
+                  placeholderTextColor={colors.textLight}
                   style={styles.fieldInput}
                 />
               </View>
@@ -271,7 +271,7 @@ export default function FestaScreen({ navigation }) {
                   value={codeInput}
                   onChangeText={setCodeInput}
                   placeholder="Ex: AB12CD"
-                  placeholderTextColor="#444"
+                  placeholderTextColor={colors.textLight}
                   style={[styles.fieldInput, styles.codeInputStyle]}
                   autoCapitalize="characters"
                   maxLength={6}
@@ -285,7 +285,7 @@ export default function FestaScreen({ navigation }) {
                 value={displayName}
                 onChangeText={setDisplayName}
                 placeholder="Como quer aparecer?"
-                placeholderTextColor="#444"
+                placeholderTextColor={colors.textLight}
                 style={styles.fieldInput}
               />
             </View>
@@ -330,13 +330,12 @@ export default function FestaScreen({ navigation }) {
             value={drinkSearch}
             onChangeText={setDrinkSearch}
             placeholder="Buscar ou digitar nome do drink..."
-            placeholderTextColor="#444"
+            placeholderTextColor={colors.textLight}
             style={styles.pickerSearchInput}
             autoFocus
           />
         </View>
 
-        {/* Opção de drink customizado */}
         {showCustom && (
           <TouchableOpacity
             style={styles.customDrinkBtn}
@@ -344,7 +343,7 @@ export default function FestaScreen({ navigation }) {
             activeOpacity={0.8}
           >
             <Text style={styles.customDrinkText}>
-              ＋ Adicionar "<Text style={{ color: '#fff' }}>{drinkSearch.trim()}</Text>"
+              ＋ Adicionar "<Text style={{ color: ACCENT }}>{drinkSearch.trim()}</Text>"
             </Text>
             <Text style={styles.customDrinkSub}>Não está no cardápio</Text>
           </TouchableOpacity>
@@ -364,7 +363,7 @@ export default function FestaScreen({ navigation }) {
               <Text style={{ fontSize: 18, color: ACCENT }}>＋</Text>
             </TouchableOpacity>
           )}
-          ItemSeparatorComponent={() => <View style={{ height: 1, backgroundColor: '#1E1E1E' }} />}
+          ItemSeparatorComponent={() => <View style={{ height: 1, backgroundColor: colors.border }} />}
         />
       </SafeAreaView>
     );
@@ -427,7 +426,7 @@ export default function FestaScreen({ navigation }) {
           </View>
         </View>
 
-        {/* REGISTRAR DRINK — botão inline */}
+        {/* REGISTRAR DRINK */}
         <TouchableOpacity style={styles.registerBtn} onPress={() => setPhase('picking')} activeOpacity={0.85}>
           <Text style={styles.registerBtnText}>＋  Registrar drink</Text>
         </TouchableOpacity>
@@ -488,7 +487,7 @@ export default function FestaScreen({ navigation }) {
                   <Text style={styles.feedEmoji}>🍹</Text>
                   <Text style={styles.feedText} numberOfLines={1}>
                     <Text style={styles.feedName}>{getMemberName(log.user_id)}</Text>
-                    {' bebeu '}<Text style={{ color: '#ccc' }}>{name}</Text>
+                    {' bebeu '}<Text style={{ color: colors.text }}>{name}</Text>
                   </Text>
                   <Text style={styles.feedTime}>{timeAgo(log.logged_at)}</Text>
                 </View>
@@ -522,95 +521,95 @@ export default function FestaScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#0D0D0D' },
+  safe: { flex: 1, backgroundColor: colors.background },
   navBack: { paddingHorizontal: spacing.xl, paddingTop: spacing.md, paddingBottom: 4 },
-  navBackText: { fontSize: 16, fontFamily: fonts.bold, color: '#888' },
+  navBackText: { fontSize: 16, fontFamily: fonts.bold, color: colors.textMuted },
 
   // ── Idle ──
   idleContent: { flexGrow: 1, alignItems: 'center', justifyContent: 'center', padding: spacing.xl, paddingBottom: 60 },
   idleEmoji:   { fontSize: 72, marginBottom: 16 },
-  idleTitle:   { fontSize: 30, fontFamily: fonts.displayBold, color: '#fff', marginBottom: 10 },
-  idleSub:     { fontSize: 14, fontFamily: fonts.semiBold, color: '#888', textAlign: 'center', lineHeight: 22, marginBottom: 40 },
+  idleTitle:   { fontSize: 30, fontFamily: fonts.displayBold, color: colors.text, marginBottom: 10 },
+  idleSub:     { fontSize: 14, fontFamily: fonts.semiBold, color: colors.textMuted, textAlign: 'center', lineHeight: 22, marginBottom: 40 },
 
   primaryBtn:     { backgroundColor: ACCENT, borderRadius: radius.lg, paddingVertical: 16, paddingHorizontal: 32, alignItems: 'center', width: '100%', marginBottom: 14 },
   primaryBtnText: { fontSize: 16, fontFamily: fonts.extraBold, color: '#fff' },
-  secondaryBtn:     { backgroundColor: '#1E1E1E', borderRadius: radius.lg, paddingVertical: 16, paddingHorizontal: 32, alignItems: 'center', width: '100%', borderWidth: 1.5, borderColor: '#333' },
-  secondaryBtnText: { fontSize: 16, fontFamily: fonts.extraBold, color: '#ccc' },
+  secondaryBtn:     { backgroundColor: colors.surface, borderRadius: radius.lg, paddingVertical: 16, paddingHorizontal: 32, alignItems: 'center', width: '100%', borderWidth: 1.5, borderColor: colors.border },
+  secondaryBtnText: { fontSize: 16, fontFamily: fonts.extraBold, color: colors.text },
 
   // ── Form ──
   formContent: { flexGrow: 1, padding: spacing.xl, paddingBottom: 60 },
   backRow:     { marginBottom: 24 },
-  backRowText: { fontSize: 16, fontFamily: fonts.bold, color: '#888' },
-  formTitle:   { fontSize: 26, fontFamily: fonts.displayBold, color: '#fff', marginBottom: 28 },
+  backRowText: { fontSize: 16, fontFamily: fonts.bold, color: colors.textMuted },
+  formTitle:   { fontSize: 26, fontFamily: fonts.displayBold, color: colors.text, marginBottom: 28 },
   field:       { marginBottom: 20 },
-  fieldLabel:  { fontSize: 12, fontFamily: fonts.extraBold, color: '#888', letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 8 },
-  fieldInput:  { backgroundColor: '#1A1A1A', borderRadius: radius.md, borderWidth: 1.5, borderColor: '#2A2A2A', paddingHorizontal: 16, paddingVertical: 14, fontSize: 15, fontFamily: fonts.bold, color: '#fff' },
+  fieldLabel:  { fontSize: 12, fontFamily: fonts.extraBold, color: colors.textMuted, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 8 },
+  fieldInput:  { backgroundColor: colors.surface, borderRadius: radius.md, borderWidth: 1.5, borderColor: colors.border, paddingHorizontal: 16, paddingVertical: 14, fontSize: 15, fontFamily: fonts.bold, color: colors.text },
   codeInputStyle: { letterSpacing: 6, textTransform: 'uppercase', fontSize: 20, textAlign: 'center' },
-  errorMsg:    { fontSize: 13, fontFamily: fonts.bold, color: '#FF5A5A', marginBottom: 16, textAlign: 'center' },
+  errorMsg:    { fontSize: 13, fontFamily: fonts.bold, color: '#C0392B', marginBottom: 16, textAlign: 'center' },
 
   // ── Picker ──
   pickerHeader:    { flexDirection: 'row', alignItems: 'center', gap: 16, padding: spacing.xl, paddingBottom: spacing.md },
-  pickerTitle:     { fontSize: 16, fontFamily: fonts.extraBold, color: '#fff', flex: 1 },
-  pickerSearchRow: { flexDirection: 'row', alignItems: 'center', marginHorizontal: spacing.xl, marginBottom: 12, backgroundColor: '#1A1A1A', borderRadius: radius.md, borderWidth: 1.5, borderColor: '#2A2A2A', paddingHorizontal: 14 },
-  pickerSearchInput: { flex: 1, paddingVertical: 12, fontSize: 14, fontFamily: fonts.bold, color: '#fff' },
-  customDrinkBtn:  { marginHorizontal: spacing.xl, marginBottom: 8, backgroundColor: '#1E1530', borderRadius: radius.md, padding: 14, borderWidth: 1.5, borderColor: ACCENT + '66' },
+  pickerTitle:     { fontSize: 16, fontFamily: fonts.extraBold, color: colors.text, flex: 1 },
+  pickerSearchRow: { flexDirection: 'row', alignItems: 'center', marginHorizontal: spacing.xl, marginBottom: 12, backgroundColor: colors.surface, borderRadius: radius.md, borderWidth: 1.5, borderColor: colors.border, paddingHorizontal: 14 },
+  pickerSearchInput: { flex: 1, paddingVertical: 12, fontSize: 14, fontFamily: fonts.bold, color: colors.text },
+  customDrinkBtn:  { marginHorizontal: spacing.xl, marginBottom: 8, backgroundColor: ACCENT + '14', borderRadius: radius.md, padding: 14, borderWidth: 1.5, borderColor: ACCENT + '66' },
   customDrinkText: { fontSize: 14, fontFamily: fonts.extraBold, color: ACCENT },
-  customDrinkSub:  { fontSize: 11, fontFamily: fonts.semiBold, color: '#555', marginTop: 3 },
+  customDrinkSub:  { fontSize: 11, fontFamily: fonts.semiBold, color: colors.textMuted, marginTop: 3 },
   drinkItem:       { flexDirection: 'row', alignItems: 'center', paddingHorizontal: spacing.xl, paddingVertical: 14 },
-  drinkItemName:   { fontSize: 14, fontFamily: fonts.bold, color: '#ddd' },
-  drinkItemSub:    { fontSize: 11, fontFamily: fonts.semiBold, color: '#555', marginTop: 2 },
+  drinkItemName:   { fontSize: 14, fontFamily: fonts.bold, color: colors.text },
+  drinkItemSub:    { fontSize: 11, fontFamily: fonts.semiBold, color: colors.textMuted, marginTop: 2 },
 
   // ── Active header ──
   partyHeader: { flexDirection: 'row', alignItems: 'center', padding: spacing.xl, paddingBottom: spacing.md },
-  headerBack:     { width: 34, height: 34, borderRadius: 10, backgroundColor: '#1A1A1A', alignItems: 'center', justifyContent: 'center' },
-  headerBackText: { fontSize: 22, color: '#fff', lineHeight: 26 },
+  headerBack:     { width: 34, height: 34, borderRadius: 10, backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
+  headerBackText: { fontSize: 22, color: colors.text, lineHeight: 26 },
   partyLabel:  { fontSize: 11, fontFamily: fonts.extraBold, color: ACCENT, letterSpacing: 1.2, textTransform: 'uppercase' },
-  partyTitle:  { fontSize: 24, fontFamily: fonts.displayBold, color: '#fff', marginTop: 2 },
-  codeBox:     { backgroundColor: '#1E1E1E', borderRadius: radius.md, padding: 12, alignItems: 'center', borderWidth: 1.5, borderColor: '#333' },
-  codeBoxLabel: { fontSize: 9, fontFamily: fonts.extraBold, color: '#555', letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 4 },
+  partyTitle:  { fontSize: 24, fontFamily: fonts.displayBold, color: colors.text, marginTop: 2 },
+  codeBox:     { backgroundColor: colors.surface, borderRadius: radius.md, padding: 12, alignItems: 'center', borderWidth: 1.5, borderColor: colors.border },
+  codeBoxLabel: { fontSize: 9, fontFamily: fonts.extraBold, color: colors.textLight, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 4 },
   codeBoxValue: { fontSize: 18, fontFamily: fonts.black, color: ACCENT, letterSpacing: 3 },
 
   // ── Stats ──
   statsRow: { flexDirection: 'row', marginHorizontal: spacing.xl, gap: 10, marginBottom: spacing.md },
-  statCard: { flex: 1, backgroundColor: '#1A1A1A', borderRadius: radius.md, padding: 12, alignItems: 'center', borderWidth: 1, borderColor: '#2A2A2A' },
-  statValue: { fontSize: 16, fontFamily: fonts.black, color: '#fff', marginBottom: 2 },
-  statLabel: { fontSize: 10, fontFamily: fonts.semiBold, color: '#555', textTransform: 'uppercase', letterSpacing: 0.5 },
+  statCard: { flex: 1, backgroundColor: colors.surface, borderRadius: radius.md, padding: 12, alignItems: 'center', borderWidth: 1, borderColor: colors.border },
+  statValue: { fontSize: 16, fontFamily: fonts.black, color: colors.text, marginBottom: 2 },
+  statLabel: { fontSize: 10, fontFamily: fonts.semiBold, color: colors.textMuted, textTransform: 'uppercase', letterSpacing: 0.5 },
 
   // ── Register button ──
   registerBtn:     { marginHorizontal: spacing.xl, marginBottom: 14, backgroundColor: ACCENT, borderRadius: radius.lg, paddingVertical: 14, alignItems: 'center', shadowColor: ACCENT, shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.4, shadowRadius: 12, elevation: 8 },
   registerBtnText: { fontSize: 15, fontFamily: fonts.extraBold, color: '#fff' },
 
   // ── Sections ──
-  section:      { marginHorizontal: spacing.xl, marginBottom: 14, backgroundColor: '#1A1A1A', borderRadius: radius.xl, padding: spacing.lg, borderWidth: 1, borderColor: '#2A2A2A' },
-  sectionTitle: { fontSize: 14, fontFamily: fonts.extraBold, color: '#fff', marginBottom: 14 },
-  emptyText:    { fontSize: 13, fontFamily: fonts.semiBold, color: '#555', textAlign: 'center', paddingVertical: 12 },
+  section:      { marginHorizontal: spacing.xl, marginBottom: 14, backgroundColor: colors.surface, borderRadius: radius.xl, padding: spacing.lg, borderWidth: 1, borderColor: colors.border },
+  sectionTitle: { fontSize: 14, fontFamily: fonts.extraBold, color: colors.text, marginBottom: 14 },
+  emptyText:    { fontSize: 13, fontFamily: fonts.semiBold, color: colors.textMuted, textAlign: 'center', paddingVertical: 12 },
 
   // ── Leaderboard ──
   rankRow:    { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 },
   rankMedal:  { fontSize: 20, width: 28, textAlign: 'center' },
-  rankName:   { fontSize: 13, fontFamily: fonts.bold, color: '#ddd', marginBottom: 5 },
-  rankBarBg:  { height: 4, backgroundColor: '#2A2A2A', borderRadius: 2, overflow: 'hidden' },
+  rankName:   { fontSize: 13, fontFamily: fonts.bold, color: colors.text, marginBottom: 5 },
+  rankBarBg:  { height: 4, backgroundColor: colors.border, borderRadius: 2, overflow: 'hidden' },
   rankBarFill: { height: '100%', backgroundColor: ACCENT, borderRadius: 2 },
-  rankCount:  { fontSize: 13, fontFamily: fonts.extraBold, color: '#fff', minWidth: 40, textAlign: 'right' },
+  rankCount:  { fontSize: 13, fontFamily: fonts.extraBold, color: colors.text, minWidth: 40, textAlign: 'right' },
   drinkTagRow: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 8, gap: 6 },
-  drinkTag:    { backgroundColor: '#2A2A2A', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4 },
-  drinkTagText:{ fontSize: 11, fontFamily: fonts.bold, color: '#ccc' },
+  drinkTag:    { backgroundColor: colors.surfaceAlt, borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4 },
+  drinkTagText:{ fontSize: 11, fontFamily: fonts.bold, color: colors.textMuted },
   drinkTagQty: { fontSize: 11, fontFamily: fonts.extraBold, color: ACCENT },
 
   // ── Feed ──
   feedRow:   { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
   feedEmoji: { fontSize: 16, flexShrink: 0 },
-  feedText:  { flex: 1, fontSize: 13, fontFamily: fonts.semiBold, color: '#888' },
+  feedText:  { flex: 1, fontSize: 13, fontFamily: fonts.semiBold, color: colors.textMuted },
   feedName:  { fontFamily: fonts.extraBold, color: ACCENT },
-  feedTime:  { fontSize: 11, fontFamily: fonts.semiBold, color: '#444', flexShrink: 0 },
+  feedTime:  { fontSize: 11, fontFamily: fonts.semiBold, color: colors.textLight, flexShrink: 0 },
 
   // ── Leave ──
-  leaveBtn:     { marginHorizontal: spacing.xl, marginTop: 8, paddingVertical: 14, borderRadius: radius.md, backgroundColor: '#1A1A1A', borderWidth: 1, borderColor: '#2A2A2A', alignItems: 'center' },
-  leaveBtnText: { fontSize: 13, fontFamily: fonts.extraBold, color: '#555' },
-  confirmBox:   { marginHorizontal: spacing.xl, marginTop: 8, padding: spacing.lg, backgroundColor: '#1A1A1A', borderRadius: radius.lg, borderWidth: 1, borderColor: '#333' },
-  confirmText:  { fontSize: 13, fontFamily: fonts.semiBold, color: '#ccc', textAlign: 'center' },
-  confirmCancel:     { flex: 1, paddingVertical: 12, borderRadius: radius.md, backgroundColor: '#2A2A2A', alignItems: 'center' },
-  confirmCancelText: { fontSize: 13, fontFamily: fonts.extraBold, color: '#888' },
-  confirmLeave:      { flex: 1, paddingVertical: 12, borderRadius: radius.md, backgroundColor: '#3D1A1A', alignItems: 'center' },
-  confirmLeaveText:  { fontSize: 13, fontFamily: fonts.extraBold, color: '#FF5A5A' },
+  leaveBtn:     { marginHorizontal: spacing.xl, marginTop: 8, paddingVertical: 14, borderRadius: radius.md, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, alignItems: 'center' },
+  leaveBtnText: { fontSize: 13, fontFamily: fonts.extraBold, color: colors.textMuted },
+  confirmBox:   { marginHorizontal: spacing.xl, marginTop: 8, padding: spacing.lg, backgroundColor: colors.surface, borderRadius: radius.lg, borderWidth: 1, borderColor: colors.border },
+  confirmText:  { fontSize: 13, fontFamily: fonts.semiBold, color: colors.text, textAlign: 'center' },
+  confirmCancel:     { flex: 1, paddingVertical: 12, borderRadius: radius.md, backgroundColor: colors.surfaceAlt, alignItems: 'center' },
+  confirmCancelText: { fontSize: 13, fontFamily: fonts.extraBold, color: colors.textMuted },
+  confirmLeave:      { flex: 1, paddingVertical: 12, borderRadius: radius.md, backgroundColor: '#FFECEC', alignItems: 'center' },
+  confirmLeaveText:  { fontSize: 13, fontFamily: fonts.extraBold, color: '#C0392B' },
 });

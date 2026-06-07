@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Image,
+  View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Share, Image,
   Modal, Pressable, Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -149,6 +149,15 @@ export default function DrinkDetailScreen({ navigation, route }) {
     setTimerLeft(drink.stirSeconds || 30);
   };
 
+  const shareDrink = async () => {
+    try {
+      await Share.share({
+        message: `🍸 ${drink.name} — ${drink.subtitle}\n\nVeja a receita completa no Bartender de Bolso!`,
+        title: drink.name,
+      });
+    } catch (_) {}
+  };
+
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       {/* TOP NAV */}
@@ -187,12 +196,17 @@ export default function DrinkDetailScreen({ navigation, route }) {
             </View>
           </View>
           <View style={{ alignItems: 'center', gap: 10 }}>
-            <TouchableOpacity
-              onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); toggleFavorite(drink.id); }}
-              style={[styles.favBtn, isFav && { backgroundColor: colors.primary, borderColor: colors.primary }]}
-            >
-              <Text style={{ fontSize: 16 }}>{isFav ? '❤️' : '🤍'}</Text>
-            </TouchableOpacity>
+            <View style={{ flexDirection: 'row', gap: 8 }}>
+              <TouchableOpacity onPress={shareDrink} style={styles.shareBtn}>
+                <Text style={{ fontSize: 15 }}>↗</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); toggleFavorite(drink.id); }}
+                style={[styles.favBtn, isFav && { backgroundColor: colors.primary, borderColor: colors.primary }]}
+              >
+                <Text style={{ fontSize: 16 }}>{isFav ? '❤️' : '🤍'}</Text>
+              </TouchableOpacity>
+            </View>
             <DrinkHero drink={drink} GlassComponent={GlassComponent} />
           </View>
         </View>
@@ -425,6 +439,7 @@ const styles = StyleSheet.create({
   metaLabel: { fontSize: 10, fontFamily: fonts.extraBold, color: colors.textLight, textTransform: 'uppercase', letterSpacing: 0.8 },
   metaValue: { fontSize: 13, fontFamily: fonts.extraBold, color: colors.text, marginTop: 2 },
   favBtn: { width: 36, height: 36, borderRadius: 10, backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
+  shareBtn: { width: 36, height: 36, borderRadius: 10, backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
   glassBox: { width: 110, height: 130, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5 },
 
   statsBar: { flexDirection: 'row', justifyContent: 'space-around', marginHorizontal: spacing.xl, backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.md, borderWidth: 2, borderColor: '#F5F5F5', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 6, elevation: 2 },
