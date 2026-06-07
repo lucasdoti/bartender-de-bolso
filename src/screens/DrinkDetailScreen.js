@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Share, Image,
+  View, Text, ScrollView, TouchableOpacity, StyleSheet, Share, Image,
   Modal, Pressable, Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -99,7 +99,7 @@ const heroStyles = StyleSheet.create({
 export default function DrinkDetailScreen({ navigation, route }) {
   const { drinkId } = route.params;
   const drink = drinks.find(d => d.id === drinkId);
-  const { favorites, toggleFavorite, addToHistory } = useApp();
+  const { favorites, toggleFavorite, addToHistory, ratings, rateDrink } = useApp();
   const { user } = useAuth();
   const [activeTab, setActiveTab]      = useState('receita');
   const [completedSteps, setCompleted] = useState([]);
@@ -136,7 +136,6 @@ export default function DrinkDetailScreen({ navigation, route }) {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     addToHistory(drink.id);
     setMarcado(true);
-    Alert.alert('Mandou bem! 🍸', `${drink.name} foi adicionado ao seu histórico. Saúde! 🥂`);
   };
 
   const startTimer = () => {
@@ -208,6 +207,13 @@ export default function DrinkDetailScreen({ navigation, route }) {
               </TouchableOpacity>
             </View>
             <DrinkHero drink={drink} GlassComponent={GlassComponent} />
+            {ratings[drink.id] > 0 && (
+              <View style={styles.heroRating}>
+                {[1,2,3,4,5].map(s => (
+                  <Text key={s} style={{ fontSize: 11, opacity: s <= ratings[drink.id] ? 1 : 0.2 }}>⭐</Text>
+                ))}
+              </View>
+            )}
           </View>
         </View>
 
@@ -369,8 +375,24 @@ export default function DrinkDetailScreen({ navigation, route }) {
                 marcadoComoFeito ? (
                   <View style={styles.doneCard}>
                     <Text style={{ fontSize: 28 }}>🥂</Text>
-                    <Text style={styles.doneTitle}>Adicionado ao histórico!</Text>
-                    <Text style={styles.doneSub}>Que tal avaliar ou favoritar? Saúde! 🥂</Text>
+                    <Text style={styles.doneTitle}>Mandou bem! Saúde! 🥂</Text>
+                    <Text style={styles.doneSub}>Como foi esse drink?</Text>
+                    <View style={styles.starsRow}>
+                      {[1,2,3,4,5].map(star => (
+                        <TouchableOpacity
+                          key={star}
+                          onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); rateDrink(drink.id, star); }}
+                          hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
+                        >
+                          <Text style={styles.starIcon}>{star <= (ratings[drink.id] || 0) ? '⭐' : '☆'}</Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                    {ratings[drink.id] > 0 && (
+                      <Text style={styles.ratedText}>
+                        {['','Não gostei 😕','Mais ou menos 😐','Razoável 😌','Muito bom! 😄','Perfeito! 🤩'][ratings[drink.id]]}
+                      </Text>
+                    )}
                   </View>
                 ) : (
                   <TouchableOpacity onPress={marcarComoFeito} activeOpacity={0.85} style={styles.fezBtn}>
@@ -497,6 +519,10 @@ const styles = StyleSheet.create({
   fezBtnSub: { fontSize: 12, fontFamily: fonts.semiBold, color: '#888' },
   doneTitle: { fontSize: 16, fontFamily: fonts.extraBold, color: '#FFD966', marginTop: 4 },
   doneSub:   { fontSize: 12, fontFamily: fonts.semiBold, color: '#888' },
+  heroRating: { flexDirection: 'row', gap: 2 },
+  starsRow: { flexDirection: 'row', gap: 8, marginTop: 6 },
+  starIcon: { fontSize: 24, color: '#FFD966' },
+  ratedText: { fontSize: 12, fontFamily: fonts.extraBold, color: '#FFD966' },
 
   historyCard: { backgroundColor: colors.surface, borderRadius: radius.xl, padding: spacing.lg, borderWidth: 2, borderColor: '#F5F5F5' },
   historyText: { fontSize: 14, fontFamily: fonts.semiBold, color: '#444', lineHeight: 22 },

@@ -12,13 +12,14 @@ import { DrinkCardList } from '../components/DrinkCard';
 import drinks from '../data/drinks';
 
 export function FavoritosScreen({ navigation }) {
-  const { favorites, toggleFavorite } = useApp();
+  const { favorites, toggleFavorite, ratings } = useApp();
   const [sort, setSort] = useState('recentes');
   const diffOrder = { Fácil: 1, Médio: 2, Difícil: 3 };
   const favDrinks = (() => {
     const list = drinks.filter(d => favorites.includes(d.id));
-    if (sort === 'nome')       return [...list].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+    if (sort === 'nome')        return [...list].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
     if (sort === 'dificuldade') return [...list].sort((a, b) => (diffOrder[a.difficulty] || 0) - (diffOrder[b.difficulty] || 0));
+    if (sort === 'avaliados')   return [...list].sort((a, b) => (ratings[b.id] || 0) - (ratings[a.id] || 0));
     return [...list].sort((a, b) => favorites.indexOf(a.id) - favorites.indexOf(b.id));
   })();
 
@@ -38,9 +39,10 @@ export function FavoritosScreen({ navigation }) {
       {/* SORT */}
       <View style={styles.sortRow}>
         {[
-          { id: 'recentes',     label: 'Recentes'   },
-          { id: 'nome',         label: 'A–Z'         },
-          { id: 'dificuldade',  label: 'Mais fáceis' },
+          { id: 'recentes',    label: 'Recentes'    },
+          { id: 'nome',        label: 'A–Z'          },
+          { id: 'dificuldade', label: 'Mais fáceis'  },
+          { id: 'avaliados',   label: '⭐ Avaliados' },
         ].map(s => (
           <TouchableOpacity
             key={s.id}
@@ -69,6 +71,7 @@ export function FavoritosScreen({ navigation }) {
               isFavorite={favorites.includes(item.id)}
               onPress={() => navigation.navigate('DrinkDetail', { drinkId: item.id })}
               onFavorite={() => toggleFavorite(item.id)}
+              rating={ratings[item.id]}
             />
           )}
           contentContainerStyle={{ padding: spacing.xl, gap: 12, paddingBottom: 100 }}

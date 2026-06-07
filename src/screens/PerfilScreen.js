@@ -21,7 +21,7 @@ const configItems = [
 ];
 
 export default function PerfilScreen({ navigation }) {
-  const { favorites, history } = useApp();
+  const { favorites, history, ratings } = useApp();
   const { signOut, user } = useAuth();
   const [section, setSection] = useState('stats');
 
@@ -244,6 +244,13 @@ export default function PerfilScreen({ navigation }) {
                   <View style={{ flex: 1 }}>
                     <Text style={styles.histName}>{drink.name}</Text>
                     <Text style={styles.histDate}>🕐 {drink.date}</Text>
+                    {ratings[drink.id] > 0 && (
+                      <View style={{ flexDirection: 'row', gap: 2, marginTop: 3 }}>
+                        {[1,2,3,4,5].map(s => (
+                          <Text key={s} style={{ fontSize: 9, opacity: s <= ratings[drink.id] ? 1 : 0.2 }}>⭐</Text>
+                        ))}
+                      </View>
+                    )}
                   </View>
                   <TouchableOpacity style={styles.arrowBtn} onPress={() => navigation.navigate('DrinkDetail', { drinkId: drink.id })}>
                     <Text style={styles.arrow}>›</Text>

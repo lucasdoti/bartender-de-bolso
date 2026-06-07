@@ -58,7 +58,7 @@ export const StarRating = ({ rating }) => (
 );
 
 // ─── DRINK CARD (LIST) ────────────────────────────────────────────────────────
-export const DrinkCardList = ({ drink, onPress, onFavorite, isFavorite }) => {
+export const DrinkCardList = ({ drink, onPress, onFavorite, isFavorite, rating }) => {
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -77,6 +77,7 @@ export const DrinkCardList = ({ drink, onPress, onFavorite, isFavorite }) => {
           <Text style={styles.metaText}>⏱ {drink.time}</Text>
           <DifficultyDots level={drink.difficulty} />
           <Text style={styles.metaText}>{drink.difficulty}</Text>
+          {rating > 0 && <StarRating rating={rating} />}
         </View>
       </View>
       <TouchableOpacity

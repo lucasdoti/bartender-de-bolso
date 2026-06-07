@@ -24,7 +24,7 @@ const INGREDIENT_ALIASES = { limao_taiti: 'limao', limao_siciliano: 'limao' };
 function norm(id) { return INGREDIENT_ALIASES[id] || id; }
 
 export default function HomeScreen({ navigation }) {
-  const { favorites, toggleFavorite, ingredients } = useApp();
+  const { favorites, toggleFavorite, ingredients, ratings } = useApp();
   const [activeMood, setActiveMood]   = useState(null);
   const [search, setSearch]           = useState('');
   const [surprisePick, setSurprisePick] = useState(null);
@@ -73,8 +73,11 @@ export default function HomeScreen({ navigation }) {
   const filtered = drinks
     .filter(d => {
       const matchMood   = activeMood ? d.tags.includes(activeMood) : true;
-      const matchSearch = d.name.toLowerCase().includes(search.toLowerCase()) ||
-        d.base.toLowerCase().includes(search.toLowerCase());
+      const q = search.toLowerCase();
+      const matchSearch = q === '' ? true :
+        d.name.toLowerCase().includes(q) ||
+        d.base.toLowerCase().includes(q) ||
+        d.ingredients.some(ing => ing.name.toLowerCase().includes(q));
       return matchMood && matchSearch;
     })
     .sort((a, b) => {
@@ -233,6 +236,7 @@ export default function HomeScreen({ navigation }) {
                   isFavorite={favorites.includes(drink.id)}
                   onPress={() => navigation.navigate('DrinkDetail', { drinkId: drink.id })}
                   onFavorite={() => toggleFavorite(drink.id)}
+                  rating={ratings[drink.id]}
                 />
               ))}
             </View>

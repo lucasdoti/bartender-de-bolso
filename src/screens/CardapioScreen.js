@@ -43,7 +43,7 @@ const INGREDIENT_ALIASES = { limao_taiti: 'limao', limao_siciliano: 'limao' };
 function normIng(id) { return INGREDIENT_ALIASES[id] || id; }
 
 export default function CardapioScreen({ navigation }) {
-  const { favorites, toggleFavorite, ingredients } = useApp();
+  const { favorites, toggleFavorite, ingredients, ratings } = useApp();
   const [filter, setFilter]       = useState('todos');
   const [base, setBase]           = useState('Todos');
   const [family, setFamily]       = useState('todas');
@@ -246,6 +246,7 @@ export default function CardapioScreen({ navigation }) {
                 isFavorite={favorites.includes(item.id)}
                 onPress={() => navigation.navigate('DrinkDetail', { drinkId: item.id })}
                 onFavorite={() => toggleFavorite(item.id)}
+                rating={ratings[item.id]}
               />
             </View>
           )}

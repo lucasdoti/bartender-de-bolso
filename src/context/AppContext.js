@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
 
@@ -9,6 +10,7 @@ export function AppProvider({ children }) {
   const [favorites,   setFavorites]   = useState([]);
   const [ingredients, setIngredients] = useState([]);
   const [history,     setHistory]     = useState([]);
+  const [ratings,     setRatings]     = useState({});
   const [loading,     setLoading]     = useState(true);
 
   // Carrega dados do usuário ao logar
@@ -17,9 +19,13 @@ export function AppProvider({ children }) {
       setFavorites([]);
       setIngredients([]);
       setHistory([]);
+      setRatings({});
       return;
     }
     loadData();
+    AsyncStorage.getItem(`drink_ratings_${user.id}`).then(val => {
+      setRatings(val ? JSON.parse(val) : {});
+    });
   }, [user]);
 
   const loadData = async () => {
@@ -74,11 +80,20 @@ export function AppProvider({ children }) {
     await supabase.from('history').insert({ user_id: user.id, drink_id: drinkId });
   };
 
+  // ── AVALIAÇÕES (local, por usuário) ──
+  const rateDrink = async (drinkId, stars) => {
+    if (!user) return;
+    const updated = { ...ratings, [drinkId]: stars };
+    setRatings(updated);
+    await AsyncStorage.setItem(`drink_ratings_${user.id}`, JSON.stringify(updated));
+  };
+
   return (
     <AppContext.Provider value={{
       favorites,    toggleFavorite,
       ingredients,  toggleIngredient,
       history,      addToHistory,
+      ratings,      rateDrink,
       loading,
     }}>
       {children}
