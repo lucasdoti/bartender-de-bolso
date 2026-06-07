@@ -438,18 +438,40 @@ export default function FestaScreen({ navigation }) {
           {leaderboard.length === 0 ? (
             <Text style={styles.emptyText}>Ninguém bebeu ainda — seja o primeiro! 🍹</Text>
           ) : (
-            leaderboard.map((entry, i) => (
-              <View key={entry.userId} style={styles.rankRow}>
-                <Text style={styles.rankMedal}>{MEDALS[i] ?? String(i + 1)}</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.rankName}>{entry.name}</Text>
-                  <View style={styles.rankBarBg}>
-                    <View style={[styles.rankBarFill, { width: `${(entry.count / maxCount) * 100}%` }]} />
+            leaderboard.map((entry, i) => {
+              const memberDrinkMap = drinkLogs
+                .filter(log => log.user_id === entry.userId)
+                .reduce((acc, log) => {
+                  const name = log.custom_name || drinks.find(d => d.id === log.drink_id)?.name || 'Drink';
+                  acc[name] = (acc[name] || 0) + 1;
+                  return acc;
+                }, {});
+              const memberDrinkList = Object.entries(memberDrinkMap).sort(([, a], [, b]) => b - a);
+
+              return (
+                <View key={entry.userId} style={[styles.rankRow, { alignItems: 'flex-start' }]}>
+                  <Text style={[styles.rankMedal, { marginTop: 2 }]}>{MEDALS[i] ?? String(i + 1)}</Text>
+                  <View style={{ flex: 1 }}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                      <Text style={styles.rankName}>{entry.name}</Text>
+                      <Text style={styles.rankCount}>{entry.count} 🥃</Text>
+                    </View>
+                    <View style={styles.rankBarBg}>
+                      <View style={[styles.rankBarFill, { width: `${(entry.count / maxCount) * 100}%` }]} />
+                    </View>
+                    <View style={styles.drinkTagRow}>
+                      {memberDrinkList.map(([drinkName, qty]) => (
+                        <View key={drinkName} style={styles.drinkTag}>
+                          <Text style={styles.drinkTagText}>
+                            {drinkName}{qty > 1 ? <Text style={styles.drinkTagQty}> ×{qty}</Text> : null}
+                          </Text>
+                        </View>
+                      ))}
+                    </View>
                   </View>
                 </View>
-                <Text style={styles.rankCount}>{entry.count} 🥃</Text>
-              </View>
-            ))
+              );
+            })
           )}
         </View>
 
@@ -570,6 +592,10 @@ const styles = StyleSheet.create({
   rankBarBg:  { height: 4, backgroundColor: '#2A2A2A', borderRadius: 2, overflow: 'hidden' },
   rankBarFill: { height: '100%', backgroundColor: ACCENT, borderRadius: 2 },
   rankCount:  { fontSize: 13, fontFamily: fonts.extraBold, color: '#fff', minWidth: 40, textAlign: 'right' },
+  drinkTagRow: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 8, gap: 6 },
+  drinkTag:    { backgroundColor: '#2A2A2A', borderRadius: 20, paddingHorizontal: 10, paddingVertical: 4 },
+  drinkTagText:{ fontSize: 11, fontFamily: fonts.bold, color: '#ccc' },
+  drinkTagQty: { fontSize: 11, fontFamily: fonts.extraBold, color: ACCENT },
 
   // ── Feed ──
   feedRow:   { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 12 },
