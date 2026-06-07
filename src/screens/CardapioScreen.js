@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import {
   View, Text, ScrollView, TextInput,
-  TouchableOpacity, StyleSheet, FlatList,
+  TouchableOpacity, StyleSheet, FlatList, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
@@ -86,7 +86,7 @@ export default function CardapioScreen({ navigation }) {
         <AppIcon size={38} />
       </View>
 
-      {/* SEARCH + FILTROS + VIEW TOGGLE */}
+      {/* SEARCH + VIEW TOGGLE */}
       <View style={styles.searchRow}>
         <View style={styles.searchWrapper}>
           <Text style={styles.searchIcon}>🔍</Text>
@@ -95,28 +95,16 @@ export default function CardapioScreen({ navigation }) {
             onChangeText={setSearch}
             placeholder="Buscar drink ou ingrediente..."
             placeholderTextColor={colors.textLight}
-            style={styles.searchInput}
+            style={[styles.searchInput, Platform.OS === 'web' && { outline: 'none' }]}
+            clearButtonMode="never"
+            returnKeyType="search"
           />
+          {search.length > 0 && (
+            <TouchableOpacity onPress={() => setSearch('')} style={styles.searchClear}>
+              <Text style={styles.searchClearText}>×</Text>
+            </TouchableOpacity>
+          )}
         </View>
-
-        <TouchableOpacity
-          onPress={() => { setShowBases(!showBases); setShowFamilies(false); }}
-          activeOpacity={0.8}
-          style={[styles.filterBtn, base !== 'Todos' && styles.filterBtnActive]}
-        >
-          <Text style={styles.filterBtnEmoji}>🥃</Text>
-          {base !== 'Todos' && <View style={styles.filterDot} />}
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => { setShowFamilies(!showFamilies); setShowBases(false); }}
-          activeOpacity={0.8}
-          style={[styles.filterBtn, family !== 'todas' && styles.filterBtnActive]}
-        >
-          <Text style={styles.filterBtnEmoji}>🍹</Text>
-          {family !== 'todas' && <View style={styles.filterDot} />}
-        </TouchableOpacity>
-
         <View style={styles.viewToggle}>
           {[{ v: 'list', icon: '☰' }, { v: 'grid', icon: '⊞' }].map(({ v, icon }) => (
             <TouchableOpacity
@@ -127,6 +115,55 @@ export default function CardapioScreen({ navigation }) {
               <Text style={{ fontSize: 16 }}>{icon}</Text>
             </TouchableOpacity>
           ))}
+        </View>
+      </View>
+
+      {/* SELECTORS — DESTILADO + FAMÍLIA */}
+      <View style={styles.selectorRow}>
+        {/* Destilado */}
+        <View style={[styles.selectorChip, base !== 'Todos' && styles.selectorChipActive]}>
+          <TouchableOpacity
+            onPress={() => { setShowBases(v => !v); setShowFamilies(false); }}
+            style={styles.selectorBody}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.selectorEmoji}>🥃</Text>
+            <Text style={[styles.selectorLabel, base !== 'Todos' && styles.selectorLabelActive]} numberOfLines={1}>
+              {base === 'Todos' ? 'Destilado' : base}
+            </Text>
+            {base === 'Todos' && <Text style={styles.selectorArrow}>▾</Text>}
+          </TouchableOpacity>
+          {base !== 'Todos' && (
+            <TouchableOpacity
+              onPress={() => { setBase('Todos'); setShowBases(false); }}
+              style={styles.selectorClear}
+            >
+              <Text style={styles.selectorClearText}>×</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Família */}
+        <View style={[styles.selectorChip, family !== 'todas' && styles.selectorChipActive]}>
+          <TouchableOpacity
+            onPress={() => { setShowFamilies(v => !v); setShowBases(false); }}
+            style={styles.selectorBody}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.selectorEmoji}>🍹</Text>
+            <Text style={[styles.selectorLabel, family !== 'todas' && styles.selectorLabelActive]} numberOfLines={1}>
+              {family === 'todas' ? 'Família' : families.find(f => f.id === family)?.label ?? 'Família'}
+            </Text>
+            {family === 'todas' && <Text style={styles.selectorArrow}>▾</Text>}
+          </TouchableOpacity>
+          {family !== 'todas' && (
+            <TouchableOpacity
+              onPress={() => { setFamily('todas'); setShowFamilies(false); }}
+              style={styles.selectorClear}
+            >
+              <Text style={styles.selectorClearText}>×</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
@@ -255,7 +292,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 24, fontFamily: fonts.displayBold, color: colors.text, lineHeight: 28 },
   titleAccent: { fontFamily: fonts.displayItal, color: colors.primary },
 
-  searchRow: { flexDirection: 'row', gap: 10, marginBottom: 12 },
+  searchRow: { flexDirection: 'row', gap: 10, marginBottom: 10 },
   searchWrapper: {
     flex: 1, flexDirection: 'row', alignItems: 'center',
     backgroundColor: colors.surface, borderRadius: radius.md,
@@ -263,21 +300,28 @@ const styles = StyleSheet.create({
   },
   searchIcon: { fontSize: 15, marginRight: 8 },
   searchInput: { flex: 1, paddingVertical: 11, fontSize: 13, fontFamily: fonts.bold, color: colors.text },
-  filterBtn: {
-    width: 44, height: 44, borderRadius: radius.md,
-    backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.border,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  filterBtnActive: { backgroundColor: colors.dark, borderColor: colors.dark },
-  filterBtnEmoji: { fontSize: 16 },
-  filterDot: {
-    position: 'absolute', top: 6, right: 6,
-    width: 7, height: 7, borderRadius: 4, backgroundColor: colors.primary,
-  },
+  searchClear: { width: 26, height: 26, borderRadius: 13, backgroundColor: colors.surfaceAlt, alignItems: 'center', justifyContent: 'center', marginRight: 2 },
+  searchClearText: { fontSize: 16, color: colors.textMuted, fontFamily: fonts.bold, lineHeight: 18 },
 
   viewToggle: { flexDirection: 'row', backgroundColor: '#F0F0EC', borderRadius: 12, padding: 3, gap: 2 },
   viewBtn: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   viewBtnActive: { backgroundColor: colors.surface, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 },
+
+  selectorRow: { flexDirection: 'row', gap: 8, marginBottom: 10 },
+  selectorChip: {
+    flex: 1, flexDirection: 'row', alignItems: 'center',
+    height: 40, borderRadius: 50,
+    backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.border,
+    overflow: 'hidden',
+  },
+  selectorChipActive: { backgroundColor: colors.dark, borderColor: colors.dark },
+  selectorBody: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12 },
+  selectorEmoji: { fontSize: 13 },
+  selectorLabel: { flex: 1, fontSize: 12, fontFamily: fonts.extraBold, color: '#555' },
+  selectorLabelActive: { color: '#fff' },
+  selectorArrow: { fontSize: 11, color: colors.textLight },
+  selectorClear: { height: 36, paddingHorizontal: 10, alignItems: 'center', justifyContent: 'center', borderLeftWidth: 1, borderLeftColor: 'rgba(255,255,255,0.2)' },
+  selectorClearText: { fontSize: 18, color: '#fff', fontFamily: fonts.bold, lineHeight: 20 },
 
   // Scroll horizontal de filtros — altura automática, sem cortes
   filterScroll: { flexGrow: 0, marginHorizontal: -spacing.xl, marginBottom: 12 },
