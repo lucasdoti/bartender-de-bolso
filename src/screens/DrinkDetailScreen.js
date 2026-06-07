@@ -158,7 +158,7 @@ export default function DrinkDetailScreen({ navigation, route }) {
   };
 
   return (
-    <SafeAreaView style={styles.safe} edges={['top']}>
+    <SafeAreaView style={styles.safe} edges={['top', 'bottom']}>
       {/* TOP NAV */}
       <View style={styles.topNav}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
@@ -168,7 +168,7 @@ export default function DrinkDetailScreen({ navigation, route }) {
         <AppIcon size={38} />
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 40 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
         {/* HERO */}
         <View style={styles.hero}>
           <View style={{ flex: 1 }}>
