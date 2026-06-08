@@ -24,7 +24,7 @@ export default function BottomNav({ active, navigation }) {
             key={tab.id}
             onPress={() => {
               if (!isActive) Haptics.selectionAsync();
-              navigation.navigate(tab.id);
+              navigation.navigate('Tabs', { screen: tab.id });
             }}
             style={[styles.tab, isActive && styles.tabActive]}
             activeOpacity={0.7}
