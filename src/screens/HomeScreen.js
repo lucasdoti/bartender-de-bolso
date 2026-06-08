@@ -10,7 +10,7 @@ import { colors, fonts, radius, spacing } from '../theme';
 import AppIcon from '../components/AppIcon';
 import BottomNav from '../components/BottomNav';
 import { DrinkCardList } from '../components/DrinkCard';
-import drinks, { ibaOrder } from '../data/drinks';
+import { useDrinks, ibaOrder } from '../hooks/useDrinks';
 
 const moods = [
   { id: 'calor',  label: 'Refrescante',  emoji: '☀️' },
@@ -25,6 +25,7 @@ function norm(id) { return INGREDIENT_ALIASES[id] || id; }
 
 export default function HomeScreen({ navigation }) {
   const { favorites, toggleFavorite, ingredients, ratings } = useApp();
+  const drinks = useDrinks();
   const [activeMood, setActiveMood]   = useState(null);
   const [search, setSearch]           = useState('');
   const [surprisePick, setSurprisePick] = useState(null);

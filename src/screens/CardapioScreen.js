@@ -9,7 +9,7 @@ import { colors, fonts, radius, spacing } from '../theme';
 import AppIcon from '../components/AppIcon';
 import BottomNav from '../components/BottomNav';
 import { DrinkCardList, DrinkCardGrid } from '../components/DrinkCard';
-import drinks from '../data/drinks';
+import { useDrinks } from '../hooks/useDrinks';
 
 const filters = [
   { id: 'todos',    label: 'Todos',       emoji: '🍸' },
@@ -44,6 +44,7 @@ function normIng(id) { return INGREDIENT_ALIASES[id] || id; }
 
 export default function CardapioScreen({ navigation }) {
   const { favorites, toggleFavorite, ingredients, ratings } = useApp();
+  const drinks = useDrinks();
   const [filter, setFilter]       = useState('todos');
   const [base, setBase]           = useState('Todos');
   const [family, setFamily]       = useState('todas');

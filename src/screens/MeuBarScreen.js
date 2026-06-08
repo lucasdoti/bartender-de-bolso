@@ -10,13 +10,12 @@ import AppIcon from '../components/AppIcon';
 import BottomNav from '../components/BottomNav';
 import { DrinkCardList } from '../components/DrinkCard';
 import { Share } from 'react-native';
-import drinks from '../data/drinks';
 import { ingredientCategories } from '../data/ingredients';
 import { xaropes, engarrafados } from '../data/recipes';
+import { useDrinks } from '../hooks/useDrinks';
 
 const allItems = ingredientCategories.flatMap(c => c.items);
 
-// limao_taiti e limao_siciliano satisfazem o requisito 'limao' nos drinks
 const INGREDIENT_ALIASES = {
   limao_taiti:     'limao',
   limao_siciliano: 'limao',
@@ -24,7 +23,7 @@ const INGREDIENT_ALIASES = {
 
 function normalizeIngredient(id) { return INGREDIENT_ALIASES[id] || id; }
 
-function calcMatches(selected) {
+function calcMatches(selected, drinks) {
   const normalized = selected.map(normalizeIngredient);
   return drinks.map(drink => {
     const missing = (drink.needs || []).filter(n => !normalized.includes(n));
@@ -39,6 +38,7 @@ const getItem  = (id) => allItems.find(i => i.id === id);
 
 export default function MeuBarScreen({ navigation }) {
   const { ingredients, toggleIngredient, favorites, toggleFavorite } = useApp();
+  const drinks = useDrinks();
   const [activeTab, setActiveTab]       = useState('bar');
   const [tempSelected, setTempSelected] = useState([]);
   const [showResults, setShowResults]   = useState(false);
@@ -65,10 +65,10 @@ export default function MeuBarScreen({ navigation }) {
 
   const clearTemp = () => { setTempSelected([]); setShowResults(false); };
 
-  const barResults    = calcMatches(ingredients);
+  const barResults    = calcMatches(ingredients, drinks);
   const barPerfect    = barResults.filter(d => d.match === 100);
   const barPartial    = barResults.filter(d => d.match >= 50 && d.match < 100);
-  const searchResults = calcMatches(tempSelected);
+  const searchResults = calcMatches(tempSelected, drinks);
   const searchPerfect = searchResults.filter(d => d.match === 100);
   const searchPartial = searchResults.filter(d => d.match >= 50 && d.match < 100);
 

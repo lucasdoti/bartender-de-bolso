@@ -8,7 +8,7 @@ import { useApp } from '../context/AppContext';
 import { colors, fonts, radius, spacing } from '../theme';
 import { DrinkCardList } from '../components/DrinkCard';
 import AppIcon from '../components/AppIcon';
-import drinks from '../data/drinks';
+import { useDrinks } from '../hooks/useDrinks';
 
 // ─── FAMÍLIAS ────────────────────────────────────────────────────────────────
 const FAMILIES = {
@@ -258,7 +258,7 @@ function extractIngredientNeeds(normalized) {
   return [...needs];
 }
 
-function localRecommend(input, userBar = []) {
+function localRecommend(input, userBar = [], drinks = []) {
   const normalized = normalizeText(input);
 
   const similarFamilies    = detectSimilarTo(normalized);
@@ -419,14 +419,15 @@ const EXAMPLES = [
 ];
 
 export default function BartenderIAScreen({ navigation }) {
-  const { favorites, toggleFavorite, ingredients: userBar } = useApp();
+  const { favorites, toggleFavorite, ingredients: userBar, ratings } = useApp();
+  const drinks = useDrinks();
   const [input, setInput]           = useState('');
   const [response, setResponse]     = useState(null);
   const [recommended, setRecommended] = useState([]);
 
   const handleSend = () => {
     if (!input.trim()) return;
-    const { message, result } = localRecommend(input.trim(), userBar);
+    const { message, result } = localRecommend(input.trim(), userBar, drinks);
     setResponse(message);
     setRecommended(result);
   };
@@ -491,6 +492,7 @@ export default function BartenderIAScreen({ navigation }) {
                       isFavorite={favorites.includes(drink.id)}
                       onPress={() => navigation.navigate('DrinkDetail', { drinkId: drink.id })}
                       onFavorite={() => toggleFavorite(drink.id)}
+                      rating={ratings[drink.id]}
                     />
                   ))}
                 </View>

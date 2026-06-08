@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert,
+  View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
@@ -8,10 +8,15 @@ import { useAuth } from '../context/AuthContext';
 import { colors, fonts, radius, spacing } from '../theme';
 import AppIcon from '../components/AppIcon';
 import BottomNav from '../components/BottomNav';
-import drinks from '../data/drinks';
+import { useDrinks } from '../hooks/useDrinks';
+import {
+  scheduleWeeklyReminder,
+  cancelWeeklyReminder,
+  getIsReminderActive,
+} from '../services/NotificationService';
 
 const configItems = [
-  { icon: '🔔', label: 'Notificações',          sub: 'Novidades e receitas',  action: 'soon'    },
+  { icon: '🔔', label: 'Lembrete semanal',      sub: 'Toda sexta às 18h',     action: 'notifications' },
   { icon: '🌙', label: 'Modo escuro',           sub: 'Em breve',              action: 'soon'    },
   { icon: '🌍', label: 'Idioma',               sub: 'Português (BR)',        action: 'soon'    },
   { icon: '⭐', label: 'Avaliar o app',         sub: 'Deixe seu feedback',    action: 'review'  },
@@ -21,7 +26,8 @@ const configItems = [
 ];
 
 export default function PerfilScreen({ navigation }) {
-  const { favorites, history, ratings } = useApp();
+  const { favorites, history, ratings, streak } = useApp();
+  const drinks = useDrinks();
   const { signOut, user } = useAuth();
   const [section, setSection] = useState('stats');
 
@@ -32,12 +38,31 @@ export default function PerfilScreen({ navigation }) {
     ]);
   };
 
-  const handleConfigPress = (action) => {
+  const handleConfigPress = async (action) => {
     if (action === 'logout')  return handleLogout();
     if (action === 'soon')    return Alert.alert('Em breve', 'Essa funcionalidade está a caminho! 🚀');
     if (action === 'review')  return Alert.alert('Avaliar o app', 'Obrigado pelo interesse! A avaliação estará disponível em breve na loja.');
     if (action === 'contact') return Alert.alert('Fale conosco', 'Manda uma mensagem para:\ncontato@bartenderdebolso.com');
     if (action === 'privacy') return navigation.navigate('PrivacyPolicy');
+    if (action === 'notifications') {
+      if (Platform.OS === 'web') {
+        return Alert.alert('Notificações', 'Lembretes disponíveis no app mobile (iOS e Android).');
+      }
+      const active = await getIsReminderActive();
+      if (active) {
+        Alert.alert('Desativar lembrete?', 'Você não receberá mais o lembrete semanal.', [
+          { text: 'Cancelar', style: 'cancel' },
+          { text: 'Desativar', style: 'destructive', onPress: cancelWeeklyReminder },
+        ]);
+      } else {
+        const ok = await scheduleWeeklyReminder();
+        if (ok) {
+          Alert.alert('Lembrete ativado! 🔔', 'Você receberá uma notificação toda sexta às 18h.');
+        } else {
+          Alert.alert('Permissão necessária', 'Ative as notificações nas configurações do celular para receber lembretes.');
+        }
+      }
+    }
   };
 
   // ── ESTATÍSTICAS REAIS (calculadas do histórico) ──
@@ -145,11 +170,12 @@ export default function PerfilScreen({ navigation }) {
         </View>
 
         {/* STAT CARDS */}
-        <View style={styles.statsGrid}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.statsGrid}>
           {[
-            { label: 'Drinks feitos', value: String(history.length || 0), emoji: '🥂' },
-            { label: 'Favoritos',     value: String(favorites.length),    emoji: '❤️' },
-            { label: 'Semanas ativo', value: String(semanasAtivo),       emoji: '📅' },
+            { label: 'Drinks feitos',  value: String(history.length || 0), emoji: '🥂' },
+            { label: 'Favoritos',      value: String(favorites.length),    emoji: '❤️' },
+            { label: 'Sequência',      value: `${streak.current}d 🔥`,    emoji: '🔥' },
+            { label: 'Recorde',        value: `${streak.longest}d`,        emoji: '🏆' },
           ].map(({ label, value, emoji }) => (
             <View key={label} style={styles.statCard}>
               <Text style={styles.statEmoji}>{emoji}</Text>
@@ -157,7 +183,7 @@ export default function PerfilScreen({ navigation }) {
               <Text style={styles.statLabel}>{label}</Text>
             </View>
           ))}
-        </View>
+        </ScrollView>
 
         {/* SECTION TABS */}
         <View style={styles.tabs}>
@@ -347,8 +373,8 @@ const styles = StyleSheet.create({
   levelText: { fontSize: 10, fontFamily: fonts.extraBold, color: colors.textMuted },
   editBtn: { width: 36, height: 36, borderRadius: 10, backgroundColor: '#F5F5F2', alignItems: 'center', justifyContent: 'center' },
 
-  statsGrid: { flexDirection: 'row', gap: 10, paddingHorizontal: spacing.xl, marginBottom: spacing.lg },
-  statCard: { flex: 1, backgroundColor: colors.surface, borderRadius: radius.md, padding: 14, alignItems: 'center', borderWidth: 2, borderColor: '#F5F5F5', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1 },
+  statsGrid: { flexDirection: 'row', gap: 10, paddingHorizontal: spacing.xl, paddingRight: spacing.xl, marginBottom: spacing.lg },
+  statCard: { width: 90, backgroundColor: colors.surface, borderRadius: radius.md, padding: 14, alignItems: 'center', borderWidth: 2, borderColor: '#F5F5F5', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1 },
   statEmoji: { fontSize: 22 },
   statValue: { fontSize: 20, fontFamily: fonts.black, color: colors.text, marginTop: 4 },
   statLabel: { fontSize: 10, fontFamily: fonts.extraBold, color: colors.textLight, marginTop: 2, textAlign: 'center', lineHeight: 13 },

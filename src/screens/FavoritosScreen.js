@@ -9,10 +9,11 @@ import { colors, fonts, radius, spacing } from '../theme';
 import AppIcon from '../components/AppIcon';
 import BottomNav from '../components/BottomNav';
 import { DrinkCardList } from '../components/DrinkCard';
-import drinks from '../data/drinks';
+import { useDrinks } from '../hooks/useDrinks';
 
 export function FavoritosScreen({ navigation }) {
   const { favorites, toggleFavorite, ratings } = useApp();
+  const drinks = useDrinks();
   const [sort, setSort] = useState('recentes');
   const diffOrder = { Fácil: 1, Médio: 2, Difícil: 3 };
   const favDrinks = (() => {

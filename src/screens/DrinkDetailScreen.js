@@ -11,8 +11,9 @@ import { supabase } from '../lib/supabase';
 import { colors, fonts, radius, spacing } from '../theme';
 import AppIcon from '../components/AppIcon';
 import BottomNav from '../components/BottomNav';
+import { DrinkCardList } from '../components/DrinkCard';
 import { glassMap } from '../components/glasses/Glasses';
-import drinks from '../data/drinks';
+import { useDrinks } from '../hooks/useDrinks';
 import drinkPhotos from '../data/drinkPhotos';
 
 const SCALES = [1, 2, 4, 6];
@@ -99,7 +100,8 @@ const heroStyles = StyleSheet.create({
 
 export default function DrinkDetailScreen({ navigation, route }) {
   const { drinkId } = route.params;
-  const drink = drinks.find(d => d.id === drinkId);
+  const allDrinks = useDrinks();
+  const drink = allDrinks.find(d => d.id === drinkId);
   const { favorites, toggleFavorite, addToHistory, ratings, rateDrink } = useApp();
   const { user } = useAuth();
   const [activeTab, setActiveTab]      = useState('receita');
@@ -437,6 +439,40 @@ export default function DrinkDetailScreen({ navigation, route }) {
           )}
 
         </View>
+
+        {/* VOCÊ TAMBÉM VAI GOSTAR */}
+        {(() => {
+          const related = allDrinks
+            .filter(d => d.id !== drink.id)
+            .map(d => ({
+              drink: d,
+              score: (d.base === drink.base ? 3 : 0) +
+                     (d.tags || []).filter(t => (drink.tags || []).includes(t)).length,
+            }))
+            .filter(d => d.score > 0)
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 3)
+            .map(d => d.drink);
+          if (related.length === 0) return null;
+          return (
+            <View style={{ paddingHorizontal: spacing.xl, marginTop: spacing.xl }}>
+              <Text style={styles.relatedTitle}>Você também vai gostar de</Text>
+              <View style={{ gap: 12 }}>
+                {related.map(r => (
+                  <DrinkCardList
+                    key={r.id}
+                    drink={r}
+                    isFavorite={favorites.includes(r.id)}
+                    onPress={() => navigation.replace('DrinkDetail', { drinkId: r.id })}
+                    onFavorite={() => toggleFavorite(r.id)}
+                    rating={ratings[r.id]}
+                  />
+                ))}
+              </View>
+            </View>
+          );
+        })()}
+
       </ScrollView>
       <BottomNav navigation={navigation} />
     </SafeAreaView>
@@ -525,6 +561,8 @@ const styles = StyleSheet.create({
   starsRow: { flexDirection: 'row', gap: 8, marginTop: 6 },
   starIcon: { fontSize: 24, color: '#FFD966' },
   ratedText: { fontSize: 12, fontFamily: fonts.extraBold, color: '#FFD966' },
+
+  relatedTitle: { fontSize: 13, fontFamily: fonts.extraBold, color: colors.textMuted, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 14 },
 
   historyCard: { backgroundColor: colors.surface, borderRadius: radius.xl, padding: spacing.lg, borderWidth: 2, borderColor: '#F5F5F5' },
   historyText: { fontSize: 14, fontFamily: fonts.semiBold, color: '#444', lineHeight: 22 },
