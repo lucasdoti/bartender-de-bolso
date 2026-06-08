@@ -30,9 +30,18 @@
       "bundler": "metro",
       "output": "single"
     },
+    "updates": {
+      "url": "https://u.expo.dev/9ce71bf4-c215-47f1-9efd-f262fdb03dfb"
+    },
     "plugins": [
       "expo-font",
       "expo-updates"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "9ce71bf4-c215-47f1-9efd-f262fdb03dfb"
+      }
+    },
+    "owner": "lucasdotisouza-2"
   }
 }
