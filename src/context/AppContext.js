@@ -124,13 +124,19 @@ export function AppProvider({ children }) {
     await AsyncStorage.setItem(`drink_ratings_${user.id}`, JSON.stringify(updated));
   };
 
+  // ── REFRESH DRINKS EXTRAS ──
+  const refreshExtraDrinks = async () => {
+    const { data } = await supabase.from('drinks_extra').select('*').eq('published', true);
+    if (data) setExtraDrinks(data.map(normalizeExtraDrink));
+  };
+
   return (
     <AppContext.Provider value={{
       favorites,    toggleFavorite,
       ingredients,  toggleIngredient,
       history,      addToHistory,
       ratings,      rateDrink,
-      extraDrinks,
+      extraDrinks,  refreshExtraDrinks,
       streak,
       loading,
     }}>
