@@ -1767,6 +1767,45 @@ export const drinks = [
     needs: ['gin', 'limao_siciliano', 'xarope_simples', 'angostura', 'gelo'],
     method: 'shaken',
   },
+  {
+    id: 54,
+    name: 'Long Island Iced Tea',
+    subtitle: 'O Monstro de Cinco Destilados',
+    base: 'Vodka',
+    category: 'Contemporâneo',
+    origin: 'EUA 🇺🇸',
+    year: '1972',
+    time: '5 min',
+    difficulty: 'Médio',
+    abv: '22%',
+    calories: 275,
+    color: '#FFF8E1',
+    accent: '#E65100',
+    tags: ['festas', 'popular'],
+    ingredients: [
+      { amount: '15ml',     name: 'Vodka',               tip: 'Qualquer vodka limpa funciona' },
+      { amount: '15ml',     name: 'Rum branco',           tip: 'Rum leve, não envelhecido' },
+      { amount: '15ml',     name: 'Gin',                  tip: 'London Dry' },
+      { amount: '15ml',     name: 'Tequila',              tip: 'Blanco/prata' },
+      { amount: '15ml',     name: 'Triple Sec',           tip: 'Cointreau ou licor de laranja similar' },
+      { amount: '30ml',     name: 'Suco de limão taiti',  tip: 'Sempre fresco — é o que equilibra tudo' },
+      { amount: '15ml',     name: 'Xarope simples',       tip: 'Ajusta o dulçor ao gosto' },
+      { amount: 'Completar',name: 'Cola',                 tip: 'Só um splash — dá a cor de chá gelado' },
+      { amount: 'Q.B.',     name: 'Gelo',                 tip: 'Muito gelo, copo bem cheio' },
+    ],
+    steps: [
+      { num: 1, title: 'Copo',      desc: 'Encha um copo long drink alto com bastante gelo.' },
+      { num: 2, title: 'Destilados',desc: 'Adicione 15ml de cada: vodka, rum branco, gin, tequila e triple sec.' },
+      { num: 3, title: 'Ácido',     desc: 'Junte 30ml de suco de limão taiti fresco e 15ml de xarope simples.' },
+      { num: 4, title: 'Mexa',      desc: 'Mexa bem para integrar os destilados com o ácido e o doce.' },
+      { num: 5, title: 'Finalize',  desc: 'Complete com um splash de cola só para dar a cor de chá gelado. Decore com rodela de limão.' },
+    ],
+    history: 'Criado em Long Island, Nova York, por volta de 1972, provavelmente por Robert "Rosebud" Butt em um concurso de coquetéis. A ideia era combinar cinco destilados de forma que o drink parecesse inofensivo como um chá gelado — mas não fosse. Entrou na lista dos Clássicos Contemporâneos da IBA.',
+    famous: 'Robert "Rosebud" Butt',
+    funFact: 'Apesar do nome e da aparência de chá gelado, não leva chá. A cor vem do splash de cola e o sabor é equilibrado pelo limão e xarope — não tem como adivinhar que tem cinco destilados dentro.',
+    needs: ['vodka', 'rum', 'gin', 'tequila', 'triplesec', 'limao_taiti', 'xarope_simples', 'gelo'],
+    method: 'built',
+  },
 ];
 
 // Ordem de popularidade baseada no ranking IBA (Unforgettables → Contemporary Classics → regionais)
@@ -1797,6 +1836,7 @@ export const ibaOrder = [
   7,  // Tom Collins
   44, // John Collins
   21, // Sex on the Beach
+  54, // Long Island Iced Tea
   13, // Tequila Sunrise
   4,  // Cuba Libre
   47, // Penicillin
