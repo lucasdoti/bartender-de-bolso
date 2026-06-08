@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert, Platform,
+  View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Alert, Platform, ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 import { colors, fonts, radius, spacing } from '../theme';
 import AppIcon from '../components/AppIcon';
 import BottomNav from '../components/BottomNav';
@@ -23,7 +24,8 @@ const configItems = [
   { icon: '💬', label: 'Fale conosco',          sub: 'Sugestões e problemas', action: 'contact' },
   { icon: '🍹', label: 'Sugerir um drink',      sub: 'Indique para adicionarmos', action: 'suggest' },
   { icon: '📋', label: 'Política de privacidade', sub: 'Seus dados e LGPD',  action: 'privacy' },
-  { icon: '🚪', label: 'Sair',                 sub: '',                      action: 'logout', danger: true },
+  { icon: '🗑️', label: 'Excluir conta',         sub: 'Remove seus dados permanentemente', action: 'deleteAccount', danger: true },
+  { icon: '🚪', label: 'Sair',                  sub: '',                      action: 'logout', danger: true },
 ];
 
 export default function PerfilScreen({ navigation }) {
@@ -31,12 +33,48 @@ export default function PerfilScreen({ navigation }) {
   const drinks = useDrinks();
   const { signOut, user } = useAuth();
   const [section, setSection] = useState('stats');
+  const [editingName, setEditingName]   = useState(false);
+  const [newNameValue, setNewNameValue] = useState('');
+  const [savingName, setSavingName]     = useState(false);
 
   const handleLogout = () => {
     Alert.alert('Sair', 'Tem certeza que deseja sair da sua conta?', [
       { text: 'Cancelar', style: 'cancel' },
       { text: 'Sair', style: 'destructive', onPress: () => signOut() },
     ]);
+  };
+
+  const handleSaveName = async () => {
+    const trimmed = newNameValue.trim();
+    if (!trimmed) return;
+    setSavingName(true);
+    await supabase.auth.updateUser({ data: { name: trimmed } });
+    setSavingName(false);
+    setEditingName(false);
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      '⚠️ Excluir conta',
+      'Todos os seus dados serão removidos permanentemente. Esta ação não pode ser desfeita.',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir minha conta',
+          style: 'destructive',
+          onPress: async () => {
+            const uid = user.id;
+            await Promise.all([
+              supabase.from('history').delete().eq('user_id', uid),
+              supabase.from('favorites').delete().eq('user_id', uid),
+              supabase.from('my_bar').delete().eq('user_id', uid),
+              supabase.from('drink_suggestions').delete().eq('user_id', uid),
+            ]);
+            await signOut();
+          },
+        },
+      ]
+    );
   };
 
   const handleConfigPress = async (action) => {
@@ -46,6 +84,7 @@ export default function PerfilScreen({ navigation }) {
     if (action === 'contact') return Alert.alert('Fale conosco', 'Manda uma mensagem para:\ncontato@bartenderdebolso.com');
     if (action === 'privacy') return navigation.navigate('PrivacyPolicy');
     if (action === 'suggest') return navigation.navigate('SuggestDrink');
+    if (action === 'deleteAccount') return handleDeleteAccount();
     if (action === 'notifications') {
       if (Platform.OS === 'web') {
         return Alert.alert('Notificações', 'Lembretes disponíveis no app mobile (iOS e Android).');
@@ -157,18 +196,53 @@ export default function PerfilScreen({ navigation }) {
             <Text style={{ fontSize: 32 }}>🥃</Text>
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={styles.userName}>{user?.user_metadata?.name || 'Bartender'}</Text>
-            <Text style={styles.userRole}>{user?.email || 'Bartender Amador 🥃'}</Text>
-            <View style={styles.levelRow}>
-              <View style={styles.levelBg}>
-                <View style={[styles.levelFill, { width: `${progressoNivel}%` }]}/>
-              </View>
-              <Text style={styles.levelText}>Nível {nivel}</Text>
-            </View>
+            {editingName ? (
+              <>
+                <TextInput
+                  value={newNameValue}
+                  onChangeText={setNewNameValue}
+                  style={styles.nameInput}
+                  placeholder="Seu nome"
+                  placeholderTextColor={colors.textLight}
+                  autoFocus
+                  maxLength={40}
+                  returnKeyType="done"
+                  onSubmitEditing={handleSaveName}
+                />
+                <View style={{ flexDirection: 'row', gap: 8, marginTop: 6 }}>
+                  <TouchableOpacity onPress={handleSaveName} style={styles.saveNameBtn} disabled={savingName}>
+                    {savingName
+                      ? <ActivityIndicator size="small" color="#fff" />
+                      : <Text style={styles.saveNameText}>Salvar</Text>
+                    }
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => setEditingName(false)} style={styles.cancelNameBtn}>
+                    <Text style={styles.cancelNameText}>Cancelar</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            ) : (
+              <>
+                <Text style={styles.userName}>{user?.user_metadata?.name || 'Bartender'}</Text>
+                <Text style={styles.userRole}>{user?.email || 'Bartender Amador 🥃'}</Text>
+                <View style={styles.levelRow}>
+                  <View style={styles.levelBg}>
+                    <View style={[styles.levelFill, { width: `${progressoNivel}%` }]}/>
+                  </View>
+                  <Text style={styles.levelText}>Nível {nivel}</Text>
+                </View>
+              </>
+            )}
           </View>
-          <TouchableOpacity style={styles.editBtn} activeOpacity={0.7} onPress={() => Alert.alert('Em breve', 'Edição de perfil chegando em breve! 🚀')}>
-            <Text style={{ fontSize: 15 }}>✏️</Text>
-          </TouchableOpacity>
+          {!editingName && (
+            <TouchableOpacity
+              style={styles.editBtn}
+              activeOpacity={0.7}
+              onPress={() => { setNewNameValue(user?.user_metadata?.name || ''); setEditingName(true); }}
+            >
+              <Text style={{ fontSize: 15 }}>✏️</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* STAT CARDS */}
@@ -374,6 +448,23 @@ const styles = StyleSheet.create({
   levelFill: { height: '100%', backgroundColor: colors.primary, borderRadius: 3 },
   levelText: { fontSize: 10, fontFamily: fonts.extraBold, color: colors.textMuted },
   editBtn: { width: 36, height: 36, borderRadius: 10, backgroundColor: '#F5F5F2', alignItems: 'center', justifyContent: 'center' },
+  nameInput: {
+    backgroundColor: '#F5F5F2', borderRadius: 10, borderWidth: 2, borderColor: colors.border,
+    paddingHorizontal: 12, paddingVertical: 8,
+    fontSize: 15, fontFamily: fonts.bold, color: colors.text,
+    ...(Platform.OS === 'web' ? { outline: 'none' } : {}),
+  },
+  saveNameBtn: {
+    backgroundColor: colors.dark, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 7,
+    alignItems: 'center', justifyContent: 'center', minWidth: 64,
+  },
+  saveNameText: { fontSize: 12, fontFamily: fonts.extraBold, color: '#fff' },
+  cancelNameBtn: {
+    borderRadius: 8, paddingHorizontal: 12, paddingVertical: 7,
+    borderWidth: 1.5, borderColor: colors.border,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  cancelNameText: { fontSize: 12, fontFamily: fonts.semiBold, color: colors.textMuted },
 
   statsGrid: { flexDirection: 'row', gap: 10, paddingHorizontal: spacing.xl, paddingRight: spacing.xl, marginBottom: spacing.lg },
   statCard: { width: 90, backgroundColor: colors.surface, borderRadius: radius.md, padding: 14, alignItems: 'center', borderWidth: 2, borderColor: '#F5F5F5', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1 },

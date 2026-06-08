@@ -1,66 +1,95 @@
 import { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity,
-  StyleSheet, ScrollView, KeyboardAvoidingView, Platform, Alert, ActivityIndicator,
+  StyleSheet, ScrollView, KeyboardAvoidingView, Platform, ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
+import { supabase } from '../lib/supabase';
 import { colors, fonts, radius, spacing } from '../theme';
 import AppIcon from '../components/AppIcon';
 import PrivacyPolicyScreen from './PrivacyPolicyScreen';
 
 export default function AuthScreen() {
   const { signIn, signUp } = useAuth();
-  const [mode, setMode]         = useState('login'); // login | signup
+  const [mode, setMode]         = useState('login'); // 'login' | 'signup' | 'forgot'
   const [name, setName]         = useState('');
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading]   = useState(false);
   const [showPolicy, setShowPolicy] = useState(false);
+  const [errorMsg, setErrorMsg]   = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
   if (showPolicy) {
     return <PrivacyPolicyScreen navigation={{ goBack: () => setShowPolicy(false) }} />;
   }
 
+  const switchMode = (next) => {
+    setErrorMsg('');
+    setSuccessMsg('');
+    setMode(next);
+  };
+
+  const traduzErro = (msg) => {
+    if (msg.includes('Invalid login'))       return 'Email ou senha incorretos.';
+    if (msg.includes('already registered'))  return 'Este email já está cadastrado.';
+    if (msg.includes('Email not confirmed')) return 'Confirme seu email antes de entrar.';
+    return msg;
+  };
+
   const handleSubmit = async () => {
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    if (mode === 'forgot') {
+      if (!email.trim()) { setErrorMsg('Digite seu email.'); return; }
+      setLoading(true);
+      const { error } = await supabase.auth.resetPasswordForEmail(email.trim());
+      setLoading(false);
+      if (error) {
+        setErrorMsg('Erro ao enviar email. Verifique o endereço e tente novamente.');
+      } else {
+        setSuccessMsg('Link enviado! Verifique seu email para redefinir sua senha. 📧');
+      }
+      return;
+    }
+
     if (!email || !password || (mode === 'signup' && !name)) {
-      Alert.alert('Atenção', 'Preencha todos os campos.');
+      setErrorMsg('Preencha todos os campos.');
       return;
     }
     if (password.length < 6) {
-      Alert.alert('Atenção', 'A senha precisa ter pelo menos 6 caracteres.');
+      setErrorMsg('A senha precisa ter pelo menos 6 caracteres.');
       return;
     }
 
     setLoading(true);
     if (mode === 'login') {
-      const { error } = await signIn(email, password);
-      if (error) Alert.alert('Erro ao entrar', traduzErro(error.message));
+      const { error } = await signIn(email.trim(), password);
+      if (error) setErrorMsg(traduzErro(error.message));
     } else {
-      const { error } = await signUp(email, password, name);
+      const { error } = await signUp(email.trim(), password, name.trim());
       if (error) {
-        Alert.alert('Erro ao cadastrar', traduzErro(error.message));
+        setErrorMsg(traduzErro(error.message));
       } else {
-        Alert.alert('Tudo certo! 🥂', 'Conta criada! Verifique seu email para confirmar e depois faça login.');
-        setMode('login');
+        switchMode('login');
+        setSuccessMsg('Conta criada! 🥂 Verifique seu email para confirmar e depois faça login.');
       }
     }
     setLoading(false);
   };
 
-  const traduzErro = (msg) => {
-    if (msg.includes('Invalid login')) return 'Email ou senha incorretos.';
-    if (msg.includes('already registered')) return 'Este email já está cadastrado.';
-    if (msg.includes('Email not confirmed')) return 'Confirme seu email antes de entrar.';
-    return msg;
+  const titles    = { login: 'Bem-vindo de volta!', signup: 'Crie sua conta',   forgot: 'Recuperar senha' };
+  const subtitles = {
+    login:  'Entre para acessar seus drinks e seu bar',
+    signup: 'Cadastre-se e comece a preparar drinks',
+    forgot: 'Enviaremos um link de redefinição para seu email',
   };
 
   return (
     <SafeAreaView style={styles.safe}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-      >
+      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
 
           {/* LOGO */}
@@ -71,14 +100,20 @@ export default function AuthScreen() {
           </View>
 
           {/* TÍTULO */}
-          <Text style={styles.title}>
-            {mode === 'login' ? 'Bem-vindo de volta!' : 'Crie sua conta'}
-          </Text>
-          <Text style={styles.subtitle}>
-            {mode === 'login'
-              ? 'Entre para acessar seus drinks e seu bar'
-              : 'Cadastre-se e comece a preparar drinks'}
-          </Text>
+          <Text style={styles.title}>{titles[mode]}</Text>
+          <Text style={styles.subtitle}>{subtitles[mode]}</Text>
+
+          {/* FEEDBACK MESSAGES */}
+          {successMsg ? (
+            <View style={styles.successBox}>
+              <Text style={styles.successText}>{successMsg}</Text>
+            </View>
+          ) : null}
+          {errorMsg ? (
+            <View style={styles.errorBox}>
+              <Text style={styles.errorText}>{errorMsg}</Text>
+            </View>
+          ) : null}
 
           {/* FORM */}
           <View style={styles.form}>
@@ -108,17 +143,26 @@ export default function AuthScreen() {
               />
             </View>
 
-            <View style={styles.inputWrapper}>
-              <Text style={styles.inputIcon}>🔒</Text>
-              <TextInput
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Senha"
-                placeholderTextColor={colors.textLight}
-                secureTextEntry
-                style={styles.input}
-              />
-            </View>
+            {mode !== 'forgot' && (
+              <View style={styles.inputWrapper}>
+                <Text style={styles.inputIcon}>🔒</Text>
+                <TextInput
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="Senha"
+                  placeholderTextColor={colors.textLight}
+                  secureTextEntry
+                  style={styles.input}
+                />
+              </View>
+            )}
+
+            {/* ESQUECI MINHA SENHA — só no modo login */}
+            {mode === 'login' && (
+              <TouchableOpacity onPress={() => switchMode('forgot')} style={{ alignSelf: 'flex-end', marginTop: -4 }}>
+                <Text style={styles.forgotLink}>Esqueci minha senha</Text>
+              </TouchableOpacity>
+            )}
 
             {/* BOTÃO PRINCIPAL */}
             <TouchableOpacity
@@ -131,23 +175,31 @@ export default function AuthScreen() {
                 <ActivityIndicator color="#FFD966" />
               ) : (
                 <Text style={styles.submitText}>
-                  {mode === 'login' ? 'Entrar' : 'Criar conta'}
+                  {mode === 'login' ? 'Entrar' : mode === 'signup' ? 'Criar conta' : 'Enviar link'}
                 </Text>
               )}
             </TouchableOpacity>
           </View>
 
           {/* ALTERNAR MODO */}
-          <View style={styles.switchRow}>
-            <Text style={styles.switchText}>
-              {mode === 'login' ? 'Ainda não tem conta?' : 'Já tem uma conta?'}
-            </Text>
-            <TouchableOpacity onPress={() => setMode(mode === 'login' ? 'signup' : 'login')}>
-              <Text style={styles.switchLink}>
-                {mode === 'login' ? 'Cadastre-se' : 'Entrar'}
+          {mode !== 'forgot' ? (
+            <View style={styles.switchRow}>
+              <Text style={styles.switchText}>
+                {mode === 'login' ? 'Ainda não tem conta?' : 'Já tem uma conta?'}
               </Text>
-            </TouchableOpacity>
-          </View>
+              <TouchableOpacity onPress={() => switchMode(mode === 'login' ? 'signup' : 'login')}>
+                <Text style={styles.switchLink}>
+                  {mode === 'login' ? 'Cadastre-se' : 'Entrar'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={[styles.switchRow, { justifyContent: 'center' }]}>
+              <TouchableOpacity onPress={() => switchMode('login')}>
+                <Text style={styles.switchLink}>‹ Voltar ao login</Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
           {/* POLÍTICA DE PRIVACIDADE */}
           <Text style={styles.privacyNote}>
@@ -173,7 +225,18 @@ const styles = StyleSheet.create({
   brandSub: { fontSize: 13, fontFamily: fonts.semiBold, color: colors.textMuted, marginTop: 4 },
 
   title: { fontSize: 26, fontFamily: fonts.displayBold, color: colors.text },
-  subtitle: { fontSize: 14, fontFamily: fonts.semiBold, color: colors.textMuted, marginTop: 6, marginBottom: spacing.xl },
+  subtitle: { fontSize: 14, fontFamily: fonts.semiBold, color: colors.textMuted, marginTop: 6, marginBottom: spacing.lg },
+
+  successBox: {
+    backgroundColor: '#F0FFF4', borderRadius: radius.md, borderWidth: 1.5, borderColor: '#6FCF97',
+    padding: spacing.md, marginBottom: spacing.md,
+  },
+  successText: { fontSize: 13, fontFamily: fonts.semiBold, color: '#1A6B3C', lineHeight: 19 },
+  errorBox: {
+    backgroundColor: '#FFF5F5', borderRadius: radius.md, borderWidth: 1.5, borderColor: '#FFAAAA',
+    padding: spacing.md, marginBottom: spacing.md,
+  },
+  errorText: { fontSize: 13, fontFamily: fonts.semiBold, color: '#C0392B' },
 
   form: { gap: 12 },
   inputWrapper: {
@@ -182,7 +245,12 @@ const styles = StyleSheet.create({
     borderWidth: 2, borderColor: colors.border, paddingHorizontal: 14,
   },
   inputIcon: { fontSize: 16, marginRight: 10 },
-  input: { flex: 1, paddingVertical: 15, fontSize: 15, fontFamily: fonts.bold, color: colors.text },
+  input: {
+    flex: 1, paddingVertical: 15, fontSize: 15, fontFamily: fonts.bold, color: colors.text,
+    ...(Platform.OS === 'web' ? { outline: 'none' } : {}),
+  },
+
+  forgotLink: { fontSize: 12, fontFamily: fonts.extraBold, color: colors.primary, paddingVertical: 4 },
 
   submitBtn: {
     backgroundColor: colors.dark, borderRadius: radius.md,
