@@ -25,6 +25,13 @@ const filters = [
 ];
 
 const bases = ['Todos', 'Rum', 'Gin', 'Vodka', 'Tequila', 'Cachaça', 'Whisky', 'Bourbon', 'Aperol', 'Campari'];
+const difficulties = ['Todas', 'Fácil', 'Médio', 'Difícil'];
+const timeOptions = [
+  { id: 'todos', label: 'Tempo' },
+  { id: '5',    label: '≤ 5 min'  },
+  { id: '10',   label: '≤ 10 min' },
+  { id: '15',   label: '≤ 15 min' },
+];
 
 const families = [
   { id: 'todas',          label: 'Todas',        emoji: '🍹' },
@@ -48,10 +55,14 @@ export default function CardapioScreen({ navigation }) {
   const [filter, setFilter]       = useState('todos');
   const [base, setBase]           = useState('Todos');
   const [family, setFamily]       = useState('todas');
+  const [difficulty, setDifficulty] = useState('Todas');
+  const [timeFilter, setTimeFilter] = useState('todos');
   const [search, setSearch]       = useState('');
   const [view, setView]           = useState('list');
-  const [showBases, setShowBases]     = useState(false);
-  const [showFamilies, setShowFamilies] = useState(false);
+  const [showBases, setShowBases]         = useState(false);
+  const [showFamilies, setShowFamilies]   = useState(false);
+  const [showDiffs, setShowDiffs]         = useState(false);
+  const [showTimes, setShowTimes]         = useState(false);
 
   const activeFamilyIds = families.find(f => f.id === family)?.ids;
   const normalizedBar = ingredients.map(normIng);
@@ -65,12 +76,15 @@ export default function CardapioScreen({ navigation }) {
           : d.tags.includes(filter);
       const matchBase   = base === 'Todos' || d.base === base;
       const matchFamily = !activeFamilyIds || activeFamilyIds.includes(d.id);
+      const matchDiff   = difficulty === 'Todas' || d.difficulty === difficulty;
+      const drinkMins   = parseInt(d.time) || 0;
+      const matchTime   = timeFilter === 'todos' || drinkMins <= parseInt(timeFilter);
       const q = search.toLowerCase();
       const matchSearch = q === '' ? true :
         d.name.toLowerCase().includes(q) ||
         d.base.toLowerCase().includes(q) ||
         d.ingredients.some(ing => ing.name.toLowerCase().includes(q));
-      return matchFilter && matchBase && matchFamily && matchSearch;
+      return matchFilter && matchBase && matchFamily && matchDiff && matchTime && matchSearch;
     })
     .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
 
@@ -124,7 +138,7 @@ export default function CardapioScreen({ navigation }) {
         {/* Destilado */}
         <View style={[styles.selectorChip, base !== 'Todos' && styles.selectorChipActive]}>
           <TouchableOpacity
-            onPress={() => { setShowBases(v => !v); setShowFamilies(false); }}
+            onPress={() => { setShowBases(v => !v); setShowFamilies(false); setShowDiffs(false); setShowTimes(false); }}
             style={styles.selectorBody}
             activeOpacity={0.8}
           >
@@ -147,7 +161,7 @@ export default function CardapioScreen({ navigation }) {
         {/* Família */}
         <View style={[styles.selectorChip, family !== 'todas' && styles.selectorChipActive]}>
           <TouchableOpacity
-            onPress={() => { setShowFamilies(v => !v); setShowBases(false); }}
+            onPress={() => { setShowFamilies(v => !v); setShowBases(false); setShowDiffs(false); setShowTimes(false); }}
             style={styles.selectorBody}
             activeOpacity={0.8}
           >
@@ -160,6 +174,55 @@ export default function CardapioScreen({ navigation }) {
           {family !== 'todas' && (
             <TouchableOpacity
               onPress={() => { setFamily('todas'); setShowFamilies(false); }}
+              style={styles.selectorClear}
+            >
+              <Text style={styles.selectorClearText}>×</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+
+      {/* SELECTORS — DIFICULDADE + TEMPO */}
+      <View style={styles.selectorRow}>
+        {/* Dificuldade */}
+        <View style={[styles.selectorChip, difficulty !== 'Todas' && styles.selectorChipActive]}>
+          <TouchableOpacity
+            onPress={() => { setShowDiffs(v => !v); setShowBases(false); setShowFamilies(false); setShowTimes(false); }}
+            style={styles.selectorBody}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.selectorEmoji}>🎯</Text>
+            <Text style={[styles.selectorLabel, difficulty !== 'Todas' && styles.selectorLabelActive]} numberOfLines={1}>
+              {difficulty === 'Todas' ? 'Dificuldade' : difficulty}
+            </Text>
+            {difficulty === 'Todas' && <Text style={styles.selectorArrow}>▾</Text>}
+          </TouchableOpacity>
+          {difficulty !== 'Todas' && (
+            <TouchableOpacity
+              onPress={() => { setDifficulty('Todas'); setShowDiffs(false); }}
+              style={styles.selectorClear}
+            >
+              <Text style={styles.selectorClearText}>×</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Tempo */}
+        <View style={[styles.selectorChip, timeFilter !== 'todos' && styles.selectorChipActive]}>
+          <TouchableOpacity
+            onPress={() => { setShowTimes(v => !v); setShowBases(false); setShowFamilies(false); setShowDiffs(false); }}
+            style={styles.selectorBody}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.selectorEmoji}>⏱</Text>
+            <Text style={[styles.selectorLabel, timeFilter !== 'todos' && styles.selectorLabelActive]} numberOfLines={1}>
+              {timeOptions.find(t => t.id === timeFilter)?.label ?? 'Tempo'}
+            </Text>
+            {timeFilter === 'todos' && <Text style={styles.selectorArrow}>▾</Text>}
+          </TouchableOpacity>
+          {timeFilter !== 'todos' && (
+            <TouchableOpacity
+              onPress={() => { setTimeFilter('todos'); setShowTimes(false); }}
               style={styles.selectorClear}
             >
               <Text style={styles.selectorClearText}>×</Text>
@@ -195,6 +258,36 @@ export default function CardapioScreen({ navigation }) {
               <Text style={[styles.baseLabel, family === f.id && { color: '#fff' }]}>
                 {f.emoji} {f.label}
               </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      {/* DROPDOWN — DIFICULDADE */}
+      {showDiffs && (
+        <View style={styles.basesGrid}>
+          {difficulties.map(d => (
+            <TouchableOpacity
+              key={d}
+              onPress={() => { setDifficulty(d); setShowDiffs(false); }}
+              style={[styles.baseChip, difficulty === d && styles.baseChipActive]}
+            >
+              <Text style={[styles.baseLabel, difficulty === d && { color: '#fff' }]}>{d}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      {/* DROPDOWN — TEMPO */}
+      {showTimes && (
+        <View style={styles.basesGrid}>
+          {timeOptions.map(t => (
+            <TouchableOpacity
+              key={t.id}
+              onPress={() => { setTimeFilter(t.id); setShowTimes(false); }}
+              style={[styles.baseChip, timeFilter === t.id && styles.baseChipActive]}
+            >
+              <Text style={[styles.baseLabel, timeFilter === t.id && { color: '#fff' }]}>{t.label}</Text>
             </TouchableOpacity>
           ))}
         </View>

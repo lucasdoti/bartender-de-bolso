@@ -15,6 +15,16 @@ import { DrinkCardList } from '../components/DrinkCard';
 import { glassMap } from '../components/glasses/Glasses';
 import { useDrinks } from '../hooks/useDrinks';
 import drinkPhotos from '../data/drinkPhotos';
+import { ingredientCategories } from '../data/ingredients';
+
+const _ingAliases = { limao_taiti: 'limao', limao_siciliano: 'limao' };
+const _normIng = id => _ingAliases[id] || id;
+
+const ingredientLabelMap = {};
+ingredientCategories.forEach(cat =>
+  cat.items.forEach(item => { ingredientLabelMap[item.id] = item.label; })
+);
+ingredientLabelMap['limao'] = 'Limão';
 
 const SCALES = [1, 2, 4, 6];
 
@@ -102,7 +112,7 @@ export default function DrinkDetailScreen({ navigation, route }) {
   const { drinkId } = route.params;
   const allDrinks = useDrinks();
   const drink = allDrinks.find(d => d.id === drinkId);
-  const { favorites, toggleFavorite, addToHistory, ratings, rateDrink } = useApp();
+  const { favorites, toggleFavorite, addToHistory, ratings, rateDrink, ingredients } = useApp();
   const { user } = useAuth();
   const [activeTab, setActiveTab]      = useState('receita');
   const [completedSteps, setCompleted] = useState([]);
@@ -153,10 +163,19 @@ export default function DrinkDetailScreen({ navigation, route }) {
 
   const shareDrink = async () => {
     try {
-      await Share.share({
-        message: `🍸 ${drink.name} — ${drink.subtitle}\n\nVeja a receita completa no Bartender de Bolso!`,
-        title: drink.name,
-      });
+      const ingList = drink.ingredients
+        .map(ing => `  • ${ing.amount ? ing.amount + ' ' : ''}${ing.name}`)
+        .join('\n');
+      const stepList = drink.steps
+        .map(s => `  ${s.num}. ${s.title}: ${s.desc}`)
+        .join('\n');
+      const msg =
+        `🍸 ${drink.name} — ${drink.subtitle}\n` +
+        `⏱ ${drink.time}  |  🎯 ${drink.difficulty}\n\n` +
+        `Ingredientes:\n${ingList}\n\n` +
+        `Preparo:\n${stepList}\n\n` +
+        `Receita do app Bartender de Bolso!`;
+      await Share.share({ message: msg, title: drink.name });
     } catch (_) {}
   };
 
@@ -294,6 +313,43 @@ export default function DrinkDetailScreen({ navigation, route }) {
                   </View>
                 </View>
               ))}
+
+              {/* O QUE ME FALTA */}
+              {user && (drink.needs || []).length > 0 && (() => {
+                const normBar = ingredients.map(_normIng);
+                const missing = (drink.needs || []).filter(n => !normBar.includes(_normIng(n)));
+                if (missing.length === 0) return (
+                  <View style={styles.allSetCard}>
+                    <Text style={{ fontSize: 22 }}>✅</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.allSetTitle}>Você tem tudo!</Text>
+                      <Text style={styles.allSetSub}>Pode preparar esse drink agora.</Text>
+                    </View>
+                  </View>
+                );
+                return (
+                  <View style={styles.missingCard}>
+                    <Text style={styles.missingSectionLabel}>🛒 O que me falta</Text>
+                    <Text style={styles.missingSub}>
+                      {missing.length} ingrediente{missing.length > 1 ? 's' : ''} que falta{missing.length > 1 ? 'm' : ''} no seu bar
+                    </Text>
+                    {missing.map(id => (
+                      <View key={id} style={styles.missingItem}>
+                        <View style={styles.missingDot} />
+                        <Text style={styles.missingLabel}>{ingredientLabelMap[id] || id}</Text>
+                      </View>
+                    ))}
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate('Tabs', { screen: 'MeuBar' })}
+                      style={[styles.goToBarBtn, { borderColor: drink.accent + '66' }]}
+                    >
+                      <Text style={[styles.goToBarText, { color: drink.accent }]}>
+                        Ir para Meu Bar →
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                );
+              })()}
             </View>
           )}
 
@@ -561,6 +617,19 @@ const styles = StyleSheet.create({
   starsRow: { flexDirection: 'row', gap: 8, marginTop: 6 },
   starIcon: { fontSize: 24, color: '#FFD966' },
   ratedText: { fontSize: 12, fontFamily: fonts.extraBold, color: '#FFD966' },
+
+  // O que me falta
+  allSetCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#F0FFF4', borderRadius: radius.lg, padding: spacing.md, borderWidth: 2, borderColor: '#86EFAC', marginTop: 4 },
+  allSetTitle: { fontSize: 14, fontFamily: fonts.extraBold, color: '#16A34A' },
+  allSetSub: { fontSize: 12, fontFamily: fonts.semiBold, color: '#4ADE80', marginTop: 2 },
+  missingCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.md, borderWidth: 2, borderColor: '#F5F5F5', marginTop: 4, gap: 6 },
+  missingSectionLabel: { fontSize: 12, fontFamily: fonts.extraBold, color: colors.textMuted, letterSpacing: 1, textTransform: 'uppercase' },
+  missingSub: { fontSize: 12, fontFamily: fonts.semiBold, color: colors.textLight, marginBottom: 4 },
+  missingItem: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 2 },
+  missingDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: colors.textLight },
+  missingLabel: { fontSize: 13, fontFamily: fonts.extraBold, color: colors.text },
+  goToBarBtn: { marginTop: 8, borderRadius: radius.md, borderWidth: 1.5, paddingVertical: 9, alignItems: 'center' },
+  goToBarText: { fontSize: 13, fontFamily: fonts.extraBold },
 
   relatedTitle: { fontSize: 13, fontFamily: fonts.extraBold, color: colors.textMuted, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 14 },
 
