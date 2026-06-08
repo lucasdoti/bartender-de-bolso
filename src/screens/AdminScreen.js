@@ -26,6 +26,15 @@ function parseIngredients(text) {
 function parseTags(text) {
   return text.split(',').map(t => t.trim()).filter(Boolean);
 }
+function parseSteps(text) {
+  return text.split('\n')
+    .map(l => l.trim()).filter(Boolean)
+    .map((l, i) => {
+      const colonIdx = l.indexOf(': ');
+      if (colonIdx > -1) return { num: i + 1, title: l.slice(0, colonIdx).trim(), desc: l.slice(colonIdx + 2).trim() };
+      return { num: i + 1, title: `Passo ${i + 1}`, desc: l };
+    });
+}
 
 const allIngredients = ingredientCategories.flatMap(c => c.items);
 function ingredientName(id) {
@@ -71,6 +80,7 @@ export default function AdminScreen({ navigation }) {
   const [formDesc, setFormDesc]         = useState('');
   const [formIngs, setFormIngs]         = useState('');
   const [formTags, setFormTags]         = useState('');
+  const [formSteps, setFormSteps]       = useState('');
   const [formPublished, setFormPublished] = useState(true);
   const [addingDrink, setAddingDrink]   = useState(false);
   const [addError, setAddError]         = useState('');
@@ -123,13 +133,14 @@ export default function AdminScreen({ navigation }) {
       time: formTime.trim() || '5 min',
       description: formDesc.trim(),
       ingredients: parseIngredients(formIngs),
+      steps: parseSteps(formSteps),
       tags: parseTags(formTags),
       published: formPublished,
     });
     setAddingDrink(false);
     if (err) { setAddError('Erro: ' + err.message); return; }
     setFormName(''); setFormBase(''); setFormColor('#1565C0'); setFormDiff('Médio');
-    setFormTime('5 min'); setFormDesc(''); setFormIngs(''); setFormTags('');
+    setFormTime('5 min'); setFormDesc(''); setFormIngs(''); setFormSteps(''); setFormTags('');
     setFormPublished(true);
     setAddOk(true);
     setTimeout(() => setAddOk(false), 3000);
@@ -411,6 +422,14 @@ export default function AdminScreen({ navigation }) {
                   placeholder={'Rum - 50ml\nSuco de limão - 30ml\nHortelã - 8 folhas'}
                   placeholderTextColor="#444" style={[styles.formInput, styles.formTextarea]}
                   multiline numberOfLines={5} textAlignVertical="top" maxLength={500} />
+              </View>
+
+              <View style={styles.formField}>
+                <Text style={styles.formLabel}>Modo de preparo (um passo por linha: "Título: Descrição")</Text>
+                <TextInput value={formSteps} onChangeText={setFormSteps}
+                  placeholder={'Monte: Adicione gelo ao copo.\nAdicione: 50ml de cachaça e suco de limão.\nFinalize: Mexa e sirva.'}
+                  placeholderTextColor="#444" style={[styles.formInput, styles.formTextarea]}
+                  multiline numberOfLines={5} textAlignVertical="top" maxLength={800} />
               </View>
 
               <View style={styles.formField}>
