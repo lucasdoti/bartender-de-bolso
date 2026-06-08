@@ -21,6 +21,7 @@ const configItems = [
   { icon: '🌍', label: 'Idioma',               sub: 'Português (BR)',        action: 'soon'    },
   { icon: '⭐', label: 'Avaliar o app',         sub: 'Deixe seu feedback',    action: 'review'  },
   { icon: '💬', label: 'Fale conosco',          sub: 'Sugestões e problemas', action: 'contact' },
+  { icon: '🍹', label: 'Sugerir um drink',      sub: 'Indique para adicionarmos', action: 'suggest' },
   { icon: '📋', label: 'Política de privacidade', sub: 'Seus dados e LGPD',  action: 'privacy' },
   { icon: '🚪', label: 'Sair',                 sub: '',                      action: 'logout', danger: true },
 ];
@@ -44,6 +45,7 @@ export default function PerfilScreen({ navigation }) {
     if (action === 'review')  return Alert.alert('Avaliar o app', 'Obrigado pelo interesse! A avaliação estará disponível em breve na loja.');
     if (action === 'contact') return Alert.alert('Fale conosco', 'Manda uma mensagem para:\ncontato@bartenderdebolso.com');
     if (action === 'privacy') return navigation.navigate('PrivacyPolicy');
+    if (action === 'suggest') return navigation.navigate('SuggestDrink');
     if (action === 'notifications') {
       if (Platform.OS === 'web') {
         return Alert.alert('Notificações', 'Lembretes disponíveis no app mobile (iOS e Android).');

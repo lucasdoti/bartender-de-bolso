@@ -37,6 +37,7 @@ export default function AdminScreen({ navigation }) {
   const [stats, setStats]               = useState(null);
   const [userList, setUserList]         = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
+  const [suggestions, setSuggestions]   = useState([]);
   const [loading, setLoading]           = useState(true);
   const [error, setError]               = useState(null);
   const [topTab, setTopTab]             = useState('makes');
@@ -44,15 +45,17 @@ export default function AdminScreen({ navigation }) {
 
   useEffect(() => {
     (async () => {
-      const [statsRes, usersRes, activityRes] = await Promise.all([
+      const [statsRes, usersRes, activityRes, suggestRes] = await Promise.all([
         supabase.rpc('get_admin_stats'),
         supabase.rpc('get_user_list'),
         supabase.rpc('get_recent_activity', { limit_n: 30 }),
+        supabase.from('drink_suggestions').select('*').order('created_at', { ascending: false }),
       ]);
       if (statsRes.error) { setError(statsRes.error.message); setLoading(false); return; }
       setStats(statsRes.data);
       setUserList(usersRes.data || []);
       setRecentActivity(activityRes.data || []);
+      setSuggestions(suggestRes.data || []);
       setLoading(false);
     })();
   }, []);
@@ -254,6 +257,36 @@ export default function AdminScreen({ navigation }) {
           </View>
         )}
 
+        {/* SUGESTÕES DE DRINKS */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>🍹 Sugestões de drinks</Text>
+          {suggestions.length === 0 ? (
+            <Text style={styles.emptyText}>Nenhuma sugestão ainda.</Text>
+          ) : suggestions.map(s => (
+            <View key={s.id} style={styles.suggestionCard}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.suggestionName}>{s.drink_name}</Text>
+                {s.base ? <Text style={styles.suggestionMeta}>Base: {s.base}</Text> : null}
+                {s.notes ? <Text style={styles.suggestionNotes}>{s.notes}</Text> : null}
+                <Text style={styles.suggestionDate}>{timeAgo(s.created_at)}</Text>
+              </View>
+              <View style={[styles.statusBadge,
+                s.status === 'approved' ? { backgroundColor: '#1A3A1A' } :
+                s.status === 'rejected' ? { backgroundColor: '#3A1A1A' } :
+                { backgroundColor: '#2A2A10' }
+              ]}>
+                <Text style={[styles.statusText,
+                  s.status === 'approved' ? { color: '#4CAF50' } :
+                  s.status === 'rejected' ? { color: '#FF5A5A' } :
+                  { color: '#FFD966' }
+                ]}>
+                  {s.status === 'approved' ? '✓ ok' : s.status === 'rejected' ? '✗ não' : '⏳'}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+
       </ScrollView>
     </SafeAreaView>
   );
@@ -316,4 +349,13 @@ const styles = StyleSheet.create({
   activityText: { flex: 1, fontSize: 13, fontFamily: fonts.semiBold, color: '#888' },
   activityUser: { fontFamily: fonts.extraBold, color: ACCENT },
   activityTime: { fontSize: 11, fontFamily: fonts.semiBold, color: '#555', flexShrink: 0 },
+
+  emptyText: { fontSize: 13, fontFamily: fonts.semiBold, color: '#555' },
+  suggestionCard: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#1E1E1E' },
+  suggestionName: { fontSize: 14, fontFamily: fonts.extraBold, color: '#fff' },
+  suggestionMeta: { fontSize: 11, fontFamily: fonts.semiBold, color: ACCENT, marginTop: 2 },
+  suggestionNotes: { fontSize: 12, fontFamily: fonts.semiBold, color: '#888', marginTop: 4, lineHeight: 17 },
+  suggestionDate: { fontSize: 10, fontFamily: fonts.semiBold, color: '#555', marginTop: 4 },
+  statusBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 8 },
+  statusText: { fontSize: 11, fontFamily: fonts.extraBold },
 });

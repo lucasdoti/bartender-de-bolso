@@ -11,7 +11,8 @@ import PerfilScreen      from '../screens/PerfilScreen';
 import BartenderIAScreen from '../screens/BartenderIAScreen';
 import AdminScreen       from '../screens/AdminScreen';
 import FestaScreen       from '../screens/FestaScreen';
-import PrivacyPolicyScreen from '../screens/PrivacyPolicyScreen';
+import PrivacyPolicyScreen  from '../screens/PrivacyPolicyScreen';
+import SuggestDrinkScreen  from '../screens/SuggestDrinkScreen';
 
 const Tab   = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -39,7 +40,8 @@ export default function AppNavigator() {
         <Stack.Screen name="BartenderIA" component={BartenderIAScreen} />
         <Stack.Screen name="Admin"       component={AdminScreen} />
         <Stack.Screen name="Festa"         component={FestaScreen} />
-        <Stack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+        <Stack.Screen name="PrivacyPolicy"  component={PrivacyPolicyScreen} />
+        <Stack.Screen name="SuggestDrink"  component={SuggestDrinkScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
