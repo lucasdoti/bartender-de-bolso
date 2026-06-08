@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
-  View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Platform,
+  View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Platform, Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
@@ -115,7 +115,15 @@ export default function AdminScreen({ navigation }) {
 
   const handleTogglePublished = async (id, current) => {
     setTogglingId(id);
-    await supabase.from('drinks_extra').update({ published: !current }).eq('id', id);
+    const { error: err } = await supabase
+      .from('drinks_extra')
+      .update({ published: !current })
+      .eq('id', id);
+    if (err) {
+      Alert.alert('Erro', 'Não foi possível alterar a visibilidade.\n' + err.message);
+      setTogglingId(null);
+      return;
+    }
     setAllExtraDrinks(prev => prev.map(d => d.id === id ? { ...d, published: !current } : d));
     refreshExtraDrinks();
     setTogglingId(null);
