@@ -31,7 +31,10 @@
       "output": "single"
     },
     "updates": {
-      "url": "https://u.expo.dev/9ce71bf4-c215-47f1-9efd-f262fdb03dfb"
+      "url": "https://u.expo.dev/9ce71bf4-c215-47f1-9efd-f262fdb03dfb",
+      "requestHeaders": {
+        "expo-channel-name": "production"
+      }
     },
     "plugins": [
       "expo-font",
