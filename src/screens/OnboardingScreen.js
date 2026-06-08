@@ -27,6 +27,13 @@ const slides = [
     accent: '#FFD966',
   },
   {
+    emoji: '🎲',
+    title: 'Surpreenda-se\ncada dia',
+    sub: 'Use o "Surpreenda-me" para descobrir o drink perfeito com o que você tem em casa.',
+    gradient: ['#1A0D0D', '#3A1515'],
+    accent: '#E85D42',
+  },
+  {
     emoji: '💬',
     title: 'Fale com o\nBartender',
     sub: 'Descreva o que você quer — forte, refrescante, parecido com Negroni — e receba a sugestão certa.',
@@ -45,6 +52,11 @@ export default function OnboardingScreen({ onDone }) {
     setCurrent(index);
   };
 
+  const onScroll = (e) => {
+    const idx = Math.round(e.nativeEvent.contentOffset.x / width);
+    if (idx !== current) setCurrent(idx);
+  };
+
   const finish = async () => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     await AsyncStorage.setItem('onboarding_done', 'true');
@@ -60,7 +72,7 @@ export default function OnboardingScreen({ onDone }) {
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        scrollEnabled={false}
+        onMomentumScrollEnd={onScroll}
         style={{ flex: 1 }}
       >
         {slides.map((slide, i) => (

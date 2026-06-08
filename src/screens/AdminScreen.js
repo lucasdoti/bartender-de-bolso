@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator,
+  View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, ActivityIndicator, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
@@ -9,6 +9,22 @@ import drinks from '../data/drinks';
 import ingredientCategories from '../data/ingredients';
 
 const ACCENT = '#9B6FD4';
+const BASES_ADMIN   = ['Rum', 'Gin', 'Vodka', 'Tequila', 'Cachaça', 'Whisky', 'Bourbon', 'Aperol', 'Campari', 'Sem álcool', 'Outro'];
+const DIFFS         = ['Fácil', 'Médio', 'Difícil', 'Expert'];
+const DRINK_COLORS  = ['#C84B31','#E64A19','#F9A825','#2E7D32','#1565C0','#00838F','#7B1FA2','#9B6FD4','#BF360C','#37474F','#1A1A1A'];
+
+function parseIngredients(text) {
+  return text.split('\n')
+    .map(l => l.trim()).filter(Boolean)
+    .map(l => {
+      const idx = l.indexOf(' - ');
+      if (idx > -1) return { name: l.slice(0, idx).trim(), amount: l.slice(idx + 3).trim() };
+      return { name: l, amount: '' };
+    });
+}
+function parseTags(text) {
+  return text.split(',').map(t => t.trim()).filter(Boolean);
+}
 
 const allIngredients = ingredientCategories.flatMap(c => c.items);
 function ingredientName(id) {
@@ -43,6 +59,21 @@ export default function AdminScreen({ navigation }) {
   const [topTab, setTopTab]             = useState('makes');
   const [showUsers, setShowUsers]       = useState(false);
 
+  // ── ADD DRINK FORM ──
+  const [showAddDrink, setShowAddDrink] = useState(false);
+  const [formName, setFormName]         = useState('');
+  const [formBase, setFormBase]         = useState('');
+  const [formColor, setFormColor]       = useState('#1565C0');
+  const [formDiff, setFormDiff]         = useState('Médio');
+  const [formTime, setFormTime]         = useState('5 min');
+  const [formDesc, setFormDesc]         = useState('');
+  const [formIngs, setFormIngs]         = useState('');
+  const [formTags, setFormTags]         = useState('');
+  const [formPublished, setFormPublished] = useState(true);
+  const [addingDrink, setAddingDrink]   = useState(false);
+  const [addError, setAddError]         = useState('');
+  const [addOk, setAddOk]              = useState(false);
+
   useEffect(() => {
     (async () => {
       const [statsRes, usersRes, activityRes, suggestRes] = await Promise.all([
@@ -59,6 +90,31 @@ export default function AdminScreen({ navigation }) {
       setLoading(false);
     })();
   }, []);
+
+  const handleAddDrink = async () => {
+    if (!formName.trim()) { setAddError('Nome obrigatório.'); return; }
+    setAddError('');
+    setAddingDrink(true);
+    const { error: err } = await supabase.from('drinks_extra').insert({
+      name: formName.trim(),
+      base: formBase || null,
+      color: formColor,
+      difficulty: formDiff,
+      time: formTime.trim() || '5 min',
+      description: formDesc.trim(),
+      ingredients: parseIngredients(formIngs),
+      tags: parseTags(formTags),
+      published: formPublished,
+    });
+    setAddingDrink(false);
+    if (err) { setAddError('Erro: ' + err.message); return; }
+    setFormName(''); setFormBase(''); setFormColor('#1565C0'); setFormDiff('Médio');
+    setFormTime('5 min'); setFormDesc(''); setFormIngs(''); setFormTags('');
+    setFormPublished(true);
+    setAddOk(true);
+    setTimeout(() => setAddOk(false), 3000);
+    setShowAddDrink(false);
+  };
 
   if (loading) {
     return (
@@ -257,6 +313,109 @@ export default function AdminScreen({ navigation }) {
           </View>
         )}
 
+        {/* ADICIONAR DRINK */}
+        <View style={styles.section}>
+          <TouchableOpacity
+            onPress={() => { setShowAddDrink(v => !v); setAddError(''); setAddOk(false); }}
+            style={styles.addDrinkToggle}
+          >
+            <Text style={styles.sectionTitle}>➕ Adicionar drink ao catálogo</Text>
+            <Text style={{ color: ACCENT, fontSize: 16 }}>{showAddDrink ? '▲' : '▼'}</Text>
+          </TouchableOpacity>
+
+          {addOk && (
+            <View style={styles.addSuccessBox}>
+              <Text style={styles.addSuccessText}>✓ Drink adicionado com sucesso!</Text>
+            </View>
+          )}
+
+          {showAddDrink && (
+            <View style={{ gap: 14, marginTop: 4 }}>
+
+              <View style={styles.formField}>
+                <Text style={styles.formLabel}>Nome *</Text>
+                <TextInput value={formName} onChangeText={setFormName} placeholder="Ex: Mojito, Negroni..." placeholderTextColor="#444" style={styles.formInput} maxLength={80} />
+              </View>
+
+              <View style={styles.formField}>
+                <Text style={styles.formLabel}>Base</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <View style={{ flexDirection: 'row', gap: 6 }}>
+                    {BASES_ADMIN.map(b => (
+                      <TouchableOpacity key={b} onPress={() => setFormBase(formBase === b ? '' : b)}
+                        style={[styles.chip, formBase === b && styles.chipActive]}>
+                        <Text style={[styles.chipText, formBase === b && { color: '#fff' }]}>{b}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </ScrollView>
+              </View>
+
+              <View style={styles.formField}>
+                <Text style={styles.formLabel}>Cor do card</Text>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 }}>
+                  {DRINK_COLORS.map(c => (
+                    <TouchableOpacity key={c} onPress={() => setFormColor(c)}
+                      style={[styles.colorDot, { backgroundColor: c }, formColor === c && styles.colorDotActive]} />
+                  ))}
+                </View>
+              </View>
+
+              <View style={styles.formField}>
+                <Text style={styles.formLabel}>Dificuldade</Text>
+                <View style={{ flexDirection: 'row', gap: 6, marginTop: 4 }}>
+                  {DIFFS.map(d => (
+                    <TouchableOpacity key={d} onPress={() => setFormDiff(d)}
+                      style={[styles.chip, formDiff === d && styles.chipActive]}>
+                      <Text style={[styles.chipText, formDiff === d && { color: '#fff' }]}>{d}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              <View style={styles.formField}>
+                <Text style={styles.formLabel}>Tempo (ex: 5 min)</Text>
+                <TextInput value={formTime} onChangeText={setFormTime} placeholder="5 min" placeholderTextColor="#444" style={styles.formInput} maxLength={20} />
+              </View>
+
+              <View style={styles.formField}>
+                <Text style={styles.formLabel}>Descrição</Text>
+                <TextInput value={formDesc} onChangeText={setFormDesc} placeholder="Breve descrição do drink..." placeholderTextColor="#444" style={[styles.formInput, styles.formTextarea]} multiline numberOfLines={3} textAlignVertical="top" maxLength={300} />
+              </View>
+
+              <View style={styles.formField}>
+                <Text style={styles.formLabel}>Ingredientes (um por linha: "Nome - Quantidade")</Text>
+                <TextInput value={formIngs} onChangeText={setFormIngs}
+                  placeholder={'Rum - 50ml\nSuco de limão - 30ml\nHortelã - 8 folhas'}
+                  placeholderTextColor="#444" style={[styles.formInput, styles.formTextarea]}
+                  multiline numberOfLines={5} textAlignVertical="top" maxLength={500} />
+              </View>
+
+              <View style={styles.formField}>
+                <Text style={styles.formLabel}>Tags (separadas por vírgula)</Text>
+                <TextInput value={formTags} onChangeText={setFormTags} placeholder="refrescante, cítrico, clássico" placeholderTextColor="#444" style={styles.formInput} maxLength={200} />
+              </View>
+
+              <TouchableOpacity
+                onPress={() => setFormPublished(v => !v)}
+                style={styles.toggleRow}
+              >
+                <View style={[styles.toggleDot, { backgroundColor: formPublished ? '#4CAF50' : '#555' }]} />
+                <Text style={styles.toggleLabel}>{formPublished ? 'Publicar imediatamente' : 'Salvar como rascunho'}</Text>
+              </TouchableOpacity>
+
+              {addError ? <Text style={styles.addError}>{addError}</Text> : null}
+
+              <TouchableOpacity onPress={handleAddDrink} disabled={addingDrink} style={styles.addDrinkBtn}>
+                {addingDrink
+                  ? <ActivityIndicator color="#fff" />
+                  : <Text style={styles.addDrinkBtnText}>Salvar drink</Text>
+                }
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+
         {/* SUGESTÕES DE DRINKS */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>🍹 Sugestões de drinks</Text>
@@ -349,6 +508,33 @@ const styles = StyleSheet.create({
   activityText: { flex: 1, fontSize: 13, fontFamily: fonts.semiBold, color: '#888' },
   activityUser: { fontFamily: fonts.extraBold, color: ACCENT },
   activityTime: { fontSize: 11, fontFamily: fonts.semiBold, color: '#555', flexShrink: 0 },
+
+  // Add drink form
+  addDrinkToggle: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  addSuccessBox: { backgroundColor: '#1A3A1A', borderRadius: 8, padding: 10, marginBottom: 8 },
+  addSuccessText: { fontSize: 13, fontFamily: fonts.semiBold, color: '#4CAF50' },
+  formField: { gap: 6 },
+  formLabel: { fontSize: 11, fontFamily: fonts.extraBold, color: '#888', letterSpacing: 0.8, textTransform: 'uppercase' },
+  formInput: {
+    backgroundColor: '#111', borderRadius: 10, borderWidth: 1.5, borderColor: '#2A2A2A',
+    paddingHorizontal: 14, paddingVertical: 11,
+    fontSize: 14, fontFamily: fonts.semiBold, color: '#ddd',
+    ...(Platform.OS === 'web' ? { outline: 'none' } : {}),
+  },
+  formTextarea: { height: 100, paddingTop: 10 },
+  chip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 50, borderWidth: 1.5, borderColor: '#333', backgroundColor: '#111' },
+  chipActive: { backgroundColor: ACCENT, borderColor: ACCENT },
+  chipText: { fontSize: 12, fontFamily: fonts.extraBold, color: '#888' },
+  colorDot: { width: 28, height: 28, borderRadius: 14 },
+  colorDotActive: { borderWidth: 3, borderColor: '#fff' },
+  toggleRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 4 },
+  toggleDot: { width: 20, height: 20, borderRadius: 10 },
+  toggleLabel: { fontSize: 13, fontFamily: fonts.semiBold, color: '#ccc' },
+  addError: { fontSize: 13, fontFamily: fonts.semiBold, color: '#FF5A5A' },
+  addDrinkBtn: {
+    backgroundColor: ACCENT, borderRadius: radius.md, paddingVertical: 14, alignItems: 'center',
+  },
+  addDrinkBtnText: { fontSize: 15, fontFamily: fonts.extraBold, color: '#fff' },
 
   emptyText: { fontSize: 13, fontFamily: fonts.semiBold, color: '#555' },
   suggestionCard: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#1E1E1E' },
