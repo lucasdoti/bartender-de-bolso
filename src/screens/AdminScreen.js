@@ -4,6 +4,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
+import { useApp } from '../context/AppContext';
 import { colors, fonts, radius, spacing } from '../theme';
 import drinks from '../data/drinks';
 import ingredientCategories from '../data/ingredients';
@@ -24,6 +25,15 @@ function parseIngredients(text) {
 }
 function parseTags(text) {
   return text.split(',').map(t => t.trim()).filter(Boolean);
+}
+function parseSteps(text) {
+  return text.split('\n')
+    .map(l => l.trim()).filter(Boolean)
+    .map((l, i) => {
+      const colonIdx = l.indexOf(': ');
+      if (colonIdx > -1) return { num: i + 1, title: l.slice(0, colonIdx).trim(), desc: l.slice(colonIdx + 2).trim() };
+      return { num: i + 1, title: `Passo ${i + 1}`, desc: l };
+    });
 }
 
 const allIngredients = ingredientCategories.flatMap(c => c.items);
@@ -50,6 +60,7 @@ function userHandle(email = '') {
 }
 
 export default function AdminScreen({ navigation }) {
+  const { refreshExtraDrinks } = useApp();
   const [stats, setStats]               = useState(null);
   const [userList, setUserList]         = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
@@ -69,10 +80,20 @@ export default function AdminScreen({ navigation }) {
   const [formDesc, setFormDesc]         = useState('');
   const [formIngs, setFormIngs]         = useState('');
   const [formTags, setFormTags]         = useState('');
+  const [formSteps, setFormSteps]       = useState('');
   const [formPublished, setFormPublished] = useState(true);
   const [addingDrink, setAddingDrink]   = useState(false);
   const [addError, setAddError]         = useState('');
   const [addOk, setAddOk]              = useState(false);
+
+  // ── GERENCIAR DRINKS EXTRAS ──
+  const [allExtraDrinks, setAllExtraDrinks] = useState([]);
+  const [togglingId, setTogglingId]         = useState(null);
+
+  const loadExtraDrinks = async () => {
+    const { data } = await supabase.from('drinks_extra').select('*').order('id', { ascending: false });
+    setAllExtraDrinks(data || []);
+  };
 
   useEffect(() => {
     (async () => {
@@ -89,7 +110,16 @@ export default function AdminScreen({ navigation }) {
       setSuggestions(suggestRes.data || []);
       setLoading(false);
     })();
+    loadExtraDrinks();
   }, []);
+
+  const handleTogglePublished = async (id, current) => {
+    setTogglingId(id);
+    await supabase.from('drinks_extra').update({ published: !current }).eq('id', id);
+    setAllExtraDrinks(prev => prev.map(d => d.id === id ? { ...d, published: !current } : d));
+    refreshExtraDrinks();
+    setTogglingId(null);
+  };
 
   const handleAddDrink = async () => {
     if (!formName.trim()) { setAddError('Nome obrigatório.'); return; }
@@ -103,17 +133,20 @@ export default function AdminScreen({ navigation }) {
       time: formTime.trim() || '5 min',
       description: formDesc.trim(),
       ingredients: parseIngredients(formIngs),
+      steps: parseSteps(formSteps),
       tags: parseTags(formTags),
       published: formPublished,
     });
     setAddingDrink(false);
     if (err) { setAddError('Erro: ' + err.message); return; }
     setFormName(''); setFormBase(''); setFormColor('#1565C0'); setFormDiff('Médio');
-    setFormTime('5 min'); setFormDesc(''); setFormIngs(''); setFormTags('');
+    setFormTime('5 min'); setFormDesc(''); setFormIngs(''); setFormSteps(''); setFormTags('');
     setFormPublished(true);
     setAddOk(true);
     setTimeout(() => setAddOk(false), 3000);
     setShowAddDrink(false);
+    loadExtraDrinks();
+    refreshExtraDrinks();
   };
 
   if (loading) {
@@ -392,6 +425,14 @@ export default function AdminScreen({ navigation }) {
               </View>
 
               <View style={styles.formField}>
+                <Text style={styles.formLabel}>Modo de preparo (um passo por linha: "Título: Descrição")</Text>
+                <TextInput value={formSteps} onChangeText={setFormSteps}
+                  placeholder={'Monte: Adicione gelo ao copo.\nAdicione: 50ml de cachaça e suco de limão.\nFinalize: Mexa e sirva.'}
+                  placeholderTextColor="#444" style={[styles.formInput, styles.formTextarea]}
+                  multiline numberOfLines={5} textAlignVertical="top" maxLength={800} />
+              </View>
+
+              <View style={styles.formField}>
                 <Text style={styles.formLabel}>Tags (separadas por vírgula)</Text>
                 <TextInput value={formTags} onChangeText={setFormTags} placeholder="refrescante, cítrico, clássico" placeholderTextColor="#444" style={styles.formInput} maxLength={200} />
               </View>
@@ -414,6 +455,34 @@ export default function AdminScreen({ navigation }) {
               </TouchableOpacity>
             </View>
           )}
+        </View>
+
+        {/* GERENCIAR DRINKS EXTRAS */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>📋 Drinks do catálogo ({allExtraDrinks.length})</Text>
+          {allExtraDrinks.length === 0 ? (
+            <Text style={styles.emptyText}>Nenhum drink adicionado ainda.</Text>
+          ) : allExtraDrinks.map(d => (
+            <View key={d.id} style={styles.manageDrinkRow}>
+              <View style={[styles.manageDrinkDot, { backgroundColor: d.color || '#555' }]} />
+              <View style={{ flex: 1 }}>
+                <Text style={styles.manageDrinkName}>{d.name}</Text>
+                {d.base ? <Text style={styles.manageDrinkBase}>{d.base}</Text> : null}
+              </View>
+              <TouchableOpacity
+                onPress={() => handleTogglePublished(d.id, d.published)}
+                disabled={togglingId === d.id}
+                style={[styles.visToggle, { backgroundColor: d.published ? '#1A3A1A' : '#2A1A1A' }]}
+              >
+                {togglingId === d.id
+                  ? <ActivityIndicator size="small" color="#fff" />
+                  : <Text style={[styles.visToggleText, { color: d.published ? '#4CAF50' : '#FF5A5A' }]}>
+                      {d.published ? '● Visível' : '○ Oculto'}
+                    </Text>
+                }
+              </TouchableOpacity>
+            </View>
+          ))}
         </View>
 
         {/* SUGESTÕES DE DRINKS */}
@@ -535,6 +604,14 @@ const styles = StyleSheet.create({
     backgroundColor: ACCENT, borderRadius: radius.md, paddingVertical: 14, alignItems: 'center',
   },
   addDrinkBtnText: { fontSize: 15, fontFamily: fonts.extraBold, color: '#fff' },
+
+  // Gerenciar drinks
+  manageDrinkRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: '#1E1E1E' },
+  manageDrinkDot: { width: 12, height: 12, borderRadius: 6, flexShrink: 0 },
+  manageDrinkName: { fontSize: 13, fontFamily: fonts.extraBold, color: '#ddd' },
+  manageDrinkBase: { fontSize: 11, fontFamily: fonts.semiBold, color: '#666', marginTop: 2 },
+  visToggle: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 8, minWidth: 72, alignItems: 'center' },
+  visToggleText: { fontSize: 11, fontFamily: fonts.extraBold },
 
   emptyText: { fontSize: 13, fontFamily: fonts.semiBold, color: '#555' },
   suggestionCard: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#1E1E1E' },
