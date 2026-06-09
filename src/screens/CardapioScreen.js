@@ -14,6 +14,7 @@ import { useDrinks } from '../hooks/useDrinks';
 const filters = [
   { id: 'todos',    label: 'Todos',       emoji: '🍸' },
   { id: 'tenho',   label: 'Posso fazer',  emoji: '✅' },
+  { id: 'semAlcool',label: 'Sem álcool',  emoji: '🍹' },
   { id: 'popular',  label: 'Populares',  emoji: '🔥' },
   { id: 'calor',    label: 'Pro calor',  emoji: '☀️' },
   { id: 'frio',     label: 'Pro frio',   emoji: '🍂' },
