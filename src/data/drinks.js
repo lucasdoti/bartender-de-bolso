@@ -2141,6 +2141,40 @@ export const drinks = [
     needs: ['agua_gas', 'gelo'],
     method: 'built',
   },
+  {
+    id: 65,
+    name: 'Macunaíma',
+    subtitle: 'O Herói Sem Nenhum Caráter',
+    base: 'Cachaça',
+    category: 'Contemporâneo',
+    origin: 'Brasil 🇧🇷',
+    year: '2010s',
+    time: '4 min',
+    difficulty: 'Médio',
+    abv: '24%',
+    calories: 165,
+    color: '#FFF3E0',
+    accent: '#BF360C',
+    tags: ['brasil', 'solo', 'date'],
+    ingredients: [
+      { amount: '45ml', name: 'Cachaça branca',  tip: 'Uma boa cachaça artesanal faz diferença aqui' },
+      { amount: '25ml', name: 'Xarope de açúcar', tip: 'Xarope simples 1:1' },
+      { amount: '20ml', name: 'Suco de limão taiti', tip: 'Fresco, espremido na hora' },
+      { amount: '7ml',  name: 'Fernet Branca',   tip: 'Pouco, mas define o drink — não substitua' },
+      { amount: 'Q.B.', name: 'Gelo',            tip: 'Bastante, para bater na coqueteleira' },
+    ],
+    steps: [
+      { num: 1, title: 'Coqueteleira', desc: 'Adicione a cachaça, o xarope, o suco de limão e o Fernet Branca à coqueteleira com bastante gelo.' },
+      { num: 2, title: 'Bata',         desc: 'Bata vigorosamente por 12-15 segundos até a coqueteleira gelar bem.' },
+      { num: 3, title: 'Coe duplo',    desc: 'Coe duplamente — passador e peneira fina — diretamente num copo barriquinha.' },
+      { num: 4, title: 'Sirva',        desc: 'Sem gelo no copo, sem canudo, sem decoração. O drink fala por si.' },
+    ],
+    history: 'Batizado em homenagem ao romance modernista de Mário de Andrade (1928), Macunaíma é um drink brasileiro de alma. O personagem — o "herói sem nenhum caráter" — é preguiçoso, malandro, sensual e profundamente contraditório. A receita reflete isso: a cachaça nacional como base, o limão tropical para frescor, e o Fernet como o amargo que complica tudo.',
+    famous: 'Mário de Andrade',
+    funFact: 'Os 7ml de Fernet Branca são a alma secreta do drink. São poucos, mas transformam um sour de cachaça simples em algo irreconhecível — exatamente como o personagem que dá nome à obra.',
+    needs: ['cachaca', 'xarope_simples', 'limao_taiti', 'gelo'],
+    method: 'shaken',
+  },
 ];
 
 // Ordem de popularidade baseada no ranking IBA (Unforgettables → Contemporary Classics → regionais)
@@ -2199,6 +2233,7 @@ export const ibaOrder = [
   24, // Clericot
   23, // Piña Verde
   53, // Fitzgerald
+  65, // Macunaíma
 ];
 
 export default drinks;
