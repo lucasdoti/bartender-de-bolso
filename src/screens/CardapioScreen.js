@@ -26,13 +26,6 @@ const filters = [
 ];
 
 const bases = ['Todos', 'Rum', 'Gin', 'Vodka', 'Tequila', 'Cachaça', 'Whisky', 'Bourbon', 'Aperol', 'Campari'];
-const difficulties = ['Todas', 'Fácil', 'Médio', 'Difícil'];
-const timeOptions = [
-  { id: 'todos', label: 'Tempo' },
-  { id: '5',    label: '≤ 5 min'  },
-  { id: '10',   label: '≤ 10 min' },
-  { id: '15',   label: '≤ 15 min' },
-];
 
 const families = [
   { id: 'todas',          label: 'Todas',        emoji: '🍹' },
@@ -53,17 +46,13 @@ function normIng(id) { return INGREDIENT_ALIASES[id] || id; }
 export default function CardapioScreen({ navigation }) {
   const { favorites, toggleFavorite, ingredients, ratings } = useApp();
   const drinks = useDrinks();
-  const [filter, setFilter]       = useState('todos');
-  const [base, setBase]           = useState('Todos');
-  const [family, setFamily]       = useState('todas');
-  const [difficulty, setDifficulty] = useState('Todas');
-  const [timeFilter, setTimeFilter] = useState('todos');
-  const [search, setSearch]       = useState('');
-  const [view, setView]           = useState('list');
-  const [showBases, setShowBases]         = useState(false);
-  const [showFamilies, setShowFamilies]   = useState(false);
-  const [showDiffs, setShowDiffs]         = useState(false);
-  const [showTimes, setShowTimes]         = useState(false);
+  const [filter, setFilter]   = useState('todos');
+  const [base, setBase]       = useState('Todos');
+  const [family, setFamily]   = useState('todas');
+  const [search, setSearch]   = useState('');
+  const [view, setView]       = useState('list');
+  const [showBases, setShowBases]       = useState(false);
+  const [showFamilies, setShowFamilies] = useState(false);
 
   const activeFamilyIds = families.find(f => f.id === family)?.ids;
   const normalizedBar = ingredients.map(normIng);
@@ -77,17 +66,17 @@ export default function CardapioScreen({ navigation }) {
           : d.tags.includes(filter);
       const matchBase   = base === 'Todos' || d.base === base;
       const matchFamily = !activeFamilyIds || activeFamilyIds.includes(d.id);
-      const matchDiff   = difficulty === 'Todas' || d.difficulty === difficulty;
-      const drinkMins   = parseInt(d.time) || 0;
-      const matchTime   = timeFilter === 'todos' || drinkMins <= parseInt(timeFilter);
       const q = search.toLowerCase();
       const matchSearch = q === '' ? true :
         d.name.toLowerCase().includes(q) ||
         d.base.toLowerCase().includes(q) ||
         d.ingredients.some(ing => ing.name.toLowerCase().includes(q));
-      return matchFilter && matchBase && matchFamily && matchDiff && matchTime && matchSearch;
+      return matchFilter && matchBase && matchFamily && matchSearch;
     })
     .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+
+  const baseActive   = base !== 'Todos';
+  const familyActive = family !== 'todas';
 
   const ListHeader = (
     <View>
@@ -134,173 +123,50 @@ export default function CardapioScreen({ navigation }) {
         </View>
       </View>
 
-      {/* SELECTORS — DESTILADO + FAMÍLIA */}
-      <View style={styles.selectorRow}>
-        {/* Destilado */}
-        <View style={[styles.selectorChip, base !== 'Todos' && styles.selectorChipActive]}>
-          <TouchableOpacity
-            onPress={() => { setShowBases(v => !v); setShowFamilies(false); setShowDiffs(false); setShowTimes(false); }}
-            style={styles.selectorBody}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.selectorEmoji}>🥃</Text>
-            <Text style={[styles.selectorLabel, base !== 'Todos' && styles.selectorLabelActive]} numberOfLines={1}>
-              {base === 'Todos' ? 'Destilado' : base}
-            </Text>
-            {base === 'Todos' && <Text style={styles.selectorArrow}>▾</Text>}
-          </TouchableOpacity>
-          {base !== 'Todos' && (
-            <TouchableOpacity
-              onPress={() => { setBase('Todos'); setShowBases(false); }}
-              style={styles.selectorClear}
-            >
-              <Text style={styles.selectorClearText}>×</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {/* Família */}
-        <View style={[styles.selectorChip, family !== 'todas' && styles.selectorChipActive]}>
-          <TouchableOpacity
-            onPress={() => { setShowFamilies(v => !v); setShowBases(false); setShowDiffs(false); setShowTimes(false); }}
-            style={styles.selectorBody}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.selectorEmoji}>🍹</Text>
-            <Text style={[styles.selectorLabel, family !== 'todas' && styles.selectorLabelActive]} numberOfLines={1}>
-              {family === 'todas' ? 'Família' : families.find(f => f.id === family)?.label ?? 'Família'}
-            </Text>
-            {family === 'todas' && <Text style={styles.selectorArrow}>▾</Text>}
-          </TouchableOpacity>
-          {family !== 'todas' && (
-            <TouchableOpacity
-              onPress={() => { setFamily('todas'); setShowFamilies(false); }}
-              style={styles.selectorClear}
-            >
-              <Text style={styles.selectorClearText}>×</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
-
-      {/* SELECTORS — DIFICULDADE + TEMPO */}
-      <View style={styles.selectorRow}>
-        {/* Dificuldade */}
-        <View style={[styles.selectorChip, difficulty !== 'Todas' && styles.selectorChipActive]}>
-          <TouchableOpacity
-            onPress={() => { setShowDiffs(v => !v); setShowBases(false); setShowFamilies(false); setShowTimes(false); }}
-            style={styles.selectorBody}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.selectorEmoji}>🎯</Text>
-            <Text style={[styles.selectorLabel, difficulty !== 'Todas' && styles.selectorLabelActive]} numberOfLines={1}>
-              {difficulty === 'Todas' ? 'Dificuldade' : difficulty}
-            </Text>
-            {difficulty === 'Todas' && <Text style={styles.selectorArrow}>▾</Text>}
-          </TouchableOpacity>
-          {difficulty !== 'Todas' && (
-            <TouchableOpacity
-              onPress={() => { setDifficulty('Todas'); setShowDiffs(false); }}
-              style={styles.selectorClear}
-            >
-              <Text style={styles.selectorClearText}>×</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-
-        {/* Tempo */}
-        <View style={[styles.selectorChip, timeFilter !== 'todos' && styles.selectorChipActive]}>
-          <TouchableOpacity
-            onPress={() => { setShowTimes(v => !v); setShowBases(false); setShowFamilies(false); setShowDiffs(false); }}
-            style={styles.selectorBody}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.selectorEmoji}>⏱</Text>
-            <Text style={[styles.selectorLabel, timeFilter !== 'todos' && styles.selectorLabelActive]} numberOfLines={1}>
-              {timeOptions.find(t => t.id === timeFilter)?.label ?? 'Tempo'}
-            </Text>
-            {timeFilter === 'todos' && <Text style={styles.selectorArrow}>▾</Text>}
-          </TouchableOpacity>
-          {timeFilter !== 'todos' && (
-            <TouchableOpacity
-              onPress={() => { setTimeFilter('todos'); setShowTimes(false); }}
-              style={styles.selectorClear}
-            >
-              <Text style={styles.selectorClearText}>×</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
-
-      {/* DROPDOWN — DESTILADO */}
-      {showBases && (
-        <View style={styles.basesGrid}>
-          {bases.map(b => (
-            <TouchableOpacity
-              key={b}
-              onPress={() => { setBase(b); setShowBases(false); }}
-              style={[styles.baseChip, base === b && styles.baseChipActive]}
-            >
-              <Text style={[styles.baseLabel, base === b && { color: '#fff' }]}>{b}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
-
-      {/* DROPDOWN — FAMÍLIA */}
-      {showFamilies && (
-        <View style={styles.basesGrid}>
-          {families.map(f => (
-            <TouchableOpacity
-              key={f.id}
-              onPress={() => { setFamily(f.id); setShowFamilies(false); }}
-              style={[styles.baseChip, family === f.id && styles.baseChipActive]}
-            >
-              <Text style={[styles.baseLabel, family === f.id && { color: '#fff' }]}>
-                {f.emoji} {f.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
-
-      {/* DROPDOWN — DIFICULDADE */}
-      {showDiffs && (
-        <View style={styles.basesGrid}>
-          {difficulties.map(d => (
-            <TouchableOpacity
-              key={d}
-              onPress={() => { setDifficulty(d); setShowDiffs(false); }}
-              style={[styles.baseChip, difficulty === d && styles.baseChipActive]}
-            >
-              <Text style={[styles.baseLabel, difficulty === d && { color: '#fff' }]}>{d}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
-
-      {/* DROPDOWN — TEMPO */}
-      {showTimes && (
-        <View style={styles.basesGrid}>
-          {timeOptions.map(t => (
-            <TouchableOpacity
-              key={t.id}
-              onPress={() => { setTimeFilter(t.id); setShowTimes(false); }}
-              style={[styles.baseChip, timeFilter === t.id && styles.baseChipActive]}
-            >
-              <Text style={[styles.baseLabel, timeFilter === t.id && { color: '#fff' }]}>{t.label}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      )}
-
-      {/* FILTER CHIPS */}
+      {/* FILTER CHIPS — unified single row */}
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         style={styles.filterScroll}
         contentContainerStyle={styles.filterContent}
       >
+        {/* Destilado selector chip */}
+        <TouchableOpacity
+          onPress={() => {
+            if (baseActive) { setBase('Todos'); setShowBases(false); }
+            else { setShowBases(v => !v); setShowFamilies(false); }
+          }}
+          activeOpacity={0.8}
+          style={[styles.chip, (baseActive || showBases) && styles.chipActive]}
+        >
+          <Text style={styles.chipEmoji}>🥃</Text>
+          <Text style={[styles.chipLabel, (baseActive || showBases) && styles.chipLabelActive]}>
+            {baseActive ? base : 'Destilado'}
+          </Text>
+          <Text style={[(baseActive || showBases) ? styles.selectorArrowActive : styles.selectorArrow]}>
+            {baseActive ? '×' : '▾'}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Família selector chip */}
+        <TouchableOpacity
+          onPress={() => {
+            if (familyActive) { setFamily('todas'); setShowFamilies(false); }
+            else { setShowFamilies(v => !v); setShowBases(false); }
+          }}
+          activeOpacity={0.8}
+          style={[styles.chip, (familyActive || showFamilies) && styles.chipActive]}
+        >
+          <Text style={styles.chipEmoji}>🍹</Text>
+          <Text style={[styles.chipLabel, (familyActive || showFamilies) && styles.chipLabelActive]}>
+            {familyActive ? (families.find(f => f.id === family)?.label ?? 'Família') : 'Família'}
+          </Text>
+          <Text style={[(familyActive || showFamilies) ? styles.selectorArrowActive : styles.selectorArrow]}>
+            {familyActive ? '×' : '▾'}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Mood / category chips */}
         {filters.map(f => (
           <TouchableOpacity
             key={f.id}
@@ -313,6 +179,38 @@ export default function CardapioScreen({ navigation }) {
           </TouchableOpacity>
         ))}
       </ScrollView>
+
+      {/* DROPDOWN — DESTILADO */}
+      {showBases && (
+        <View style={styles.dropdownGrid}>
+          {bases.map(b => (
+            <TouchableOpacity
+              key={b}
+              onPress={() => { setBase(b); setShowBases(false); }}
+              style={[styles.dropChip, base === b && styles.dropChipActive]}
+            >
+              <Text style={[styles.dropLabel, base === b && { color: '#fff' }]}>{b}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      {/* DROPDOWN — FAMÍLIA */}
+      {showFamilies && (
+        <View style={styles.dropdownGrid}>
+          {families.map(f => (
+            <TouchableOpacity
+              key={f.id}
+              onPress={() => { setFamily(f.id); setShowFamilies(false); }}
+              style={[styles.dropChip, family === f.id && styles.dropChipActive]}
+            >
+              <Text style={[styles.dropLabel, family === f.id && { color: '#fff' }]}>
+                {f.emoji} {f.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
 
     </View>
   );
@@ -403,45 +301,26 @@ const styles = StyleSheet.create({
   viewBtn: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
   viewBtnActive: { backgroundColor: colors.surface, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 4, elevation: 2 },
 
-  selectorRow: { flexDirection: 'row', gap: 8, marginBottom: 10 },
-  selectorChip: {
-    flex: 1, flexDirection: 'row', alignItems: 'center',
-    height: 40, borderRadius: 50,
-    backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.border,
-    overflow: 'hidden',
-  },
-  selectorChipActive: { backgroundColor: colors.dark, borderColor: colors.dark },
-  selectorBody: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12 },
-  selectorEmoji: { fontSize: 13 },
-  selectorLabel: { flex: 1, fontSize: 12, fontFamily: fonts.extraBold, color: '#555' },
-  selectorLabelActive: { color: '#fff' },
-  selectorArrow: { fontSize: 11, color: colors.textLight },
-  selectorClear: { height: 36, paddingHorizontal: 10, alignItems: 'center', justifyContent: 'center', borderLeftWidth: 1, borderLeftColor: 'rgba(255,255,255,0.2)' },
-  selectorClearText: { fontSize: 18, color: '#fff', fontFamily: fonts.bold, lineHeight: 20 },
-
-  // Scroll horizontal de filtros — altura automática, sem cortes
-  filterScroll: { flexGrow: 0, marginHorizontal: -spacing.xl, marginBottom: 12 },
+  filterScroll: { flexGrow: 0, marginHorizontal: -spacing.xl, marginBottom: 10 },
   filterContent: { paddingHorizontal: spacing.xl, gap: 8 },
+
   chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 50,
-    backgroundColor: colors.surface,
-    borderWidth: 2,
-    borderColor: colors.border,
+    flexDirection: 'row', alignItems: 'center', gap: 5,
+    paddingHorizontal: 13, paddingVertical: 9,
+    borderRadius: 50, backgroundColor: colors.surface,
+    borderWidth: 2, borderColor: colors.border,
   },
   chipActive: { backgroundColor: colors.dark, borderColor: colors.dark },
   chipEmoji: { fontSize: 14 },
   chipLabel: { fontSize: 13, fontFamily: fonts.extraBold, color: '#666' },
   chipLabelActive: { color: '#fff' },
+  selectorArrow: { fontSize: 10, color: colors.textLight, marginLeft: 1 },
+  selectorArrowActive: { fontSize: 13, color: '#fff', marginLeft: 1, fontFamily: fonts.bold },
 
-  basesGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 10 },
-  baseChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 50, backgroundColor: '#F5F5F2' },
-  baseChipActive: { backgroundColor: colors.dark },
-  baseLabel: { fontSize: 12, fontFamily: fonts.extraBold, color: '#555' },
+  dropdownGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 10 },
+  dropChip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 50, backgroundColor: '#F5F5F2' },
+  dropChipActive: { backgroundColor: colors.dark },
+  dropLabel: { fontSize: 12, fontFamily: fonts.extraBold, color: '#555' },
 
   empty: { alignItems: 'center', justifyContent: 'center', paddingVertical: 60 },
   emptyTitle: { fontSize: 16, fontFamily: fonts.extraBold, color: colors.text, marginTop: 12 },
