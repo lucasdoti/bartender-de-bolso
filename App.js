@@ -26,6 +26,7 @@ import AuthScreen from './src/screens/AuthScreen';
 import OnboardingScreen from './src/screens/OnboardingScreen';
 import AgeGateScreen from './src/screens/AgeGateScreen';
 import OfflineBanner from './src/components/OfflineBanner';
+import { scheduleDailyDrinkNotification } from './src/lib/notifications';
 
 const Loader = () => (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FAFAF8' }}>
@@ -45,6 +46,7 @@ function Root() {
     ]).then(([age, onb]) => {
       setAgeConfirmed(!!age);
       setOnboardingDone(!!onb);
+      if (age && onb) scheduleDailyDrinkNotification();
     });
   }, []);
 

@@ -11,6 +11,7 @@ import AppIcon from '../components/AppIcon';
 import BottomNav from '../components/BottomNav';
 import { DrinkCardList } from '../components/DrinkCard';
 import { useDrinks, ibaOrder } from '../hooks/useDrinks';
+import { getDrinkOfDay } from '../lib/drinkOfDay';
 
 const moods = [
   { id: 'calor',  label: 'Refrescante',  emoji: '☀️' },
@@ -24,8 +25,9 @@ const INGREDIENT_ALIASES = { limao_taiti: 'limao', limao_siciliano: 'limao' };
 function norm(id) { return INGREDIENT_ALIASES[id] || id; }
 
 export default function HomeScreen({ navigation }) {
-  const { favorites, toggleFavorite, ingredients, ratings } = useApp();
+  const { favorites, toggleFavorite, ingredients, ratings, extraDrinks } = useApp();
   const drinks = useDrinks();
+  const drinkOfDay = getDrinkOfDay(extraDrinks);
   const [activeMood, setActiveMood]   = useState(null);
   const [search, setSearch]           = useState('');
   const [surprisePick, setSurprisePick] = useState(null);
@@ -174,6 +176,27 @@ export default function HomeScreen({ navigation }) {
           </View>
         )}
 
+        {/* DRINK DO DIA */}
+        {drinkOfDay && (
+          <TouchableOpacity
+            onPress={() => navigation.navigate('DrinkDetail', { drinkId: drinkOfDay.id })}
+            activeOpacity={0.85}
+            style={[styles.drinkDayCard, { borderColor: drinkOfDay.accent + '33' }]}
+          >
+            <View style={[styles.drinkDayIcon, { backgroundColor: drinkOfDay.color }]}>
+              <Text style={{ fontSize: 22 }}>☀️</Text>
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.drinkDayLabel}>Drink do dia</Text>
+              <Text style={styles.drinkDayName}>{drinkOfDay.name}</Text>
+              <Text style={styles.drinkDayMeta}>{drinkOfDay.time} · {drinkOfDay.difficulty}</Text>
+            </View>
+            <View style={[styles.drinkDayBase, { backgroundColor: drinkOfDay.color }]}>
+              <Text style={[styles.drinkDayBaseText, { color: drinkOfDay.accent }]}>{drinkOfDay.base}</Text>
+            </View>
+          </TouchableOpacity>
+        )}
+
         {/* MODO FESTA */}
         <TouchableOpacity onPress={() => navigation.navigate('Festa')} activeOpacity={0.85} style={styles.ctaFesta}>
           <View style={{ flex: 1 }}>
@@ -279,6 +302,14 @@ const styles = StyleSheet.create({
   surpriseBtnText: { fontSize: 12, fontFamily: fonts.extraBold, color: '#1C1A14' },
   surpriseDismiss: { width: 28, height: 28, borderRadius: 8, backgroundColor: 'rgba(255,255,255,0.08)', alignItems: 'center', justifyContent: 'center' },
   surpriseDismissText: { fontSize: 11, color: '#888', fontFamily: fonts.extraBold },
+
+  drinkDayCard: { marginHorizontal: spacing.xl, marginTop: 12, backgroundColor: colors.surface, borderRadius: radius.xl, padding: spacing.lg, flexDirection: 'row', alignItems: 'center', borderWidth: 1.5, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 10, elevation: 3 },
+  drinkDayIcon: { width: 48, height: 48, borderRadius: radius.lg, alignItems: 'center', justifyContent: 'center', marginRight: 14 },
+  drinkDayLabel: { fontSize: 10, fontFamily: fonts.extraBold, color: colors.primary, letterSpacing: 1.1, textTransform: 'uppercase', marginBottom: 2 },
+  drinkDayName: { fontSize: 16, fontFamily: fonts.extraBold, color: colors.text },
+  drinkDayMeta: { fontSize: 11, fontFamily: fonts.semiBold, color: colors.textMuted, marginTop: 2 },
+  drinkDayBase: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20, marginLeft: 10 },
+  drinkDayBaseText: { fontSize: 11, fontFamily: fonts.extraBold },
 
   ctaFesta: { marginHorizontal: spacing.xl, marginTop: 12, backgroundColor: '#14201A', borderRadius: radius.xl, padding: spacing.lg, paddingVertical: 20, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#1F3D2E', shadowColor: '#2ECC71', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.15, shadowRadius: 16, elevation: 6 },
   ctaFestaLabel: { fontSize: 11, color: '#2ECC71', fontFamily: fonts.extraBold, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 4 },

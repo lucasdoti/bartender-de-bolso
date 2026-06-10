@@ -56,11 +56,33 @@ export function FavoritosScreen({ navigation }) {
         ))}
       </View>
 
+      {favDrinks.length > 0 && (
+        <TouchableOpacity
+          onPress={() => navigation.navigate('MeuBar')}
+          activeOpacity={0.85}
+          style={styles.shoppingShortcut}
+        >
+          <Text style={styles.shoppingShortcutIcon}>🛒</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.shoppingShortcutTitle}>Lista de compras</Text>
+            <Text style={styles.shoppingShortcutSub}>Ver o que falta para seus favoritos</Text>
+          </View>
+          <Text style={styles.shoppingShortcutArrow}>→</Text>
+        </TouchableOpacity>
+      )}
+
       {favDrinks.length === 0 ? (
         <View style={styles.empty}>
-          <Text style={{ fontSize: 48 }}>🤍</Text>
+          <Text style={{ fontSize: 52 }}>🤍</Text>
           <Text style={styles.emptyTitle}>Nenhum favorito ainda</Text>
-          <Text style={styles.emptySub}>Explore o cardápio e salve seus drinks preferidos!</Text>
+          <Text style={styles.emptySub}>Salve seus drinks preferidos enquanto explora o cardápio!</Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Cardapio')}
+            activeOpacity={0.85}
+            style={styles.emptyBtn}
+          >
+            <Text style={styles.emptyBtnText}>Explorar cardápio →</Text>
+          </TouchableOpacity>
         </View>
       ) : (
         <FlatList
@@ -101,4 +123,11 @@ const styles = StyleSheet.create({
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 80 },
   emptyTitle: { fontSize: 16, fontFamily: fonts.extraBold, color: colors.text, marginTop: 16 },
   emptySub: { fontSize: 13, fontFamily: fonts.semiBold, color: colors.textLight, marginTop: 6, textAlign: 'center', paddingHorizontal: 40 },
+  emptyBtn: { marginTop: 20, backgroundColor: colors.primary, borderRadius: radius.lg, paddingVertical: 12, paddingHorizontal: 28 },
+  emptyBtnText: { fontSize: 13, fontFamily: fonts.extraBold, color: '#fff' },
+  shoppingShortcut: { marginHorizontal: spacing.xl, marginBottom: spacing.sm, backgroundColor: '#0D1B2A', borderRadius: radius.lg, padding: spacing.md, flexDirection: 'row', alignItems: 'center', gap: 12 },
+  shoppingShortcutIcon: { fontSize: 22 },
+  shoppingShortcutTitle: { fontSize: 13, fontFamily: fonts.extraBold, color: '#FFD966' },
+  shoppingShortcutSub: { fontSize: 11, fontFamily: fonts.semiBold, color: '#888', marginTop: 2 },
+  shoppingShortcutArrow: { fontSize: 16, color: '#FFD966', fontFamily: fonts.extraBold },
 });

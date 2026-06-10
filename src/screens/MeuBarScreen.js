@@ -268,11 +268,16 @@ export default function MeuBarScreen({ navigation }) {
           {ingredients.length === 0 && (
             <View style={styles.section}>
               <View style={styles.hintCard}>
-                <Ionicons name="add-circle-outline" size={28} color="#FFD966" />
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.hintTitle}>Seu bar está vazio</Text>
-                  <Text style={styles.hintSub}>Adicione ingredientes para ver os drinks disponíveis automaticamente!</Text>
-                </View>
+                <Text style={{ fontSize: 40, marginBottom: 14 }}>🥃</Text>
+                <Text style={styles.hintTitle}>Seu bar está vazio</Text>
+                <Text style={styles.hintSub}>Adicione os ingredientes que você tem em casa e descubra os drinks que já pode preparar agora!</Text>
+                <TouchableOpacity
+                  onPress={() => setOpenCat('Destilados')}
+                  activeOpacity={0.85}
+                  style={styles.hintBtn}
+                >
+                  <Text style={styles.hintBtnText}>Adicionar ingredientes →</Text>
+                </TouchableOpacity>
               </View>
             </View>
           )}
@@ -540,9 +545,11 @@ const styles = StyleSheet.create({
   ctaBtn: { backgroundColor: colors.dark, borderRadius: radius.lg, padding: spacing.lg, alignItems: 'center', marginTop: 8, shadowColor: colors.dark, shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.28, shadowRadius: 16, elevation: 8 },
   ctaBtnLabel: { fontSize: 11, fontFamily: fonts.extraBold, color: '#B8860B', letterSpacing: 1.2, textTransform: 'uppercase' },
   ctaBtnTitle: { fontSize: 17, fontFamily: fonts.extraBold, color: '#fff', marginTop: 4 },
-  hintCard: { backgroundColor: colors.dark, borderRadius: radius.lg, padding: spacing.lg, flexDirection: 'row', gap: 14, alignItems: 'flex-start', opacity: 0.7 },
-  hintTitle: { fontSize: 14, fontFamily: fonts.extraBold, color: '#FFD966', marginBottom: 4 },
-  hintSub: { fontSize: 12, fontFamily: fonts.semiBold, color: '#888', lineHeight: 18 },
+  hintCard: { backgroundColor: colors.dark, borderRadius: radius.xl, padding: spacing.xl, alignItems: 'center', borderWidth: 1, borderColor: '#B8860B44', shadowColor: '#B8860B', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.15, shadowRadius: 16, elevation: 6 },
+  hintTitle: { fontSize: 18, fontFamily: fonts.extraBold, color: '#FFD966', marginBottom: 8, textAlign: 'center' },
+  hintSub: { fontSize: 13, fontFamily: fonts.semiBold, color: '#888', lineHeight: 20, textAlign: 'center' },
+  hintBtn: { marginTop: 18, backgroundColor: '#FFD966', borderRadius: radius.lg, paddingVertical: 12, paddingHorizontal: 24 },
+  hintBtnText: { fontSize: 13, fontFamily: fonts.extraBold, color: '#1C1A14' },
   empty: { alignItems: 'center', paddingVertical: 40 },
   emptyTitle: { fontSize: 15, fontFamily: fonts.extraBold, color: colors.text, marginTop: 10 },
   emptySub: { fontSize: 12, fontFamily: fonts.semiBold, color: colors.textLight, marginTop: 4, textAlign: 'center' },
