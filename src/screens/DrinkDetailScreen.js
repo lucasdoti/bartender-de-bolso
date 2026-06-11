@@ -31,7 +31,7 @@ const SCALES = [1, 2, 4, 6];
 function scaleAmount(amount, scale) {
   if (scale === 1) return amount;
   if (!amount) return amount;
-  const unchanged = ['Q.B.', 'Completar', 'A gosto', 'Opcional'];
+  const unchanged = ['A gosto', 'Completar', 'Opcional'];
   if (unchanged.some(s => amount.includes(s))) return amount;
 
   // frações: "1/2 un."

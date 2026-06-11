@@ -19,7 +19,7 @@ export const drinks = [
       { amount: '30ml', name: 'Vermute tinto', tip: 'Doce' },
       { amount: 'Completar', name: 'Água com gás', tip: 'Refrescância' },
       { amount: '1 fatia', name: 'Laranja', tip: 'Decoração' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Cubos' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Cubos' },
     ],
     steps: [
       { num: 1, title: 'Monte', desc: 'Adicione 30ml de Campari e 30ml de Vermute tinto ao copo com gelo.' },
@@ -52,7 +52,7 @@ export const drinks = [
       { amount: '60ml', name: 'Aperol', tip: 'Proporção 3:2:1' },
       { amount: '30ml', name: 'Água com gás', tip: 'Por último' },
       { amount: '1 fatia', name: 'Laranja', tip: 'Decoração' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Encha a taça' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Encha a taça' },
     ],
     steps: [
       { num: 1, title: 'Gelo', desc: 'Encha a taça de vinho com gelo.' },
@@ -85,7 +85,7 @@ export const drinks = [
       { amount: '50ml', name: 'Cachaça', tip: 'Branca' },
       { amount: '100ml', name: 'Leite de coco', tip: 'Cremoso' },
       { amount: '30ml', name: 'Leite condensado', tip: 'Adoça' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Para bater' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Para bater' },
     ],
     steps: [
       { num: 1, title: 'Bata', desc: 'Bata 50ml de cachaça, 100ml de leite de coco e 30ml de leite condensado no liquidificador com gelo.' },
@@ -118,7 +118,7 @@ export const drinks = [
       { amount: '90ml', name: 'Suco de tomate', tip: 'Bem gelado' },
       { amount: '15ml', name: 'Suco de limão', tip: 'Fresco' },
       { amount: '2 dashes', name: 'Molho inglês', tip: 'Worcestershire' },
-      { amount: 'Q.B.', name: 'Sal e pimenta', tip: 'A gosto' },
+      { amount: 'A gosto', name: 'Sal e pimenta', tip: 'A gosto' },
     ],
     steps: [
       { num: 1, title: 'Tempere', desc: 'Misture 45ml de vodka, 90ml de suco de tomate, 15ml de suco de limão e 2 dashes de molho inglês num copo com gelo.' },
@@ -150,7 +150,7 @@ export const drinks = [
       { amount: '60ml', name: 'Cachaça', tip: 'Leblon ou Ypióca ouro' },
       { amount: '1 un.', name: 'Limão taiti', tip: 'Em 8 pedaços' },
       { amount: '20ml', name: 'Xarope simples', tip: 'Ou 2 col. de açúcar' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Triturado' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Triturado' },
     ],
     steps: [
       { num: 1, title: 'Corte', desc: 'Corte 1 limão taiti em 8 pedaços e retire o miolo branco.' },
@@ -184,7 +184,7 @@ export const drinks = [
       { amount: '1/2 un.', name: 'Maracujá', tip: 'Polpa fresca' },
       { amount: '1/2 un.', name: 'Limão', tip: 'Em pedaços' },
       { amount: '20ml', name: 'Xarope simples', tip: 'Ou 2 col. de açúcar' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Triturado' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Triturado' },
     ],
     steps: [
       { num: 1, title: 'Macere', desc: 'Corte 1/2 limão em pedaços e coloque no copo com 20ml de xarope simples (ou 2 col. de açúcar). Macere levemente.' },
@@ -218,7 +218,7 @@ export const drinks = [
       { amount: '1/2 un.', name: 'Limão', tip: 'Em pedaços' },
       { amount: '4 un.', name: 'Morango', tip: 'Maduros' },
       { amount: '20ml', name: 'Xarope simples', tip: 'Ou 2 col. de açúcar' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Triturado' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Triturado' },
     ],
     steps: [
       { num: 1, title: 'Macere', desc: 'Coloque 1/2 limão (em pedaços), 4 morangos maduros e 20ml de xarope simples (ou 2 col. de açúcar) no copo. Macere levemente.' },
@@ -250,7 +250,7 @@ export const drinks = [
       { amount: '60ml', name: 'Vodka', tip: 'No lugar da cachaça' },
       { amount: '1 un.', name: 'Limão', tip: 'Em pedaços' },
       { amount: '20ml', name: 'Xarope simples', tip: 'Ou 2 col. de açúcar' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Triturado' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Triturado' },
     ],
     steps: [
       { num: 1, title: 'Macere', desc: 'Corte 1 limão em pedaços e coloque no copo com 20ml de xarope simples (ou 2 col. de açúcar). Macere levemente.' },
@@ -281,8 +281,8 @@ export const drinks = [
     ingredients: [
       { amount: '200ml', name: 'Espumante', tip: 'Brut' },
       { amount: '100ml', name: 'Suco', tip: 'Frutas variadas' },
-      { amount: 'Q.B.', name: 'Frutas picadas', tip: 'Maçã, morango, laranja' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Cubos' },
+      { amount: 'A gosto', name: 'Frutas picadas', tip: 'Maçã, morango, laranja' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Cubos' },
     ],
     steps: [
       { num: 1, title: 'Frutas', desc: 'Pique maçã, morango e laranja e coloque na jarra.' },
@@ -316,7 +316,7 @@ export const drinks = [
       { amount: '15ml', name: 'Suco de limão', tip: 'Fresco' },
       { amount: '15ml', name: 'Xarope de framboesa', tip: 'Dá cor e doçura' },
       { amount: '1 un.', name: 'Clara de ovo', tip: 'Espuma sedosa' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Para bater' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Para bater' },
     ],
     steps: [
       { num: 1, title: 'Dry shake', desc: 'Coloque 45ml de gin, 15ml de suco de limão, 15ml de xarope de framboesa e 1 clara de ovo na coqueteleira. Bata sem gelo primeiro.' },
@@ -350,7 +350,7 @@ export const drinks = [
       { amount: '15ml', name: 'Triple Sec', tip: 'Cointreau' },
       { amount: '15ml', name: 'Suco de cranberry', tip: 'Dá a cor rosa' },
       { amount: '15ml', name: 'Suco de limão', tip: 'Fresco' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Para bater' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Para bater' },
     ],
     steps: [
       { num: 1, title: 'Bata', desc: 'Bata 40ml de vodka citrus, 15ml de Triple Sec, 15ml de suco de cranberry e 15ml de suco de limão com gelo por 15 segundos.' },
@@ -382,7 +382,7 @@ export const drinks = [
       { amount: '50ml', name: 'Rum branco', tip: 'Bacardi ou Havana' },
       { amount: '120ml', name: 'Cola', tip: 'Gelada' },
       { amount: '10ml', name: 'Suco de limão', tip: 'Dá frescor' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Cubos' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Cubos' },
     ],
     steps: [
       { num: 1, title: 'Monte', desc: 'Encha o copo com gelo. Adicione 50ml de rum branco e 10ml de suco de limão.' },
@@ -414,7 +414,7 @@ export const drinks = [
       { amount: '60ml', name: 'Rum branco', tip: 'Use um rum de qualidade' },
       { amount: '25ml', name: 'Suco de limão', tip: 'Fresco é essencial' },
       { amount: '15ml', name: 'Xarope simples', tip: 'Açúcar e água iguais' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Para bater' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Para bater' },
     ],
     steps: [
       { num: 1, title: 'Bata', desc: 'Combine 60ml de rum branco, 25ml de suco de limão e 15ml de xarope simples na coqueteleira com gelo. Bata por 15 segundos.' },
@@ -446,7 +446,7 @@ export const drinks = [
       { amount: '60ml', name: 'Rum escuro', tip: 'Goslings é o original' },
       { amount: '100ml', name: 'Cerveja de gengibre', tip: 'Ginger beer' },
       { amount: '15ml', name: 'Suco de limão', tip: 'Opcional' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Cubos' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Cubos' },
     ],
     steps: [
       { num: 1, title: 'Gelo', desc: 'Encha o copo com gelo.' },
@@ -480,7 +480,7 @@ export const drinks = [
       { amount: '30ml', name: 'Licor de café', tip: 'Kahlúa' },
       { amount: '30ml', name: 'Café espresso', tip: 'Fresco e quente' },
       { amount: '10ml', name: 'Xarope simples', tip: 'Opcional' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Para bater' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Para bater' },
     ],
     steps: [
       { num: 1, title: 'Café', desc: 'Prepare 30ml de café espresso fresco e deixe esfriar um pouco.' },
@@ -547,7 +547,7 @@ export const drinks = [
       { amount: '50ml', name: 'Gin', tip: 'Escolha um aromático' },
       { amount: '150ml', name: 'Água tônica', tip: 'Bem gelada' },
       { amount: '1 fatia', name: 'Limão', tip: 'Ou pepino, alecrim' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Encha a taça' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Encha a taça' },
     ],
     steps: [
       { num: 1, title: 'Gelo', desc: 'Encha a taça com bastante gelo.' },
@@ -581,7 +581,7 @@ export const drinks = [
       { amount: '20ml', name: 'Rum escuro', tip: 'Para flutuar' },
       { amount: '15ml', name: 'Triple Sec', tip: 'Curaçao' },
       { amount: '15ml', name: 'Suco de limão', tip: 'Fresco' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Triturado' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Triturado' },
     ],
     steps: [
       { num: 1, title: 'Bata', desc: 'Bata 40ml de rum dourado, 15ml de Triple Sec e 15ml de suco de limão com gelo.' },
@@ -614,8 +614,8 @@ export const drinks = [
       { amount: '50ml', name: 'Tequila prata', tip: 'Patrón Silver' },
       { amount: '25ml', name: 'Triple Sec', tip: 'Cointreau' },
       { amount: '25ml', name: 'Suco de limão', tip: 'Fresco' },
-      { amount: 'Q.B.', name: 'Sal', tip: 'Para a borda' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Para bater' },
+      { amount: 'A gosto', name: 'Sal', tip: 'Para a borda' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Para bater' },
     ],
     steps: [
       { num: 1, title: 'Borda', desc: 'Passe limão na borda da taça e passe no sal.' },
@@ -679,7 +679,7 @@ export const drinks = [
       { amount: '60ml', name: 'Gin', tip: 'London Dry premium' },
       { amount: '10ml', name: 'Vermute seco', tip: 'Martini Dry' },
       { amount: '1 un.', name: 'Azeitona', tip: 'Ou casca de limão' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Para mexer' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Para mexer' },
     ],
     steps: [
       { num: 1, title: 'Resfrie', desc: 'Resfrie a taça com gelo e descarte.' },
@@ -712,7 +712,7 @@ export const drinks = [
     ingredients: [
       { amount: '75ml', name: 'Espumante', tip: 'Brut gelado' },
       { amount: '75ml', name: 'Suco de laranja', tip: 'Fresco' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Opcional' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Opcional' },
     ],
     steps: [
       { num: 1, title: 'Suco', desc: 'Coloque 75ml de suco de laranja fresco na taça.' },
@@ -744,7 +744,7 @@ export const drinks = [
       { amount: '60ml', name: 'Bourbon', tip: 'Kentucky' },
       { amount: '10ml', name: 'Xarope simples', tip: 'Ou 1 col. de açúcar' },
       { amount: '10 folhas', name: 'Hortelã', tip: 'Fresca' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Triturado, bastante' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Triturado, bastante' },
     ],
     steps: [
       { num: 1, title: 'Macere', desc: 'Coloque 10 folhas de hortelã e 10ml de xarope simples (ou 1 col. de açúcar) no copo. Macere levemente — só para liberar o aroma.' },
@@ -778,7 +778,7 @@ export const drinks = [
       { amount: '30ml', name: 'Suco de limão', tip: 'Sempre fresco' },
       { amount: '20ml', name: 'Xarope simples', tip: 'Ou 2 col. de açúcar' },
       { amount: '8 folhas', name: 'Hortelã', tip: 'Dê um tapa nas folhas antes' },
-      { amount: 'Q.B.', name: 'Gelo picado', tip: 'Libera mais frio' },
+      { amount: 'A gosto', name: 'Gelo picado', tip: 'Libera mais frio' },
       { amount: 'Completar', name: 'Água com gás', tip: 'Por último, sem mexer muito' },
     ],
     steps: [
@@ -814,7 +814,7 @@ export const drinks = [
       { amount: '15ml',   name: 'Suco de limão taiti',  tip: 'Fresco' },
       { amount: '100ml',  name: 'Água com gás',         tip: 'Bem gelada' },
       { amount: '3 col.', name: 'Espuma de gengibre',   tip: 'Ver receita na aba Receitas' },
-      { amount: 'Q.B.',   name: 'Gelo',                 tip: 'Cubos grandes' },
+      { amount: 'A gosto',   name: 'Gelo',                 tip: 'Cubos grandes' },
     ],
     steps: [
       { num: 1, title: 'Espuma', desc: 'Prepare a espuma de gengibre com antecedência (ver receita na aba Receitas do Meu Bar).' },
@@ -885,7 +885,7 @@ export const drinks = [
       { amount: '30ml', name: 'Vermute tinto', tip: 'Doce' },
       { amount: '60ml', name: 'Prosecco', tip: 'No lugar do gin' },
       { amount: '1 fatia', name: 'Laranja', tip: 'Decoração' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Cubos' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Cubos' },
     ],
     steps: [
       { num: 1, title: 'Monte', desc: 'Adicione 30ml de Campari e 30ml de Vermute tinto ao copo com gelo.' },
@@ -952,8 +952,8 @@ export const drinks = [
       { amount: '50ml', name: 'Tequila', tip: 'Prata' },
       { amount: '15ml', name: 'Suco de limão', tip: 'Fresco' },
       { amount: 'Completar', name: 'Refrigerante de toranja', tip: 'Ou soda' },
-      { amount: 'Q.B.', name: 'Sal', tip: 'Borda' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Cubos' },
+      { amount: 'A gosto', name: 'Sal', tip: 'Borda' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Cubos' },
     ],
     steps: [
       { num: 1, title: 'Borda', desc: 'Passe limão na borda do copo e passe no sal.' },
@@ -986,7 +986,7 @@ export const drinks = [
       { amount: '60ml', name: 'Rum branco', tip: 'Bacardi é tradicional' },
       { amount: '90ml', name: 'Suco de abacaxi', tip: 'Fresco se possível' },
       { amount: '30ml', name: 'Creme de coco', tip: 'Coco Lopez é o original' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Para bater bem gelado' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Para bater bem gelado' },
     ],
     steps: [
       { num: 1, title: 'Bata', desc: 'Bata 60ml de rum branco, 90ml de suco de abacaxi e 30ml de creme de coco no liquidificador com gelo até ficar cremoso.' },
@@ -1019,7 +1019,7 @@ export const drinks = [
       { amount: '60ml', name: 'Suco de abacaxi', tip: 'Fresco' },
       { amount: '20ml', name: 'Suco de limão', tip: 'Equilibra' },
       { amount: '10 folhas', name: 'Hortelã', tip: 'Refrescância' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Triturado' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Triturado' },
     ],
     steps: [
       { num: 1, title: 'Macere', desc: 'Macere 10 folhas de hortelã levemente no copo.' },
@@ -1051,7 +1051,7 @@ export const drinks = [
       { amount: '40ml', name: 'Vodka', tip: 'Boa qualidade' },
       { amount: '120ml', name: 'Suco de cranberry', tip: 'Dá cor' },
       { amount: '30ml', name: 'Suco de toranja', tip: 'Equilibra' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Cubos' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Cubos' },
     ],
     steps: [
       { num: 1, title: 'Monte', desc: 'Encha o copo com gelo.' },
@@ -1084,7 +1084,7 @@ export const drinks = [
       { amount: '20ml', name: 'Licor de pêssego', tip: 'Peach schnapps' },
       { amount: '40ml', name: 'Suco de laranja', tip: 'Fresco' },
       { amount: '40ml', name: 'Suco de cranberry', tip: 'Dá cor' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Cubos' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Cubos' },
     ],
     steps: [
       { num: 1, title: 'Monte', desc: 'Encha o copo com gelo.' },
@@ -1116,7 +1116,7 @@ export const drinks = [
       { amount: '45ml', name: 'Tequila', tip: 'Prata ou ouro' },
       { amount: '90ml', name: 'Suco de laranja', tip: 'Fresco' },
       { amount: '15ml', name: 'Granadina', tip: 'Cria o efeito degradê' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Cubos' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Cubos' },
     ],
     steps: [
       { num: 1, title: 'Monte', desc: 'Encha o copo com gelo. Adicione 45ml de tequila e 90ml de suco de laranja fresco.' },
@@ -1149,7 +1149,7 @@ export const drinks = [
       { amount: '30ml', name: 'Suco de limão', tip: 'Fresco' },
       { amount: '15ml', name: 'Xarope simples', tip: 'Equilibra a acidez' },
       { amount: 'Completar', name: 'Água com gás', tip: 'Por cima' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Cubos' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Cubos' },
     ],
     steps: [
       { num: 1, title: 'Bata', desc: 'Bata 45ml de gin, 30ml de suco de limão e 15ml de xarope simples com gelo.' },
@@ -1183,7 +1183,7 @@ export const drinks = [
       { amount: '30ml', name: 'Suco de limão', tip: 'Fresco' },
       { amount: '15ml', name: 'Xarope simples', tip: 'Equilibra' },
       { amount: '1 un.', name: 'Clara de ovo', tip: 'Opcional, dá espuma' },
-      { amount: 'Q.B.', name: 'Gelo', tip: 'Para bater' },
+      { amount: 'A gosto', name: 'Gelo', tip: 'Para bater' },
     ],
     steps: [
       { num: 1, title: 'Dry shake', desc: 'Bata 60ml de bourbon, 30ml de suco de limão, 15ml de xarope simples e 1 clara de ovo na coqueteleira sem gelo primeiro.' },
@@ -1347,7 +1347,7 @@ export const drinks = [
     ingredients: [
       { amount: '60ml',  name: 'Campari',           tip: 'Generoso' },
       { amount: '150ml', name: 'Suco de laranja',   tip: 'Espremido na hora — fundamental' },
-      { amount: 'Q.B.',  name: 'Gelo',              tip: 'Cubos grandes' },
+      { amount: 'A gosto',  name: 'Gelo',              tip: 'Cubos grandes' },
     ],
     steps: [
       { num: 1, title: 'Suco',  desc: 'Esprema laranjas na hora para obter 150ml de suco fresco — é o segredo do drink.' },
@@ -1448,7 +1448,7 @@ export const drinks = [
       { amount: '30ml',      name: 'Suco de limão', tip: 'Fresco' },
       { amount: '20ml',      name: 'Xarope simples', tip: 'Ou 2 col. de açúcar' },
       { amount: 'Completar', name: 'Água com gás',  tip: 'Por cima' },
-      { amount: 'Q.B.',      name: 'Gelo',          tip: 'Cubos' },
+      { amount: 'A gosto',      name: 'Gelo',          tip: 'Cubos' },
     ],
     steps: [
       { num: 1, title: 'Bata',     desc: 'Bata 45ml de bourbon, 30ml de suco de limão e 20ml de xarope simples com gelo.' },
@@ -1753,7 +1753,7 @@ export const drinks = [
       { amount: '22ml',     name: 'Suco de limão siciliano', tip: 'Sempre fresco' },
       { amount: '22ml',     name: 'Xarope simples',          tip: 'Ver receita em Xaropes' },
       { amount: '2 dashs',  name: 'Angostura',               tip: 'Não exagere — só 2 dashs' },
-      { amount: 'Q.B.',     name: 'Gelo',                    tip: 'Para bater' },
+      { amount: 'A gosto',     name: 'Gelo',                    tip: 'Para bater' },
     ],
     steps: [
       { num: 1, title: 'Monte',  desc: 'Combine 60ml de gin, 22ml de suco de limão siciliano, 22ml de xarope simples e 2 dashs de Angostura na coqueteleira com gelo.' },
@@ -1791,7 +1791,7 @@ export const drinks = [
       { amount: '30ml',     name: 'Suco de limão taiti',  tip: 'Sempre fresco — é o que equilibra tudo' },
       { amount: '15ml',     name: 'Xarope simples',       tip: 'Ajusta o dulçor ao gosto' },
       { amount: 'Completar',name: 'Cola',                 tip: 'Só um splash — dá a cor de chá gelado' },
-      { amount: 'Q.B.',     name: 'Gelo',                 tip: 'Muito gelo, copo bem cheio' },
+      { amount: 'A gosto',     name: 'Gelo',                 tip: 'Muito gelo, copo bem cheio' },
     ],
     steps: [
       { num: 1, title: 'Copo',      desc: 'Encha um copo long drink alto com bastante gelo.' },
@@ -1828,7 +1828,7 @@ export const drinks = [
       { amount: '2 col.',   name: 'Açúcar',               tip: 'Ou xarope simples para dissolver melhor' },
       { amount: '10 folhas',name: 'Hortelã',              tip: 'Macerada suavemente, não esmagada' },
       { amount: 'Completar',name: 'Água com gás',         tip: 'Bem gelada' },
-      { amount: 'Q.B.',     name: 'Gelo',                 tip: 'Pilé ou em cubo' },
+      { amount: 'A gosto',     name: 'Gelo',                 tip: 'Pilé ou em cubo' },
     ],
     steps: [
       { num: 1, title: 'Macere',   desc: 'Coloque o açúcar e a hortelã no copo. Macere levemente para liberar os óleos sem amargar.' },
@@ -1861,7 +1861,7 @@ export const drinks = [
       { amount: '120ml',  name: 'Suco de laranja',  tip: 'Natural ou industrializado' },
       { amount: '30ml',   name: 'Granadina',        tip: 'Dá a cor rosada característica' },
       { amount: 'Completar', name: 'Água com gás',  tip: 'Ginger ale é o original, mas água com gás funciona' },
-      { amount: 'Q.B.',   name: 'Gelo',             tip: 'Cubo' },
+      { amount: 'A gosto',   name: 'Gelo',             tip: 'Cubo' },
     ],
     steps: [
       { num: 1, title: 'Monte',    desc: 'Encha o copo com gelo.' },
@@ -1895,7 +1895,7 @@ export const drinks = [
       { amount: '4 col.', name: 'Açúcar',            tip: 'Ajuste ao gosto' },
       { amount: '4 col.', name: 'Leite condensado',  tip: 'É o segredo da cremosidade' },
       { amount: '400ml',  name: 'Água com gás',      tip: 'Bem gelada' },
-      { amount: 'Q.B.',   name: 'Gelo',              tip: 'Para bater' },
+      { amount: 'A gosto',   name: 'Gelo',              tip: 'Para bater' },
     ],
     steps: [
       { num: 1, title: 'Liquidificador', desc: 'Bata os limões cortados (com casca) com o açúcar, leite condensado e metade da água com gás no liquidificador por 10 segundos.' },
@@ -1929,7 +1929,7 @@ export const drinks = [
       { amount: '20ml',     name: 'Xarope simples',      tip: 'Equilibra a acidez do morango' },
       { amount: '8 folhas', name: 'Hortelã',             tip: 'Macerada levemente' },
       { amount: 'Completar',name: 'Água com gás',        tip: 'Bem gelada' },
-      { amount: 'Q.B.',     name: 'Gelo',                tip: 'Pilé ou cubo' },
+      { amount: 'A gosto',     name: 'Gelo',                tip: 'Pilé ou cubo' },
     ],
     steps: [
       { num: 1, title: 'Macere', desc: 'Macere os morangos com o xarope simples e a hortelã no copo.' },
@@ -1963,7 +1963,7 @@ export const drinks = [
       { amount: '20ml',     name: 'Xarope simples',   tip: 'O maracujá é ácido, o xarope equilibra' },
       { amount: '15ml',     name: 'Suco de limão taiti', tip: 'Potencializa a acidez tropical' },
       { amount: 'Completar',name: 'Água com gás',     tip: 'Bem gelada' },
-      { amount: 'Q.B.',     name: 'Gelo',             tip: 'Cubo' },
+      { amount: 'A gosto',     name: 'Gelo',             tip: 'Cubo' },
     ],
     steps: [
       { num: 1, title: 'Polpa',    desc: 'Coloque a polpa do maracujá diretamente no copo.' },
@@ -1996,7 +1996,7 @@ export const drinks = [
       { amount: '30ml',     name: 'Xarope de gengibre',  tip: 'Quanto mais concentrado, mais picante' },
       { amount: '25ml',     name: 'Suco de limão taiti', tip: 'Fresco — o ácido equilibra o picante' },
       { amount: 'Completar',name: 'Água com gás',        tip: 'Bem gelada — dá a sensação de ginger beer' },
-      { amount: 'Q.B.',     name: 'Gelo',                tip: 'Cubo' },
+      { amount: 'A gosto',     name: 'Gelo',                tip: 'Cubo' },
     ],
     steps: [
       { num: 1, title: 'Copo',     desc: 'Encha o copo com gelo.' },
@@ -2029,7 +2029,7 @@ export const drinks = [
       { amount: '45ml',     name: 'Xarope de sabugueiro', tip: 'Elderflower — floral e delicado' },
       { amount: '20ml',     name: 'Suco de limão siciliano', tip: 'O ácido corta a doçura floral' },
       { amount: 'Completar',name: 'Água com gás',           tip: 'Bem gelada' },
-      { amount: 'Q.B.',     name: 'Gelo',                   tip: 'Cubo' },
+      { amount: 'A gosto',     name: 'Gelo',                   tip: 'Cubo' },
     ],
     steps: [
       { num: 1, title: 'Copo',     desc: 'Encha uma taça de vinho ou copo long drink com gelo.' },
@@ -2062,7 +2062,7 @@ export const drinks = [
       { amount: '150ml', name: 'Suco de abacaxi',   tip: 'Natural ou em lata — sem adição de açúcar' },
       { amount: '60ml',  name: 'Creme de coco',     tip: 'Não confundir com leite de coco — mais espesso' },
       { amount: '30ml',  name: 'Leite de coco',     tip: 'Para suavizar a textura' },
-      { amount: 'Q.B.',  name: 'Gelo',              tip: 'Bastante — é batida no liquidificador' },
+      { amount: 'A gosto',  name: 'Gelo',              tip: 'Bastante — é batida no liquidificador' },
     ],
     steps: [
       { num: 1, title: 'Liquidificador', desc: 'Bata o suco de abacaxi, creme de coco, leite de coco e o gelo no liquidificador até ficar cremoso e homogêneo.' },
@@ -2094,7 +2094,7 @@ export const drinks = [
       { amount: '150ml', name: 'Suco de laranja',   tip: 'Natural — dá muito mais sabor' },
       { amount: '1 un.', name: 'Maracujá',          tip: 'Polpa peneirada' },
       { amount: '20ml',  name: 'Granadina',         tip: 'Despeje por último para criar o efeito degradê' },
-      { amount: 'Q.B.', name: 'Gelo',              tip: 'Cubo' },
+      { amount: 'A gosto', name: 'Gelo',              tip: 'Cubo' },
     ],
     steps: [
       { num: 1, title: 'Monte',     desc: 'Encha o copo com gelo.' },
@@ -2127,7 +2127,7 @@ export const drinks = [
       { amount: '45ml',     name: 'Xarope de sua escolha',  tip: 'Sabugueiro, framboesa, morango, lavanda — qualquer um funciona' },
       { amount: 'Completar',name: 'Água com gás',           tip: 'Bem gelada — é a base da bebida' },
       { amount: '30ml',     name: 'Creme de leite',         tip: 'Opcional — transforma em Italian Cream Soda' },
-      { amount: 'Q.B.',     name: 'Gelo',                   tip: 'Cubo' },
+      { amount: 'A gosto',     name: 'Gelo',                   tip: 'Cubo' },
     ],
     steps: [
       { num: 1, title: 'Copo',     desc: 'Encha um copo alto com gelo.' },
@@ -2161,7 +2161,7 @@ export const drinks = [
       { amount: '25ml', name: 'Xarope de açúcar', tip: 'Xarope simples 1:1' },
       { amount: '20ml', name: 'Suco de limão taiti', tip: 'Fresco, espremido na hora' },
       { amount: '7ml',  name: 'Fernet Branca',   tip: 'Pouco, mas define o drink — não substitua' },
-      { amount: 'Q.B.', name: 'Gelo',            tip: 'Bastante, para bater na coqueteleira' },
+      { amount: 'A gosto', name: 'Gelo',            tip: 'Bastante, para bater na coqueteleira' },
     ],
     steps: [
       { num: 1, title: 'Coqueteleira', desc: 'Adicione a cachaça, o xarope, o suco de limão e o Fernet Branca à coqueteleira com bastante gelo.' },
