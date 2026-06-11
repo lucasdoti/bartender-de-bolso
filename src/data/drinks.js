@@ -973,7 +973,7 @@ export const drinks = [
     subtitle: 'O Tropical Caribenho',
     base: 'Rum',
     category: 'Tropical',
-    origin: 'Porto Rico 🇵🇷',
+    origin: 'Puerto Rico 🇵🇷',
     year: '1954',
     time: '6 min',
     difficulty: 'Fácil',

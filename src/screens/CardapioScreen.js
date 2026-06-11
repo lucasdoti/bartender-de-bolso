@@ -27,6 +27,27 @@ const filters = [
 
 const bases = ['Todos', 'Rum', 'Gin', 'Vodka', 'Tequila', 'Cachaça', 'Whisky', 'Bourbon', 'Aperol', 'Campari'];
 
+const origins = [
+  { id: 'todas',  label: 'Origem',  emoji: '🌍' },
+  { id: 'brasil', label: 'Brasil',  emoji: '🇧🇷' },
+  { id: 'cuba',   label: 'Cuba',    emoji: '🇨🇺' },
+  { id: 'eua',    label: 'EUA',     emoji: '🇺🇸' },
+  { id: 'italia', label: 'Itália',  emoji: '🇮🇹' },
+  { id: 'mexico', label: 'México',  emoji: '🇲🇽' },
+  { id: 'uk',     label: 'UK',      emoji: '🏴' },
+  { id: 'franca', label: 'França',  emoji: '🇫🇷' },
+];
+
+const ORIGIN_MAP = {
+  brasil: 'Brasil 🇧🇷',
+  cuba:   'Cuba 🇨🇺',
+  eua:    'EUA 🇺🇸',
+  italia: 'Itália 🇮🇹',
+  mexico: 'México 🇲🇽',
+  uk:     'Inglaterra 🏴',
+  franca: 'França 🇫🇷',
+};
+
 const families = [
   { id: 'todas',          label: 'Todas',        emoji: '🍹' },
   { id: 'negroni',        label: 'Negroni Style', emoji: '🍊', ids: [5, 38, 33, 41, 49] },
@@ -49,10 +70,12 @@ export default function CardapioScreen({ navigation }) {
   const [filter, setFilter]   = useState('todos');
   const [base, setBase]       = useState('Todos');
   const [family, setFamily]   = useState('todas');
+  const [origin, setOrigin]   = useState('todas');
   const [search, setSearch]   = useState('');
   const [view, setView]       = useState('list');
   const [showBases, setShowBases]       = useState(false);
   const [showFamilies, setShowFamilies] = useState(false);
+  const [showOrigins, setShowOrigins]   = useState(false);
 
   const activeFamilyIds = families.find(f => f.id === family)?.ids;
   const normalizedBar = ingredients.map(normIng);
@@ -66,17 +89,19 @@ export default function CardapioScreen({ navigation }) {
           : d.tags.includes(filter);
       const matchBase   = base === 'Todos' || d.base === base;
       const matchFamily = !activeFamilyIds || activeFamilyIds.includes(d.id);
+      const matchOrigin = origin === 'todas' || d.origin === ORIGIN_MAP[origin];
       const q = search.toLowerCase();
       const matchSearch = q === '' ? true :
         d.name.toLowerCase().includes(q) ||
         d.base.toLowerCase().includes(q) ||
         d.ingredients.some(ing => ing.name.toLowerCase().includes(q));
-      return matchFilter && matchBase && matchFamily && matchSearch;
+      return matchFilter && matchBase && matchFamily && matchOrigin && matchSearch;
     })
     .sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
 
   const baseActive   = base !== 'Todos';
   const familyActive = family !== 'todas';
+  const originActive = origin !== 'todas';
 
   const ListHeader = (
     <View>
@@ -134,7 +159,7 @@ export default function CardapioScreen({ navigation }) {
         <TouchableOpacity
           onPress={() => {
             if (baseActive) { setBase('Todos'); setShowBases(false); }
-            else { setShowBases(v => !v); setShowFamilies(false); }
+            else { setShowBases(v => !v); setShowFamilies(false); setShowOrigins(false); }
           }}
           activeOpacity={0.8}
           style={[styles.chip, (baseActive || showBases) && styles.chipActive]}
@@ -152,7 +177,7 @@ export default function CardapioScreen({ navigation }) {
         <TouchableOpacity
           onPress={() => {
             if (familyActive) { setFamily('todas'); setShowFamilies(false); }
-            else { setShowFamilies(v => !v); setShowBases(false); }
+            else { setShowFamilies(v => !v); setShowBases(false); setShowOrigins(false); }
           }}
           activeOpacity={0.8}
           style={[styles.chip, (familyActive || showFamilies) && styles.chipActive]}
@@ -163,6 +188,24 @@ export default function CardapioScreen({ navigation }) {
           </Text>
           <Text style={[(familyActive || showFamilies) ? styles.selectorArrowActive : styles.selectorArrow]}>
             {familyActive ? '×' : '▾'}
+          </Text>
+        </TouchableOpacity>
+
+        {/* Origem selector chip */}
+        <TouchableOpacity
+          onPress={() => {
+            if (originActive) { setOrigin('todas'); setShowOrigins(false); }
+            else { setShowOrigins(v => !v); setShowBases(false); setShowFamilies(false); }
+          }}
+          activeOpacity={0.8}
+          style={[styles.chip, (originActive || showOrigins) && styles.chipActive]}
+        >
+          <Text style={styles.chipEmoji}>🌍</Text>
+          <Text style={[styles.chipLabel, (originActive || showOrigins) && styles.chipLabelActive]}>
+            {originActive ? (origins.find(o => o.id === origin)?.label ?? 'Origem') : 'Origem'}
+          </Text>
+          <Text style={[(originActive || showOrigins) ? styles.selectorArrowActive : styles.selectorArrow]}>
+            {originActive ? '×' : '▾'}
           </Text>
         </TouchableOpacity>
 
@@ -206,6 +249,23 @@ export default function CardapioScreen({ navigation }) {
             >
               <Text style={[styles.dropLabel, family === f.id && { color: '#fff' }]}>
                 {f.emoji} {f.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      {/* DROPDOWN — ORIGEM */}
+      {showOrigins && (
+        <View style={styles.dropdownGrid}>
+          {origins.map(o => (
+            <TouchableOpacity
+              key={o.id}
+              onPress={() => { setOrigin(o.id); setShowOrigins(false); }}
+              style={[styles.dropChip, origin === o.id && styles.dropChipActive]}
+            >
+              <Text style={[styles.dropLabel, origin === o.id && { color: '#fff' }]}>
+                {o.emoji} {o.label}
               </Text>
             </TouchableOpacity>
           ))}
