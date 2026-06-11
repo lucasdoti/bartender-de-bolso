@@ -28,24 +28,36 @@ const filters = [
 const bases = ['Todos', 'Rum', 'Gin', 'Vodka', 'Tequila', 'Cachaça', 'Whisky', 'Bourbon', 'Aperol', 'Campari'];
 
 const origins = [
-  { id: 'todas',  label: 'Origem',  emoji: '🌍' },
-  { id: 'brasil', label: 'Brasil',  emoji: '🇧🇷' },
-  { id: 'cuba',   label: 'Cuba',    emoji: '🇨🇺' },
-  { id: 'eua',    label: 'EUA',     emoji: '🇺🇸' },
-  { id: 'italia', label: 'Itália',  emoji: '🇮🇹' },
-  { id: 'mexico', label: 'México',  emoji: '🇲🇽' },
-  { id: 'uk',     label: 'UK',      emoji: '🏴' },
-  { id: 'franca', label: 'França',  emoji: '🇫🇷' },
+  { id: 'todas',       label: 'Origem',       emoji: '🌍' },
+  { id: 'brasil',      label: 'Brasil',       emoji: '🇧🇷' },
+  { id: 'cuba',        label: 'Cuba',         emoji: '🇨🇺' },
+  { id: 'eua',         label: 'EUA',          emoji: '🇺🇸' },
+  { id: 'italia',      label: 'Itália',       emoji: '🇮🇹' },
+  { id: 'uk',          label: 'Inglaterra',   emoji: '🏴' },
+  { id: 'franca',      label: 'França',       emoji: '🇫🇷' },
+  { id: 'mexico',      label: 'México',       emoji: '🇲🇽' },
+  { id: 'puertorico',  label: 'Puerto Rico',  emoji: '🇵🇷' },
+  { id: 'irlanda',     label: 'Irlanda',      emoji: '🇮🇪' },
+  { id: 'peru',        label: 'Peru',         emoji: '🇵🇪' },
+  { id: 'argentina',   label: 'Argentina',    emoji: '🇦🇷' },
+  { id: 'bermudas',    label: 'Bermudas',     emoji: '🇧🇲' },
+  { id: 'alemanha',    label: 'Alemanha',     emoji: '🇩🇪' },
 ];
 
 const ORIGIN_MAP = {
-  brasil: 'Brasil 🇧🇷',
-  cuba:   'Cuba 🇨🇺',
-  eua:    'EUA 🇺🇸',
-  italia: 'Itália 🇮🇹',
-  mexico: 'México 🇲🇽',
-  uk:     'Inglaterra 🏴',
-  franca: 'França 🇫🇷',
+  brasil:     'Brasil 🇧🇷',
+  cuba:       'Cuba 🇨🇺',
+  eua:        'EUA 🇺🇸',
+  italia:     'Itália 🇮🇹',
+  uk:         'Inglaterra 🏴',
+  franca:     'França 🇫🇷',
+  mexico:     'México 🇲🇽',
+  puertorico: 'Puerto Rico 🇵🇷',
+  irlanda:    'Irlanda 🇮🇪',
+  peru:       'Peru 🇵🇪',
+  argentina:  'Argentina 🇦🇷',
+  bermudas:   'Bermudas 🇧🇲',
+  alemanha:   'Alemanha 🇩🇪',
 };
 
 const families = [
