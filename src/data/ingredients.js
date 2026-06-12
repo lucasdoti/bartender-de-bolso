@@ -40,6 +40,7 @@ export const ingredientCategories = [
       { id: 'bourbon',   label: 'Bourbon',    emoji: '🍯' },
       { id: 'campari',   label: 'Campari',    emoji: '🍷' },
       { id: 'aperol',    label: 'Aperol',     emoji: '🍑' },
+      { id: 'cynar',     label: 'Cynar',      emoji: '🌿' },
       { id: 'vermute',   label: 'Vermute',    emoji: '🍷' },
       { id: 'triplesec', label: 'Triple Sec', emoji: '🍊' },
       { id: 'pisco',     label: 'Pisco',      emoji: '🏺' },
