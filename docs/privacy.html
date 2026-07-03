@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Política de Privacidade — Bartender de Bolso</title>
+  <style>
+    :root {
+      --bg:        #FAFAF8;
+      --bg-alt:    #F2F2EE;
+      --surface:   #FFFFFF;
+      --border:    #E2E2DC;
+      --text:      #1A1A16;
+      --text-muted:#6B6B62;
+      --accent:    #C84B31;
+      --accent-dim:#F0E8E5;
+      --link:      #A83A22;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg:        #0F0F0C;
+        --bg-alt:    #1A1A14;
+        --surface:   #1C1C16;
+        --border:    #2A2A22;
+        --text:      #EDEDE8;
+        --text-muted:#8A8A7E;
+        --accent:    #E05A3A;
+        --accent-dim:#2A1A14;
+        --link:      #E8705A;
+      }
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+      font-size: 16px;
+      line-height: 1.75;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--link); text-underline-offset: 3px; }
+    a:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 2px; }
+    header { border-bottom: 1px solid var(--border); padding: 28px 24px 24px; }
+    .header-inner { max-width: 680px; margin: 0 auto; display: flex; align-items: center; gap: 14px; }
+    .app-icon { width: 48px; height: 48px; border-radius: 12px; background: #1A0A06; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,.18); }
+    .app-name { font-family: Georgia, 'Times New Roman', serif; font-size: 1.15rem; font-weight: normal; color: var(--text); letter-spacing: .01em; }
+    .app-name span { display: block; font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif; font-size: .72rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); margin-top: 1px; }
+    main { max-width: 680px; margin: 0 auto; padding: 48px 24px 80px; }
+    .doc-title { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(1.75rem, 4vw, 2.4rem); font-weight: normal; line-height: 1.2; color: var(--text); margin-bottom: 12px; }
+    .doc-meta { display: flex; gap: 20px; flex-wrap: wrap; font-size: .82rem; color: var(--text-muted); font-weight: 500; letter-spacing: .02em; padding-bottom: 32px; border-bottom: 1px solid var(--border); margin-bottom: 40px; }
+    .doc-meta span::before { content: '·'; margin-right: 8px; color: var(--accent); }
+    .doc-meta span:first-child::before { content: none; }
+    .intro-box { background: var(--accent-dim); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; padding: 16px 20px; margin-bottom: 40px; font-size: .93rem; color: var(--text); line-height: 1.65; }
+    .section { margin-bottom: 40px; }
+    .section-header { display: flex; align-items: baseline; gap: 14px; margin-bottom: 14px; }
+    .section-num { font-family: Georgia, serif; font-size: .78rem; font-weight: normal; color: var(--accent); letter-spacing: .06em; flex-shrink: 0; padding-top: 2px; }
+    h2 { font-family: Georgia, 'Times New Roman', serif; font-size: 1.15rem; font-weight: normal; color: var(--text); line-height: 1.3; }
+    p { font-size: .94rem; color: var(--text); line-height: 1.8; margin-bottom: 12px; }
+    p:last-child { margin-bottom: 0; }
+    ul, ol { padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    li { font-size: .94rem; color: var(--text); line-height: 1.7; padding-left: 20px; position: relative; }
+    li::before { content: '—'; position: absolute; left: 0; color: var(--accent); font-size: .85rem; }
+    .data-table { width: 100%; border-collapse: collapse; font-size: .88rem; margin: 16px 0; }
+    .data-table th { text-align: left; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); border-bottom: 2px solid var(--border); padding: 8px 12px 8px 0; }
+    .data-table td { padding: 10px 12px 10px 0; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; }
+    .data-table tr:last-child td { border-bottom: none; }
+    .data-table td:first-child { font-weight: 600; }
+    .table-wrap { overflow-x: auto; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+    .rights-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin: 16px 0; }
+    .right-card { background: var(--bg-alt); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+    .right-card strong { display: block; font-size: .85rem; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+    .right-card span { font-size: .82rem; color: var(--text-muted); line-height: 1.5; }
+    .contact-box { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; }
+    .contact-box p { font-size: .92rem; margin-bottom: 16px; }
+    .contact-item { display: flex; align-items: center; gap: 10px; font-size: .9rem; color: var(--text); margin-bottom: 8px; }
+    .contact-item:last-child { margin-bottom: 0; }
+    .contact-label { font-size: .72rem; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; color: var(--text-muted); min-width: 60px; }
+    footer { border-top: 1px solid var(--border); padding: 24px; text-align: center; font-size: .78rem; color: var(--text-muted); }
+    @media (max-width: 480px) { main { padding: 32px 16px 64px; } .rights-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="app-icon">🍸</div>
+    <div class="app-name">
+      Bartender de Bolso
+      <span>Aplicativo de Drinks</span>
+    </div>
+  </div>
+</header>
+
+<main>
+  <h1 class="doc-title">Política de Privacidade</h1>
+  <div class="doc-meta">
+    <span>Versão 1.0</span>
+    <span>Vigência: julho de 2026</span>
+    <span>Idioma: Português (BR)</span>
+  </div>
+
+  <div class="intro-box">
+    Este documento descreve como o <strong>Bartender de Bolso</strong> coleta, usa e protege suas informações pessoais. Ao utilizar o aplicativo, você concorda com os termos desta política. Ela foi elaborada em conformidade com a <strong>Lei Geral de Proteção de Dados (LGPD) — Lei nº 13.709/2018</strong>.
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-num">01</span><h2>Quem somos</h2></div>
+    <p>O <strong>Bartender de Bolso</strong> é um aplicativo mobile de receitas e guia de drinks, desenvolvido e operado de forma independente. O responsável pelo tratamento dos seus dados (controlador, nos termos da LGPD) é o desenvolvedor do aplicativo, identificado ao final desta política na seção de contato.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-num">02</span><h2>Quais dados coletamos</h2></div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead><tr><th>Dado</th><th>Finalidade</th><th>Onde é armazenado</th></tr></thead>
+        <tbody>
+          <tr><td>E-mail e senha</td><td>Criação e acesso à conta</td><td>Supabase (nuvem)</td></tr>
+          <tr><td>Drinks favoritos</td><td>Personalização do app</td><td>Supabase (nuvem)</td></tr>
+          <tr><td>Avaliações de drinks</td><td>Personalização do app</td><td>Supabase (nuvem)</td></tr>
+          <tr><td>Drinks personalizados</td><td>Receitas criadas pelo usuário</td><td>Supabase (nuvem)</td></tr>
+          <tr><td>Ingredientes do bar</td><td>Sugestão de receitas disponíveis</td><td>Dispositivo (local)</td></tr>
+          <tr><td>Preferências do app</td><td>Onboarding, confirmação de idade</td><td>Dispositivo (local)</td></tr>
+          <tr><td>Token de notificação</td><td>Envio de notificações push</td><td>Expo / dispositivo</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>Não coletamos dados de localização, câmera, microfone, contatos ou qualquer outra informação além das listadas acima.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-num">03</span><h2>Como usamos seus dados</h2></div>
+    <ul>
+      <li>Criar e gerenciar sua conta no aplicativo</li>
+      <li>Salvar e exibir seus drinks favoritos e avaliações entre sessões</li>
+      <li>Sincronizar seus dados em múltiplos dispositivos</li>
+      <li>Enviar notificações push com sugestões de drinks (somente com sua permissão)</li>
+      <li>Melhorar a experiência do aplicativo com base no uso</li>
+    </ul>
+    <p>Não utilizamos seus dados para publicidade de terceiros, venda de dados ou perfilagem automatizada com efeitos significativos.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-num">04</span><h2>Base legal (LGPD)</h2></div>
+    <p>O tratamento dos seus dados é realizado com fundamento no:</p>
+    <ul>
+      <li><strong>Consentimento</strong> — para notificações push e preferências (Art. 7º, I)</li>
+      <li><strong>Execução de contrato</strong> — para manter sua conta e sincronizar dados necessários ao funcionamento do serviço (Art. 7º, V)</li>
+      <li><strong>Legítimo interesse</strong> — para melhorias no aplicativo (Art. 7º, IX)</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-num">05</span><h2>Compartilhamento de dados</h2></div>
+    <p>Seus dados pessoais podem ser compartilhados com:</p>
+    <ul>
+      <li><strong>Supabase Inc.</strong> — plataforma de banco de dados e autenticação. Os dados podem ser armazenados em servidores nos EUA. Consulte em <a href="https://supabase.com/privacy" target="_blank" rel="noopener">supabase.com/privacy</a>.</li>
+      <li><strong>Expo (Expo Inc.)</strong> — infraestrutura de notificações push. Consulte em <a href="https://expo.dev/privacy" target="_blank" rel="noopener">expo.dev/privacy</a>.</li>
+      <li><strong>Google LLC</strong> — plataforma de distribuição (Google Play). Consulte em <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">policies.google.com/privacy</a>.</li>
+    </ul>
+    <p>Não vendemos, alugamos ou compartilhamos seus dados com terceiros para fins comerciais.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-num">06</span><h2>Retenção de dados</h2></div>
+    <p>Seus dados são mantidos enquanto sua conta estiver ativa. Ao solicitar a exclusão da conta, removemos seus dados pessoais dos nossos servidores em até <strong>30 dias</strong>, salvo obrigação legal que exija retenção por prazo maior.</p>
+    <p>Dados armazenados localmente no dispositivo podem ser removidos a qualquer momento desinstalando o app.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-num">07</span><h2>Seus direitos (LGPD, Art. 18)</h2></div>
+    <div class="rights-grid">
+      <div class="right-card"><strong>Acesso</strong><span>Solicitar cópia dos seus dados pessoais armazenados</span></div>
+      <div class="right-card"><strong>Correção</strong><span>Corrigir dados incompletos, inexatos ou desatualizados</span></div>
+      <div class="right-card"><strong>Exclusão</strong><span>Solicitar a exclusão da sua conta e dados</span></div>
+      <div class="right-card"><strong>Portabilidade</strong><span>Receber seus dados em formato estruturado</span></div>
+      <div class="right-card"><strong>Revogação</strong><span>Revogar o consentimento para notificações a qualquer momento</span></div>
+      <div class="right-card"><strong>Informação</strong><span>Saber com quem seus dados são compartilhados</span></div>
+    </div>
+    <p>Para exercer qualquer um desses direitos, entre em contato pelo e-mail indicado na seção de contato.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-num">08</span><h2>Segurança</h2></div>
+    <p>Adotamos medidas técnicas e organizacionais para proteger seus dados, incluindo:</p>
+    <ul>
+      <li>Autenticação segura via Supabase Auth (senhas com hash bcrypt)</li>
+      <li>Comunicação criptografada via HTTPS/TLS</li>
+      <li>Acesso restrito ao banco de dados por políticas de segurança em nível de linha (Row-Level Security)</li>
+    </ul>
+    <p>Em caso de incidente de segurança que afete seus dados, notificaremos os titulares conforme exigido pela LGPD.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-num">09</span><h2>Crianças e adolescentes</h2></div>
+    <p>O <strong>Bartender de Bolso</strong> é destinado exclusivamente a maiores de 18 anos. O aplicativo conta com verificação de idade na primeira abertura e não coleta conscientemente dados de menores de 18 anos. Caso identifiquemos que dados de um menor foram coletados, procederemos à exclusão imediata.</p>
+  </div>
+
+  <div class="section">
+    <div class="section-header"><span class="section-num">10</span><h2>Atualizações desta política</h2></div>
+    <p>Esta política pode ser atualizada periodicamente. Quando houver alterações relevantes, notificaremos você pelo aplicativo ou por e-mail. O uso contínuo do aplicativo após a publicação de alterações constitui aceitação da política atualizada.</p>
+  </div>
+
+  <hr>
+
+  <div class="section">
+    <div class="section-header"><span class="section-num">✉</span><h2>Contato</h2></div>
+    <div class="contact-box">
+      <p>Para dúvidas, solicitações de exclusão de dados ou exercício dos seus direitos previstos na LGPD:</p>
+      <div class="contact-item"><span class="contact-label">App</span><span>Bartender de Bolso</span></div>
+      <div class="contact-item"><span class="contact-label">E-mail</span><a href="mailto:lucas_doti@hotmail.com">lucas_doti@hotmail.com</a></div>
+      <div class="contact-item"><span class="contact-label">País</span><span>Brasil</span></div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  © 2026 Bartender de Bolso · Política de Privacidade v1.0 · Conforme a LGPD (Lei nº 13.709/2018)
+</footer>
+
+</body>
+</html>
