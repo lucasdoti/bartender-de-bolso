@@ -128,7 +128,7 @@ export const drinks = [
     history: 'Criado nos anos 1920 em Paris no Harry\'s Bar. É famoso como cura para ressaca pelo seu poder revitalizante.',
     famous: 'Fernand Petiot',
     funFact: 'Existem versões com bacon, camarão e até hambúrguer na decoração.',
-    needs: ['vodka', 'limao', 'gelo'],
+    needs: ['vodka', 'limao', 'suco_de_tomate', 'gelo'],
     method: 'built',
   },
   {
@@ -360,7 +360,7 @@ export const drinks = [
     history: 'Criado em 1988 por Toby Cecchini em Nova York. Ficou mundialmente famoso com a série Sex and the City.',
     famous: 'Carrie Bradshaw',
     funFact: 'Após Sex and the City, as vendas de Cointreau subiram 30%.',
-    needs: ['vodka', 'triplesec', 'limao', 'sumo_laranja', 'gelo'],
+    needs: ['vodka', 'triplesec', 'limao', 'suco_de_cranberry', 'gelo'],
     method: 'shaken',
   },
   {
@@ -392,7 +392,7 @@ export const drinks = [
     history: 'Surgiu por volta de 1900 em Cuba após a chegada da Coca-Cola à ilha. O nome celebra a independência cubana.',
     famous: 'Soldados americanos em Cuba',
     funFact: 'O brinde "Por Cuba Libre!" deu nome ao drink.',
-    needs: ['rum', 'limao', 'gelo'],
+    needs: ['rum', 'limao', 'refrigerante_cola', 'gelo'],
     method: 'built',
   },
   {
@@ -558,7 +558,7 @@ export const drinks = [
     history: 'Nasceu no século XIX quando oficiais britânicos na Índia misturavam gin com água tônica (que tinha quinino contra malária).',
     famous: 'Oficiais britânicos na Índia',
     funFact: 'O quinino da tônica brilha sob luz negra.',
-    needs: ['gin', 'gelo'],
+    needs: ['gin', 'agua_tonica', 'gelo'],
     method: 'built',
   },
   {
@@ -964,7 +964,7 @@ export const drinks = [
     history: 'A Paloma é, na verdade, o coquetel com tequila mais popular no México — mais do que a própria Margarita.',
     famous: 'Bartenders mexicanos',
     funFact: '"Paloma" significa "pomba" em espanhol.',
-    needs: ['tequila', 'limao', 'gelo'],
+    needs: ['tequila', 'limao', 'suco_de_toranja', 'gelo'],
     method: 'built',
   },
   {
@@ -996,7 +996,7 @@ export const drinks = [
     history: 'Criada em 1954 no Caribe Hilton em San Juan, Porto Rico, pelo bartender Ramón Marrero. É o drink nacional de Porto Rico.',
     famous: 'Ramón "Monchito" Marrero',
     funFact: 'Porto Rico declarou a Piña Colada bebida oficial em 1978.',
-    needs: ['rum', 'creme_coco', 'gelo'],
+    needs: ['rum', 'creme_coco', 'suco_de_abacaxi', 'gelo'],
     method: 'blended',
   },
   {
@@ -1029,7 +1029,7 @@ export const drinks = [
     history: 'Uma releitura tropical e refrescante combinando abacaxi com hortelã, popular em bares de praia.',
     famous: 'Bares de praia brasileiros',
     funFact: 'A hortelã realça o frescor do abacaxi.',
-    needs: ['rum', 'hortela', 'limao', 'gelo'],
+    needs: ['rum', 'hortela', 'limao', 'suco_de_abacaxi', 'gelo'],
     method: 'blended',
   },
   {
@@ -1061,7 +1061,7 @@ export const drinks = [
     history: 'Popularizado nos anos 1980, embora o nome date dos anos 1920. Refrescante e fácil de beber.',
     famous: 'Bares americanos',
     funFact: 'Trocando a toranja por abacaxi vira um Bay Breeze.',
-    needs: ['vodka', 'gelo'],
+    needs: ['vodka', 'suco_de_cranberry', 'suco_de_toranja', 'gelo'],
     method: 'built',
   },
   {
@@ -1094,7 +1094,7 @@ export const drinks = [
     history: 'Criado nos anos 1980 na Flórida durante o Spring Break. Nome chamativo que ajudou nas vendas.',
     famous: 'Bares da Flórida',
     funFact: 'Nasceu numa competição para vender mais peach schnapps.',
-    needs: ['vodka', 'sumo_laranja', 'gelo'],
+    needs: ['vodka', 'sumo_laranja', 'suco_de_cranberry', 'gelo'],
     method: 'built',
   },
   {
@@ -1126,7 +1126,7 @@ export const drinks = [
     history: 'Criado nos anos 1970 na Califórnia. Ganhou fama quando os Rolling Stones o adotaram em turnê.',
     famous: 'Rolling Stones',
     funFact: 'A turnê de 1972 dos Stones foi apelidada de "Cocaine & Tequila Sunrise Tour".',
-    needs: ['tequila', 'sumo_laranja', 'gelo'],
+    needs: ['tequila', 'sumo_laranja', 'granadina', 'gelo'],
     method: 'built',
   },
   {
@@ -1697,7 +1697,7 @@ export const drinks = [
     history: "Criada nos anos 1990 por Julio Bermejo no Tommy's Mexican Restaurant em San Francisco. Elimina o Triple Sec para valorizar a tequila pura.",
     famous: 'Julio Bermejo',
     funFact: "A Tommy's Margarita elevou o debate sobre tequila 100% agave no mundo da coquetelaria.",
-    needs: ['tequila', 'limao', 'gelo'],
+    needs: ['tequila', 'limao', 'xarope_agave', 'gelo'],
     method: 'shaken',
   },
   {
