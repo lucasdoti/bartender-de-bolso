@@ -491,7 +491,7 @@ export const drinks = [
     history: 'Criado em 1983 por Dick Bradsell em Londres quando uma modelo pediu algo que a "acordasse e depois embebedasse".',
     famous: 'Dick Bradsell',
     funFact: 'A espuma cremosa vem de bater bem o café fresco.',
-    needs: ['vodka', 'gelo'],
+    needs: ['vodka', 'cafe', 'xarope_simples', 'gelo'],
     method: 'shaken',
   },
   {
