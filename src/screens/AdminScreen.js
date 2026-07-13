@@ -86,6 +86,26 @@ export default function AdminScreen({ navigation }) {
   const [addError, setAddError]         = useState('');
   const [addOk, setAddOk]              = useState(false);
 
+  // ── PREMIUM ──
+  const [premiumEmail, setPremiumEmail]   = useState('');
+  const [premiumLoading, setPremiumLoading] = useState(false);
+  const [premiumMsg, setPremiumMsg]       = useState('');
+
+  const handleSetPremium = async (grant) => {
+    if (!premiumEmail.trim()) return;
+    setPremiumLoading(true);
+    setPremiumMsg('');
+    const { data, error } = await supabase.rpc('set_user_premium', {
+      target_email: premiumEmail.trim().toLowerCase(),
+      premium: grant,
+    });
+    setPremiumLoading(false);
+    if (error) { setPremiumMsg('Erro: ' + error.message); return; }
+    if (data === 'user_not_found') { setPremiumMsg('Usuário não encontrado.'); return; }
+    setPremiumMsg(grant ? '✓ Premium ativado!' : '✓ Premium removido.');
+    setPremiumEmail('');
+  };
+
   // ── GERENCIAR DRINKS EXTRAS ──
   const [allExtraDrinks, setAllExtraDrinks] = useState([]);
   const [togglingId, setTogglingId]         = useState(null);
@@ -493,6 +513,37 @@ export default function AdminScreen({ navigation }) {
           ))}
         </View>
 
+        {/* PREMIUM */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>👑 Gerenciar Premium</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="E-mail do usuário"
+            placeholderTextColor="#555"
+            value={premiumEmail}
+            onChangeText={t => { setPremiumEmail(t); setPremiumMsg(''); }}
+            autoCapitalize="none"
+            keyboardType="email-address"
+          />
+          <View style={{ flexDirection: 'row', gap: 10, marginTop: 10 }}>
+            <TouchableOpacity
+              style={[styles.premiumBtn, { backgroundColor: '#2E7D32' }]}
+              onPress={() => handleSetPremium(true)}
+              disabled={premiumLoading}
+            >
+              <Text style={styles.premiumBtnText}>✓ Ativar Premium</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.premiumBtn, { backgroundColor: '#B71C1C' }]}
+              onPress={() => handleSetPremium(false)}
+              disabled={premiumLoading}
+            >
+              <Text style={styles.premiumBtnText}>✕ Remover</Text>
+            </TouchableOpacity>
+          </View>
+          {premiumMsg ? <Text style={[styles.emptyText, { marginTop: 10, color: premiumMsg.startsWith('✓') ? '#4CAF50' : '#FF5A5A' }]}>{premiumMsg}</Text> : null}
+        </View>
+
         {/* SUGESTÕES DE DRINKS */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>🍹 Sugestões de drinks</Text>
@@ -622,6 +673,9 @@ const styles = StyleSheet.create({
   visToggleText: { fontSize: 11, fontFamily: fonts.extraBold },
 
   emptyText: { fontSize: 13, fontFamily: fonts.semiBold, color: '#555' },
+  premiumBtn: { flex: 1, paddingVertical: 10, borderRadius: radius.md, alignItems: 'center' },
+  premiumBtnText: { fontSize: 13, fontFamily: fonts.extraBold, color: '#fff' },
+  input: { backgroundColor: '#1A1A1A', borderWidth: 1, borderColor: '#333', borderRadius: radius.md, paddingHorizontal: 14, paddingVertical: 10, color: '#fff', fontFamily: fonts.semiBold, fontSize: 14 },
   suggestionCard: { flexDirection: 'row', alignItems: 'flex-start', gap: 12, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#1E1E1E' },
   suggestionName: { fontSize: 14, fontFamily: fonts.extraBold, color: '#fff' },
   suggestionMeta: { fontSize: 11, fontFamily: fonts.semiBold, color: ACCENT, marginTop: 2 },
