@@ -5,6 +5,8 @@ import { useAuth } from './AuthContext';
 
 const AppContext = createContext();
 
+const ADMIN_EMAIL = 'lucas_doti@hotmail.com';
+
 function normalizeExtraDrink(d) {
   return {
     ...d,
@@ -51,12 +53,20 @@ export function AppProvider({ children }) {
   const [extraDrinks, setExtraDrinks] = useState([]);
   const [streak,      setStreak]      = useState({ current: 0, longest: 0 });
   const [loading,     setLoading]     = useState(true);
+  const [isPremium,   setIsPremium]   = useState(false);
 
   useEffect(() => {
     if (!user) {
       setFavorites([]); setIngredients([]); setHistory([]);
       setRatings({}); setExtraDrinks([]); setStreak({ current: 0, longest: 0 });
+      setIsPremium(false);
       return;
+    }
+    if (user.email === ADMIN_EMAIL) {
+      setIsPremium(true);
+    } else {
+      supabase.from('profiles').select('is_premium').eq('id', user.id).maybeSingle()
+        .then(({ data }) => setIsPremium(data?.is_premium ?? false));
     }
     loadData();
     AsyncStorage.getItem(`drink_ratings_${user.id}`).then(val => {
@@ -139,6 +149,7 @@ export function AppProvider({ children }) {
       extraDrinks,  refreshExtraDrinks,
       streak,
       loading,
+      isPremium,
     }}>
       {children}
     </AppContext.Provider>

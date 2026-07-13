@@ -25,7 +25,7 @@ const INGREDIENT_ALIASES = { limao_taiti: 'limao', limao_siciliano: 'limao' };
 function norm(id) { return INGREDIENT_ALIASES[id] || id; }
 
 export default function HomeScreen({ navigation }) {
-  const { favorites, toggleFavorite, ingredients, ratings, extraDrinks } = useApp();
+  const { favorites, toggleFavorite, ingredients, ratings, extraDrinks, isPremium } = useApp();
   const drinks = useDrinks();
   const drinkOfDay = getDrinkOfDay(extraDrinks);
   const [activeMood, setActiveMood]   = useState(null);
@@ -34,6 +34,7 @@ export default function HomeScreen({ navigation }) {
 
   const surpriseMe = () => {
     try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch (_) {}
+    if (!isPremium) { navigation.navigate('Paywall'); return; }
     const normalized = ingredients.map(norm);
 
     if (normalized.length === 0) {
@@ -125,7 +126,7 @@ export default function HomeScreen({ navigation }) {
         </View>
 
         {/* CTA PRINCIPAL — BARTENDER IA */}
-        <TouchableOpacity onPress={() => navigation.navigate('BartenderIA')} activeOpacity={0.85} style={styles.ctaMain}>
+        <TouchableOpacity onPress={() => isPremium ? navigation.navigate('BartenderIA') : navigation.navigate('Paywall')} activeOpacity={0.85} style={styles.ctaMain}>
           <View style={{ flex: 1 }}>
             <Text style={styles.ctaMainLabel}>✦ Inteligência artificial</Text>
             <Text style={styles.ctaMainTitle}>Fale com o{'\n'}Bartender 💬</Text>
@@ -144,7 +145,7 @@ export default function HomeScreen({ navigation }) {
             <Text style={styles.ctaSmallSub}>Drink do momento</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => navigation.navigate('MeuBar')} activeOpacity={0.85} style={[styles.ctaSmall, { backgroundColor: '#1C1A14' }]}>
+          <TouchableOpacity onPress={() => isPremium ? navigation.navigate('Tabs', { screen: 'MeuBar' }) : navigation.navigate('Paywall')} activeOpacity={0.85} style={[styles.ctaSmall, { backgroundColor: '#1C1A14' }]}>
             <Text style={{ fontSize: 26, marginBottom: 8 }}>🥃</Text>
             <Text style={styles.ctaSmallTitle}>Meu Bar</Text>
             <Text style={styles.ctaSmallSub}>O que tenho em casa</Text>
