@@ -6,7 +6,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
 import { colors, fonts, radius, spacing } from '../theme';
-import AppIcon from '../components/AppIcon';
 import BottomNav from '../components/BottomNav';
 import { DrinkCardList } from '../components/DrinkCard';
 import { useDrinks } from '../hooks/useDrinks';
@@ -34,11 +33,19 @@ export function FavoritosScreen({ navigation }) {
             Meus <Text style={styles.titleAccent}>favoritos</Text>
           </Text>
         </View>
-        <AppIcon size={38} />
+        {favDrinks.length > 0 && (
+          <TouchableOpacity
+            onPress={() => navigation.navigate('MeuBar')}
+            activeOpacity={0.8}
+            style={styles.shoppingIconBtn}
+          >
+            <Text style={styles.shoppingIconEmoji}>🛒</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       {/* SORT */}
-      <View style={styles.sortRow}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.sortRow}>
         {[
           { id: 'recentes',    label: 'Recentes'    },
           { id: 'nome',        label: 'A–Z'          },
@@ -54,22 +61,7 @@ export function FavoritosScreen({ navigation }) {
             <Text style={[styles.sortLabel, sort === s.id && { color: '#fff' }]}>{s.label}</Text>
           </TouchableOpacity>
         ))}
-      </View>
-
-      {favDrinks.length > 0 && (
-        <TouchableOpacity
-          onPress={() => navigation.navigate('MeuBar')}
-          activeOpacity={0.85}
-          style={styles.shoppingShortcut}
-        >
-          <Text style={styles.shoppingShortcutIcon}>🛒</Text>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.shoppingShortcutTitle}>Lista de compras</Text>
-            <Text style={styles.shoppingShortcutSub}>Ver o que falta para seus favoritos</Text>
-          </View>
-          <Text style={styles.shoppingShortcutArrow}>→</Text>
-        </TouchableOpacity>
-      )}
+      </ScrollView>
 
       {favDrinks.length === 0 ? (
         <View style={styles.empty}>
@@ -111,23 +103,20 @@ export default FavoritosScreen;
 
 // ─── STYLES ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', padding: spacing.xl, paddingBottom: spacing.md },
-  count: { fontSize: 12, fontFamily: fonts.bold, color: colors.textLight },
-  title: { fontSize: 24, fontFamily: fonts.displayBold, color: colors.text, lineHeight: 28 },
-  titleAccent: { fontFamily: fonts.displayItal, color: colors.primary },
-  sortRow: { flexDirection: 'row', gap: 8, paddingHorizontal: spacing.xl, marginBottom: spacing.md },
-  sortChip: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 50, borderWidth: 2, borderColor: colors.border, backgroundColor: colors.surface },
-  sortChipActive: { backgroundColor: colors.dark, borderColor: colors.dark },
-  sortLabel: { fontSize: 12, fontFamily: fonts.extraBold, color: '#888' },
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 80 },
-  emptyTitle: { fontSize: 16, fontFamily: fonts.extraBold, color: colors.text, marginTop: 16 },
-  emptySub: { fontSize: 13, fontFamily: fonts.semiBold, color: colors.textLight, marginTop: 6, textAlign: 'center', paddingHorizontal: 40 },
-  emptyBtn: { marginTop: 20, backgroundColor: colors.primary, borderRadius: radius.lg, paddingVertical: 12, paddingHorizontal: 28 },
-  emptyBtnText: { fontSize: 13, fontFamily: fonts.extraBold, color: '#fff' },
-  shoppingShortcut: { marginHorizontal: spacing.xl, marginBottom: spacing.sm, backgroundColor: '#0D1B2A', borderRadius: radius.lg, padding: spacing.md, flexDirection: 'row', alignItems: 'center', gap: 12 },
-  shoppingShortcutIcon: { fontSize: 22 },
-  shoppingShortcutTitle: { fontSize: 13, fontFamily: fonts.extraBold, color: '#FFD966' },
-  shoppingShortcutSub: { fontSize: 11, fontFamily: fonts.semiBold, color: '#888', marginTop: 2 },
-  shoppingShortcutArrow: { fontSize: 16, color: '#FFD966', fontFamily: fonts.extraBold },
+  safe:         { flex: 1, backgroundColor: colors.background },
+  header:       { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: spacing.xl, paddingBottom: spacing.md },
+  count:        { fontSize: 12, fontFamily: fonts.bold, color: colors.textLight },
+  title:        { fontSize: 24, fontFamily: fonts.displayBold, color: colors.text, lineHeight: 28 },
+  titleAccent:  { fontFamily: fonts.displayItal, color: colors.primary },
+  shoppingIconBtn:   { width: 40, height: 40, borderRadius: 12, backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
+  shoppingIconEmoji: { fontSize: 18 },
+  sortRow:       { gap: 8, paddingHorizontal: spacing.xl, marginBottom: spacing.md },
+  sortChip:      { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 50, borderWidth: 2, borderColor: colors.border, backgroundColor: colors.surface },
+  sortChipActive:{ backgroundColor: colors.dark, borderColor: colors.dark },
+  sortLabel:     { fontSize: 12, fontFamily: fonts.extraBold, color: '#888' },
+  empty:         { flex: 1, alignItems: 'center', justifyContent: 'center', paddingBottom: 80 },
+  emptyTitle:    { fontSize: 16, fontFamily: fonts.extraBold, color: colors.text, marginTop: 16 },
+  emptySub:      { fontSize: 13, fontFamily: fonts.semiBold, color: colors.textLight, marginTop: 6, textAlign: 'center', paddingHorizontal: 40 },
+  emptyBtn:      { marginTop: 20, backgroundColor: colors.primary, borderRadius: radius.lg, paddingVertical: 12, paddingHorizontal: 28 },
+  emptyBtnText:  { fontSize: 13, fontFamily: fonts.extraBold, color: '#fff' },
 });

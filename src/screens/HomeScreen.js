@@ -6,8 +6,8 @@ import {
 import * as Haptics from 'expo-haptics';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import { colors, fonts, radius, spacing } from '../theme';
-import AppIcon from '../components/AppIcon';
 import BottomNav from '../components/BottomNav';
 import { DrinkCardList } from '../components/DrinkCard';
 import { useDrinks, ibaOrder } from '../hooks/useDrinks';
@@ -26,22 +26,22 @@ function norm(id) { return INGREDIENT_ALIASES[id] || id; }
 
 export default function HomeScreen({ navigation }) {
   const { favorites, toggleFavorite, ingredients, ratings, extraDrinks, isPremium } = useApp();
+  const { user } = useAuth();
   const drinks = useDrinks();
   const drinkOfDay = getDrinkOfDay(extraDrinks);
-  const [activeMood, setActiveMood]   = useState(null);
-  const [search, setSearch]           = useState('');
+  const [activeMood, setActiveMood]     = useState(null);
+  const [search, setSearch]             = useState('');
   const [surprisePick, setSurprisePick] = useState(null);
+
+  const displayName = user?.user_metadata?.name || 'Bartender';
+  const initials = displayName.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase().substring(0, 2) || 'B';
+  const firstName = displayName.split(' ')[0];
 
   const surpriseMe = () => {
     try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch (_) {}
     if (!isPremium) { navigation.navigate('Paywall'); return; }
     const normalized = ingredients.map(norm);
-
-    if (normalized.length === 0) {
-      navigation.navigate('MeuBar');
-      return;
-    }
-
+    if (normalized.length === 0) { navigation.navigate('MeuBar'); return; }
     const scored = drinks
       .filter(d => (d.needs || []).length > 0)
       .map(d => {
@@ -51,25 +51,16 @@ export default function HomeScreen({ navigation }) {
       })
       .filter(s => s.matched > 0)
       .sort((a, b) => b.ratio - a.ratio || b.matched - a.matched);
-
-    if (scored.length === 0) {
-      navigation.navigate('MeuBar');
-      return;
-    }
-
+    if (scored.length === 0) { navigation.navigate('MeuBar'); return; }
     const candidates = scored.slice(0, 5);
     const { drink: pick, ratio } = candidates[Math.floor(Math.random() * candidates.length)];
-
     if (ratio === 1) {
       setSurprisePick(null);
       navigation.navigate('DrinkDetail', { drinkId: pick.id });
     } else {
       const missing = (pick.needs || [])
         .filter(n => !normalized.includes(n))
-        .map(n => {
-          const ing = pick.ingredients?.find(i => i.id === n);
-          return ing ? ing.name : n;
-        });
+        .map(n => { const ing = pick.ingredients?.find(i => i.id === n); return ing ? ing.name : n; });
       setSurprisePick({ drink: pick, missing });
     }
   };
@@ -92,10 +83,17 @@ export default function HomeScreen({ navigation }) {
 
   const greeting = () => {
     const h = new Date().getHours();
-    if (h < 12) return 'Bom dia ☀️';
-    if (h < 18) return 'Boa tarde 🌤';
-    return 'Boa noite 🌙';
+    if (h < 12) return 'Bom dia';
+    if (h < 18) return 'Boa tarde';
+    return 'Boa noite';
   };
+
+  const quickActions = [
+    { emoji: '✨', label: 'Surpresa',    onPress: surpriseMe },
+    { emoji: '🥃', label: 'Meu Bar',     onPress: () => isPremium ? navigation.navigate('Tabs', { screen: 'MeuBar' }) : navigation.navigate('Paywall') },
+    { emoji: '🤖', label: 'Bartender IA',onPress: () => isPremium ? navigation.navigate('BartenderIA') : navigation.navigate('Paywall') },
+    { emoji: '🎉', label: 'Modo Festa',  onPress: () => navigation.navigate('Festa') },
+  ];
 
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
@@ -103,14 +101,20 @@ export default function HomeScreen({ navigation }) {
 
         {/* HEADER */}
         <View style={styles.header}>
-          <View>
-            <Text style={styles.greeting}>{greeting()}</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.greeting}>{greeting()}, {firstName} ✦</Text>
             <Text style={styles.title}>
-              O que vamos{'\n'}
-              <Text style={styles.titleAccent}>preparar hoje?</Text>
+              O que vamos <Text style={styles.titleAccent}>preparar?</Text>
             </Text>
           </View>
-          <AppIcon size={46} />
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Tabs', { screen: 'Perfil' })}
+            activeOpacity={0.8}
+          >
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>{initials}</Text>
+            </View>
+          </TouchableOpacity>
         </View>
 
         {/* SEARCH */}
@@ -123,44 +127,61 @@ export default function HomeScreen({ navigation }) {
             placeholderTextColor={colors.textLight}
             style={styles.searchInput}
           />
+          {search.length > 0 && (
+            <TouchableOpacity onPress={() => setSearch('')} style={styles.searchClear}>
+              <Text style={styles.searchClearText}>×</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
-        {/* CTA PRINCIPAL — BARTENDER IA */}
-        <TouchableOpacity onPress={() => isPremium ? navigation.navigate('BartenderIA') : navigation.navigate('Paywall')} activeOpacity={0.85} style={styles.ctaMain}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.ctaMainLabel}>✦ Inteligência artificial</Text>
-            <Text style={styles.ctaMainTitle}>Fale com o{'\n'}Bartender 💬</Text>
-            <Text style={styles.ctaMainSub}>Descreva o que quer e eu sugiro o drink perfeito</Text>
-          </View>
-          <View style={styles.ctaMainIcon}>
-            <Text style={{ fontSize: 36 }}>🍸</Text>
-          </View>
-        </TouchableOpacity>
-
-        {/* CTAs SECUNDÁRIOS — SURPREENDA-ME + MEU BAR */}
-        <View style={styles.ctaRow}>
-          <TouchableOpacity onPress={surpriseMe} activeOpacity={0.85} style={[styles.ctaSmall, { backgroundColor: '#0D1B2A' }]}>
-            <Text style={{ fontSize: 26, marginBottom: 8 }}>✨</Text>
-            <Text style={styles.ctaSmallTitle}>Surpreenda-me</Text>
-            <Text style={styles.ctaSmallSub}>Drink do momento</Text>
+        {/* DRINK DO DIA — hero card */}
+        {drinkOfDay && (
+          <TouchableOpacity
+            onPress={() => navigation.navigate('DrinkDetail', { drinkId: drinkOfDay.id })}
+            activeOpacity={0.88}
+            style={[styles.drinkHero, { backgroundColor: drinkOfDay.color }]}
+          >
+            <View style={styles.drinkHeroContent}>
+              <Text style={[styles.drinkHeroLabel, { color: drinkOfDay.accent }]}>☀️ DRINK DO DIA</Text>
+              <Text style={styles.drinkHeroName}>{drinkOfDay.name}</Text>
+              {drinkOfDay.subtitle ? (
+                <Text style={styles.drinkHeroSub} numberOfLines={1}>{drinkOfDay.subtitle}</Text>
+              ) : null}
+              <View style={styles.drinkHeroMeta}>
+                <View style={[styles.drinkHeroTag, { backgroundColor: drinkOfDay.accent + '22' }]}>
+                  <Text style={[styles.drinkHeroTagText, { color: drinkOfDay.accent }]}>⏱ {drinkOfDay.time}</Text>
+                </View>
+                <View style={[styles.drinkHeroTag, { backgroundColor: drinkOfDay.accent + '22' }]}>
+                  <Text style={[styles.drinkHeroTagText, { color: drinkOfDay.accent }]}>🎯 {drinkOfDay.difficulty}</Text>
+                </View>
+                <View style={[styles.drinkHeroTag, { backgroundColor: drinkOfDay.accent + '33' }]}>
+                  <Text style={[styles.drinkHeroTagText, { color: drinkOfDay.accent }]}>{drinkOfDay.base}</Text>
+                </View>
+              </View>
+            </View>
+            <Text style={[styles.drinkHeroArrow, { color: drinkOfDay.accent }]}>›</Text>
           </TouchableOpacity>
+        )}
 
-          <TouchableOpacity onPress={() => isPremium ? navigation.navigate('Tabs', { screen: 'MeuBar' }) : navigation.navigate('Paywall')} activeOpacity={0.85} style={[styles.ctaSmall, { backgroundColor: '#1C1A14' }]}>
-            <Text style={{ fontSize: 26, marginBottom: 8 }}>🥃</Text>
-            <Text style={styles.ctaSmallTitle}>Meu Bar</Text>
-            <Text style={styles.ctaSmallSub}>O que tenho em casa</Text>
-          </TouchableOpacity>
+        {/* QUICK ACTIONS */}
+        <View style={styles.quickActions}>
+          {quickActions.map(action => (
+            <TouchableOpacity key={action.label} onPress={action.onPress} activeOpacity={0.8} style={styles.actionBtn}>
+              <View style={styles.actionCircle}>
+                <Text style={styles.actionEmoji}>{action.emoji}</Text>
+              </View>
+              <Text style={styles.actionLabel}>{action.label}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
-        {/* FALTA SÓ ISSO — resultado parcial do Surpreenda-me */}
+        {/* SURPRISE RESULT */}
         {surprisePick && (
           <View style={styles.surpriseCard}>
             <View style={{ flex: 1 }}>
               <Text style={styles.surpriseLabel}>✨ Que tal este drink?</Text>
               <Text style={styles.surpriseName}>{surprisePick.drink.name}</Text>
-              <Text style={styles.surpriseMissing}>
-                Falta só: {surprisePick.missing.join(', ')}
-              </Text>
+              <Text style={styles.surpriseMissing}>Falta só: {surprisePick.missing.join(', ')}</Text>
             </View>
             <View style={styles.surpriseActions}>
               <TouchableOpacity
@@ -176,39 +197,6 @@ export default function HomeScreen({ navigation }) {
             </View>
           </View>
         )}
-
-        {/* DRINK DO DIA */}
-        {drinkOfDay && (
-          <TouchableOpacity
-            onPress={() => navigation.navigate('DrinkDetail', { drinkId: drinkOfDay.id })}
-            activeOpacity={0.85}
-            style={[styles.drinkDayCard, { borderColor: drinkOfDay.accent + '33' }]}
-          >
-            <View style={[styles.drinkDayIcon, { backgroundColor: drinkOfDay.color }]}>
-              <Text style={{ fontSize: 22 }}>☀️</Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.drinkDayLabel}>Drink do dia</Text>
-              <Text style={styles.drinkDayName}>{drinkOfDay.name}</Text>
-              <Text style={styles.drinkDayMeta}>{drinkOfDay.time} · {drinkOfDay.difficulty}</Text>
-            </View>
-            <View style={[styles.drinkDayBase, { backgroundColor: drinkOfDay.color }]}>
-              <Text style={[styles.drinkDayBaseText, { color: drinkOfDay.accent }]}>{drinkOfDay.base}</Text>
-            </View>
-          </TouchableOpacity>
-        )}
-
-        {/* MODO FESTA */}
-        <TouchableOpacity onPress={() => navigation.navigate('Festa')} activeOpacity={0.85} style={styles.ctaFesta}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.ctaFestaLabel}>✦ Novo</Text>
-            <Text style={styles.ctaFestaTitle}>Modo Festa 🎉</Text>
-            <Text style={styles.ctaFestaSub}>Compare quem bebeu mais com os amigos</Text>
-          </View>
-          <View style={styles.ctaFestaIcon}>
-            <Text style={{ fontSize: 32 }}>🏆</Text>
-          </View>
-        </TouchableOpacity>
 
         {/* MOODS */}
         <View style={styles.section}>
@@ -275,59 +263,105 @@ export default function HomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: colors.background },
-  scroll: { flex: 1 },
+  safe:    { flex: 1, backgroundColor: colors.background },
+  scroll:  { flex: 1 },
   content: { paddingBottom: 100 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', padding: spacing.xl, paddingBottom: 0 },
-  greeting: { fontSize: 13, fontFamily: fonts.semiBold, color: colors.textMuted, letterSpacing: 0.5 },
-  title: { fontSize: 28, fontFamily: fonts.displayBold, color: colors.text, lineHeight: 34, marginTop: 2 },
-  titleAccent: { fontFamily: fonts.displayItal, color: colors.primary },
-  searchWrapper: { flexDirection: 'row', alignItems: 'center', margin: spacing.xl, marginTop: spacing.lg, backgroundColor: colors.surface, borderRadius: radius.md, borderWidth: 2, borderColor: colors.border, paddingHorizontal: 14, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 2 },
-  searchIcon: { fontSize: 16, marginRight: 8 },
-  searchInput: { flex: 1, paddingVertical: 13, fontSize: 14, fontFamily: fonts.bold, color: colors.text },
-  ctaMain: { marginHorizontal: spacing.xl, backgroundColor: '#120D24', borderRadius: radius.xl, padding: spacing.lg, paddingVertical: 22, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#2D1854', shadowColor: '#9B6FD4', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.2, shadowRadius: 20, elevation: 8 },
-  ctaMainLabel: { fontSize: 11, color: '#9B6FD4', fontFamily: fonts.extraBold, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 6 },
-  ctaMainTitle: { fontSize: 22, fontFamily: fonts.extraBold, color: '#fff', lineHeight: 28 },
-  ctaMainSub: { fontSize: 12, fontFamily: fonts.semiBold, color: '#888', marginTop: 6 },
-  ctaMainIcon: { width: 72, height: 72, borderRadius: radius.lg, backgroundColor: '#2D1854', alignItems: 'center', justifyContent: 'center', marginLeft: 12 },
-  ctaRow: { flexDirection: 'row', marginHorizontal: spacing.xl, gap: 12, marginTop: 12 },
-  ctaSmall: { flex: 1, borderRadius: radius.xl, padding: spacing.md, paddingVertical: 18, alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 10, elevation: 4 },
-  ctaSmallTitle: { fontSize: 13, fontFamily: fonts.extraBold, color: '#fff', textAlign: 'center' },
-  ctaSmallSub: { fontSize: 11, fontFamily: fonts.semiBold, color: '#888', marginTop: 3, textAlign: 'center' },
-  surpriseCard: { marginHorizontal: spacing.xl, marginTop: 12, backgroundColor: '#0D1B2A', borderRadius: radius.xl, padding: spacing.lg, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#1E3550' },
-  surpriseLabel: { fontSize: 11, color: '#FFD966', fontFamily: fonts.extraBold, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4 },
-  surpriseName: { fontSize: 18, fontFamily: fonts.extraBold, color: '#fff' },
-  surpriseMissing: { fontSize: 12, fontFamily: fonts.semiBold, color: '#C0392B', marginTop: 4 },
-  surpriseActions: { alignItems: 'flex-end', gap: 8, marginLeft: 12 },
-  surpriseBtn: { backgroundColor: '#FFD966', borderRadius: radius.md, paddingVertical: 8, paddingHorizontal: 14 },
-  surpriseBtnText: { fontSize: 12, fontFamily: fonts.extraBold, color: '#1C1A14' },
-  surpriseDismiss: { width: 28, height: 28, borderRadius: 8, backgroundColor: 'rgba(255,255,255,0.08)', alignItems: 'center', justifyContent: 'center' },
+
+  // Header
+  header: {
+    flexDirection: 'row', alignItems: 'center',
+    paddingHorizontal: spacing.xl, paddingTop: spacing.lg, paddingBottom: spacing.sm,
+    gap: 12,
+  },
+  greeting:     { fontSize: 13, fontFamily: fonts.semiBold, color: colors.textMuted, letterSpacing: 0.2 },
+  title:        { fontSize: 22, fontFamily: fonts.displayBold, color: colors.text, lineHeight: 28, marginTop: 2 },
+  titleAccent:  { fontFamily: fonts.displayItal, color: colors.primary },
+
+  // Avatar
+  avatar: {
+    width: 44, height: 44, borderRadius: 14,
+    backgroundColor: colors.dark, alignItems: 'center', justifyContent: 'center',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.15, shadowRadius: 8, elevation: 4,
+  },
+  avatarText: { fontSize: 17, fontFamily: fonts.black, color: colors.gold, letterSpacing: -0.5 },
+
+  // Search
+  searchWrapper: {
+    flexDirection: 'row', alignItems: 'center',
+    marginHorizontal: spacing.xl, marginTop: spacing.sm, marginBottom: spacing.md,
+    backgroundColor: colors.surface, borderRadius: radius.md,
+    borderWidth: 2, borderColor: colors.border, paddingHorizontal: 14,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.05, shadowRadius: 6, elevation: 2,
+  },
+  searchIcon:      { fontSize: 16, marginRight: 8 },
+  searchInput:     { flex: 1, paddingVertical: 13, fontSize: 14, fontFamily: fonts.bold, color: colors.text },
+  searchClear:     { width: 26, height: 26, borderRadius: 13, backgroundColor: colors.surfaceAlt, alignItems: 'center', justifyContent: 'center' },
+  searchClearText: { fontSize: 16, color: colors.textMuted, fontFamily: fonts.bold, lineHeight: 18 },
+
+  // Drink do Dia — hero
+  drinkHero: {
+    marginHorizontal: spacing.xl, borderRadius: radius.xl,
+    padding: spacing.lg, paddingVertical: 22,
+    flexDirection: 'row', alignItems: 'center',
+    marginBottom: spacing.lg,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.1, shadowRadius: 16, elevation: 5,
+  },
+  drinkHeroContent:  { flex: 1 },
+  drinkHeroLabel:    { fontSize: 10, fontFamily: fonts.extraBold, letterSpacing: 1.5, textTransform: 'uppercase', marginBottom: 6 },
+  drinkHeroName:     { fontSize: 26, fontFamily: fonts.displayBold, color: colors.dark, lineHeight: 30, marginBottom: 4 },
+  drinkHeroSub:      { fontSize: 12, fontFamily: fonts.semiBold, color: colors.dark, opacity: 0.55, marginBottom: 12 },
+  drinkHeroMeta:     { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
+  drinkHeroTag:      { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 50 },
+  drinkHeroTagText:  { fontSize: 11, fontFamily: fonts.extraBold },
+  drinkHeroArrow:    { fontSize: 30, opacity: 0.5, marginLeft: 8 },
+
+  // Quick Actions
+  quickActions: {
+    flexDirection: 'row', justifyContent: 'space-between',
+    marginHorizontal: spacing.xl, marginBottom: spacing.lg,
+  },
+  actionBtn: { alignItems: 'center', gap: 8, flex: 1 },
+  actionCircle: {
+    width: 60, height: 60, borderRadius: 30,
+    backgroundColor: colors.surface, alignItems: 'center', justifyContent: 'center',
+    borderWidth: 2, borderColor: colors.border,
+    shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.07, shadowRadius: 10, elevation: 3,
+  },
+  actionEmoji: { fontSize: 24 },
+  actionLabel: { fontSize: 10, fontFamily: fonts.extraBold, color: colors.textMuted, textAlign: 'center', lineHeight: 14 },
+
+  // Surprise result
+  surpriseCard: {
+    marginHorizontal: spacing.xl, marginBottom: spacing.md,
+    backgroundColor: '#0D1B2A', borderRadius: radius.xl,
+    padding: spacing.lg, flexDirection: 'row', alignItems: 'center',
+    borderWidth: 1, borderColor: '#1E3550',
+  },
+  surpriseLabel:       { fontSize: 11, color: '#FFD966', fontFamily: fonts.extraBold, letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4 },
+  surpriseName:        { fontSize: 18, fontFamily: fonts.extraBold, color: '#fff' },
+  surpriseMissing:     { fontSize: 12, fontFamily: fonts.semiBold, color: '#C0392B', marginTop: 4 },
+  surpriseActions:     { alignItems: 'flex-end', gap: 8, marginLeft: 12 },
+  surpriseBtn:         { backgroundColor: '#FFD966', borderRadius: radius.md, paddingVertical: 8, paddingHorizontal: 14 },
+  surpriseBtnText:     { fontSize: 12, fontFamily: fonts.extraBold, color: '#1C1A14' },
+  surpriseDismiss:     { width: 28, height: 28, borderRadius: 8, backgroundColor: 'rgba(255,255,255,0.08)', alignItems: 'center', justifyContent: 'center' },
   surpriseDismissText: { fontSize: 11, color: '#888', fontFamily: fonts.extraBold },
 
-  drinkDayCard: { marginHorizontal: spacing.xl, marginTop: 12, backgroundColor: colors.surface, borderRadius: radius.xl, padding: spacing.lg, flexDirection: 'row', alignItems: 'center', borderWidth: 1.5, shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.06, shadowRadius: 10, elevation: 3 },
-  drinkDayIcon: { width: 48, height: 48, borderRadius: radius.lg, alignItems: 'center', justifyContent: 'center', marginRight: 14 },
-  drinkDayLabel: { fontSize: 10, fontFamily: fonts.extraBold, color: colors.primary, letterSpacing: 1.1, textTransform: 'uppercase', marginBottom: 2 },
-  drinkDayName: { fontSize: 16, fontFamily: fonts.extraBold, color: colors.text },
-  drinkDayMeta: { fontSize: 11, fontFamily: fonts.semiBold, color: colors.textMuted, marginTop: 2 },
-  drinkDayBase: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20, marginLeft: 10 },
-  drinkDayBaseText: { fontSize: 11, fontFamily: fonts.extraBold },
-
-  ctaFesta: { marginHorizontal: spacing.xl, marginTop: 12, backgroundColor: '#14201A', borderRadius: radius.xl, padding: spacing.lg, paddingVertical: 20, flexDirection: 'row', alignItems: 'center', borderWidth: 1, borderColor: '#1F3D2E', shadowColor: '#2ECC71', shadowOffset: { width: 0, height: 6 }, shadowOpacity: 0.15, shadowRadius: 16, elevation: 6 },
-  ctaFestaLabel: { fontSize: 11, color: '#2ECC71', fontFamily: fonts.extraBold, letterSpacing: 1.2, textTransform: 'uppercase', marginBottom: 4 },
-  ctaFestaTitle: { fontSize: 20, fontFamily: fonts.extraBold, color: '#fff', lineHeight: 26 },
-  ctaFestaSub: { fontSize: 12, fontFamily: fonts.semiBold, color: '#888', marginTop: 4 },
-  ctaFestaIcon: { width: 60, height: 60, borderRadius: radius.lg, backgroundColor: '#1F3D2E', alignItems: 'center', justifyContent: 'center', marginLeft: 12 },
-  section: { paddingHorizontal: spacing.xl, marginTop: spacing.xl },
+  // Sections
+  section:       { paddingHorizontal: spacing.xl, marginTop: spacing.sm, marginBottom: spacing.sm },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
-  sectionTitle: { fontSize: 16, fontFamily: fonts.extraBold, color: colors.text },
-  sectionLink: { fontSize: 12, fontFamily: fonts.extraBold, color: colors.primary },
-  moodScroll: { marginHorizontal: -spacing.xl, paddingHorizontal: spacing.xl },
-  moodChip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingVertical: 8, borderRadius: 50, backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.border, marginRight: 10 },
+  sectionTitle:  { fontSize: 16, fontFamily: fonts.extraBold, color: colors.text },
+  sectionLink:   { fontSize: 12, fontFamily: fonts.extraBold, color: colors.primary },
+
+  // Moods
+  moodScroll:     { marginHorizontal: -spacing.xl, paddingHorizontal: spacing.xl },
+  moodChip:       { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 16, paddingVertical: 8, borderRadius: 50, backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.border, marginRight: 10 },
   moodChipActive: { backgroundColor: colors.dark, borderColor: colors.dark },
-  moodEmoji: { fontSize: 14 },
-  moodLabel: { fontSize: 12, fontFamily: fonts.extraBold, color: '#555' },
-  moodLabelActive: { color: '#fff' },
-  empty: { alignItems: 'center', paddingVertical: 48 },
+  moodEmoji:      { fontSize: 14 },
+  moodLabel:      { fontSize: 12, fontFamily: fonts.extraBold, color: '#555' },
+  moodLabelActive:{ color: '#fff' },
+
+  // Empty
+  empty:      { alignItems: 'center', paddingVertical: 48 },
   emptyTitle: { fontSize: 14, fontFamily: fonts.extraBold, color: colors.text, marginTop: 8 },
-  emptySub: { fontSize: 12, fontFamily: fonts.semiBold, color: colors.textLight, marginTop: 4 },
+  emptySub:   { fontSize: 12, fontFamily: fonts.semiBold, color: colors.textLight, marginTop: 4 },
 });
