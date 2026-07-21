@@ -194,6 +194,21 @@ export default function MeuBarScreen({ navigation }) {
       {activeTab === 'bar' && (
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
           <View style={styles.section}>
+            {/* Summary card — drinks disponíveis no topo */}
+            {ingredients.length > 0 && (
+              <View style={styles.summaryCard}>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.summaryCount}>
+                    {barPerfect.length} {barPerfect.length === 1 ? 'drink pronto' : 'drinks prontos'} agora
+                  </Text>
+                  {barPartial.length > 0 && (
+                    <Text style={styles.summaryPartial}>+{barPartial.length} quase prontos</Text>
+                  )}
+                </View>
+                <View style={styles.summaryDot} />
+              </View>
+            )}
+
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Ingredientes no bar ({ingredients.length})</Text>
               {ingredients.length > 0 && (
@@ -578,6 +593,17 @@ const styles = StyleSheet.create({
   recipeTipText: { fontSize: 12, fontFamily: fonts.semiBold, color: '#7A5C00', lineHeight: 18 },
   usedInChip: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 50, backgroundColor: '#F0F0EC' },
   usedInText: { fontSize: 11, fontFamily: fonts.extraBold, color: colors.text },
+
+  // Summary card
+  summaryCard: {
+    backgroundColor: '#F0FFF4', borderRadius: radius.lg,
+    padding: spacing.md, marginBottom: spacing.md,
+    flexDirection: 'row', alignItems: 'center',
+    borderWidth: 1.5, borderColor: '#86EFAC',
+  },
+  summaryCount:   { fontSize: 15, fontFamily: fonts.extraBold, color: '#16A34A' },
+  summaryPartial: { fontSize: 12, fontFamily: fonts.semiBold, color: '#4ADE80', marginTop: 2 },
+  summaryDot:     { width: 10, height: 10, borderRadius: 5, backgroundColor: '#16A34A' },
 
   // Shopping list
   shoppingBtn: { backgroundColor: '#0D1B2A', borderRadius: radius.lg, padding: spacing.md, marginBottom: 12 },

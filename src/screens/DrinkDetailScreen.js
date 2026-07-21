@@ -9,7 +9,6 @@ import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { colors, fonts, radius, spacing } from '../theme';
-import AppIcon from '../components/AppIcon';
 import BottomNav from '../components/BottomNav';
 import { DrinkCardList } from '../components/DrinkCard';
 import { glassMap } from '../components/glasses/Glasses';
@@ -186,11 +185,21 @@ export default function DrinkDetailScreen({ navigation, route }) {
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
           <Text style={styles.backIcon}>‹</Text>
         </TouchableOpacity>
-        <Text style={styles.navTitle}>Ficha do Drink</Text>
-        <AppIcon size={38} />
+        <Text style={styles.navTitle} numberOfLines={1}>{drink.name}</Text>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          <TouchableOpacity onPress={shareDrink} style={styles.navBtn}>
+            <Text style={{ fontSize: 15 }}>↗</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); toggleFavorite(drink.id); }}
+            style={[styles.navBtn, isFav && { backgroundColor: colors.primary, borderColor: colors.primary }]}
+          >
+            <Text style={{ fontSize: 15 }}>{isFav ? '❤️' : '🤍'}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: activeTab === 'preparo' && !marcadoComoFeito ? 160 : 100 }}>
         {/* HERO */}
         <View style={styles.hero}>
           <View style={{ flex: 1 }}>
@@ -217,17 +226,6 @@ export default function DrinkDetailScreen({ navigation, route }) {
             </View>
           </View>
           <View style={{ alignItems: 'center', gap: 10 }}>
-            <View style={{ flexDirection: 'row', gap: 8 }}>
-              <TouchableOpacity onPress={shareDrink} style={styles.shareBtn}>
-                <Text style={{ fontSize: 15 }}>↗</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={() => { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); toggleFavorite(drink.id); }}
-                style={[styles.favBtn, isFav && { backgroundColor: colors.primary, borderColor: colors.primary }]}
-              >
-                <Text style={{ fontSize: 16 }}>{isFav ? '❤️' : '🤍'}</Text>
-              </TouchableOpacity>
-            </View>
             <DrinkHero drink={drink} GlassComponent={GlassComponent} />
             {ratings[drink.id] > 0 && (
               <View style={styles.heroRating}>
@@ -244,7 +242,8 @@ export default function DrinkDetailScreen({ navigation, route }) {
           {[
             { icon: '⏱', label: 'Tempo',        value: drink.time       },
             { icon: '🎯', label: 'Dificuldade',  value: drink.difficulty },
-            { icon: '🧪', label: 'Ingredientes', value: `${drink.ingredients.length} itens` },
+            { icon: '🧪', label: 'Ingredientes', value: `${drink.ingredients.length}` },
+            { icon: '🌍', label: 'Origem',       value: drink.origin?.split(' ')[0] || '—' },
           ].map(({ icon, label, value }) => (
             <View key={label} style={styles.stat}>
               <Text style={styles.statIcon}>{icon}</Text>
@@ -530,6 +529,15 @@ export default function DrinkDetailScreen({ navigation, route }) {
         })()}
 
       </ScrollView>
+
+      {/* STICKY — Marcar como feito */}
+      {activeTab === 'preparo' && !marcadoComoFeito && (
+        <TouchableOpacity onPress={marcarComoFeito} activeOpacity={0.85} style={styles.stickyFez}>
+          <Text style={{ fontSize: 20 }}>🍸</Text>
+          <Text style={styles.stickyFezText}>Marcar como feito</Text>
+        </TouchableOpacity>
+      )}
+
       <BottomNav navigation={navigation} />
     </SafeAreaView>
   );
@@ -539,11 +547,20 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   topNav: {
     flexDirection: 'row', justifyContent: 'space-between',
-    alignItems: 'center', padding: spacing.xl, paddingBottom: spacing.md,
+    alignItems: 'center', padding: spacing.xl, paddingBottom: spacing.md, gap: 10,
   },
-  backBtn: { width: 38, height: 38, borderRadius: radius.sm, backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
+  backBtn: { width: 38, height: 38, borderRadius: radius.sm, backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.border, alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   backIcon: { fontSize: 22, color: colors.text, lineHeight: 24 },
-  navTitle: { fontSize: 14, fontFamily: fonts.extraBold, color: colors.text },
+  navTitle: { flex: 1, fontSize: 15, fontFamily: fonts.extraBold, color: colors.text, textAlign: 'center' },
+  navBtn:   { width: 38, height: 38, borderRadius: radius.sm, backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
+
+  // Sticky button
+  stickyFez: {
+    backgroundColor: colors.dark, flexDirection: 'row', alignItems: 'center',
+    justifyContent: 'center', gap: 10, paddingVertical: 16,
+    borderTopWidth: 1, borderTopColor: 'rgba(0,0,0,0.06)',
+  },
+  stickyFezText: { fontSize: 16, fontFamily: fonts.extraBold, color: colors.gold },
 
   hero: { flexDirection: 'row', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16, padding: spacing.xl, paddingTop: 0 },
   tags: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 10 },
@@ -554,8 +571,6 @@ const styles = StyleSheet.create({
   metaRow: { flexDirection: 'row', gap: spacing.lg, marginTop: 14 },
   metaLabel: { fontSize: 10, fontFamily: fonts.extraBold, color: colors.textLight, textTransform: 'uppercase', letterSpacing: 0.8 },
   metaValue: { fontSize: 13, fontFamily: fonts.extraBold, color: colors.text, marginTop: 2 },
-  favBtn: { width: 36, height: 36, borderRadius: 10, backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
-  shareBtn: { width: 36, height: 36, borderRadius: 10, backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.border, alignItems: 'center', justifyContent: 'center' },
   glassBox: { width: 110, height: 130, borderRadius: 20, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5 },
 
   statsBar: { flexDirection: 'row', justifyContent: 'space-around', marginHorizontal: spacing.xl, backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.md, borderWidth: 2, borderColor: '#F5F5F5', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 6, elevation: 2 },

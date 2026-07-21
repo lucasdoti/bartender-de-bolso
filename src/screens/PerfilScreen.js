@@ -191,67 +191,80 @@ export default function PerfilScreen({ navigation }) {
         </View>
 
         {/* AVATAR */}
-        <View style={styles.avatarRow}>
-          <View style={styles.avatar}>
-            <Text style={{ fontSize: 32 }}>🥃</Text>
-          </View>
-          <View style={{ flex: 1 }}>
-            {editingName ? (
-              <>
-                <TextInput
-                  value={newNameValue}
-                  onChangeText={setNewNameValue}
-                  style={styles.nameInput}
-                  placeholder="Seu nome"
-                  placeholderTextColor={colors.textLight}
-                  autoFocus
-                  maxLength={40}
-                  returnKeyType="done"
-                  onSubmitEditing={handleSaveName}
-                />
-                <View style={{ flexDirection: 'row', gap: 8, marginTop: 6 }}>
-                  <TouchableOpacity onPress={handleSaveName} style={styles.saveNameBtn} disabled={savingName}>
-                    {savingName
-                      ? <ActivityIndicator size="small" color="#fff" />
-                      : <Text style={styles.saveNameText}>Salvar</Text>
-                    }
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => setEditingName(false)} style={styles.cancelNameBtn}>
-                    <Text style={styles.cancelNameText}>Cancelar</Text>
-                  </TouchableOpacity>
-                </View>
-              </>
-            ) : (
-              <>
-                <Text style={styles.userName}>{user?.user_metadata?.name || 'Bartender'}</Text>
-                <Text style={styles.userRole}>{user?.email || 'Bartender Amador 🥃'}</Text>
-                <View style={styles.levelRow}>
-                  <View style={styles.levelBg}>
-                    <View style={[styles.levelFill, { width: `${progressoNivel}%` }]}/>
-                  </View>
-                  <Text style={styles.levelText}>Nível {nivel}</Text>
-                </View>
-              </>
-            )}
-          </View>
-          {!editingName && (
-            <TouchableOpacity
-              style={styles.editBtn}
-              activeOpacity={0.7}
-              onPress={() => { setNewNameValue(user?.user_metadata?.name || ''); setEditingName(true); }}
-            >
-              <Text style={{ fontSize: 15 }}>✏️</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+        {(() => {
+          const name = user?.user_metadata?.name || 'Bartender';
+          const initials = name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase().substring(0, 2) || 'B';
+          return (
+            <View style={styles.avatarRow}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarInitials}>{initials}</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                {editingName ? (
+                  <>
+                    <TextInput
+                      value={newNameValue}
+                      onChangeText={setNewNameValue}
+                      style={styles.nameInput}
+                      placeholder="Seu nome"
+                      placeholderTextColor={colors.textLight}
+                      autoFocus
+                      maxLength={40}
+                      returnKeyType="done"
+                      onSubmitEditing={handleSaveName}
+                    />
+                    <View style={{ flexDirection: 'row', gap: 8, marginTop: 6 }}>
+                      <TouchableOpacity onPress={handleSaveName} style={styles.saveNameBtn} disabled={savingName}>
+                        {savingName
+                          ? <ActivityIndicator size="small" color="#fff" />
+                          : <Text style={styles.saveNameText}>Salvar</Text>
+                        }
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={() => setEditingName(false)} style={styles.cancelNameBtn}>
+                        <Text style={styles.cancelNameText}>Cancelar</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </>
+                ) : (
+                  <>
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                      <Text style={styles.userName}>{name}</Text>
+                      {streak.current > 0 && (
+                        <View style={styles.streakBadge}>
+                          <Text style={styles.streakBadgeText}>🔥{streak.current}</Text>
+                        </View>
+                      )}
+                    </View>
+                    <Text style={styles.userRole}>{user?.email || 'Bartender Amador 🥃'}</Text>
+                    <View style={styles.levelRow}>
+                      <View style={styles.levelBg}>
+                        <View style={[styles.levelFill, { width: `${progressoNivel}%` }]}/>
+                      </View>
+                      <Text style={styles.levelText}>Nível {nivel}</Text>
+                    </View>
+                  </>
+                )}
+              </View>
+              {!editingName && (
+                <TouchableOpacity
+                  style={styles.editBtn}
+                  activeOpacity={0.7}
+                  onPress={() => { setNewNameValue(user?.user_metadata?.name || ''); setEditingName(true); }}
+                >
+                  <Text style={{ fontSize: 15 }}>✏️</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          );
+        })()}
 
-        {/* STAT CARDS */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.statsGrid}>
+        {/* STAT CARDS — grid fixo, sem scroll */}
+        <View style={styles.statsGrid}>
           {[
-            { label: 'Drinks feitos',  value: String(history.length || 0), emoji: '🥂' },
-            { label: 'Favoritos',      value: String(favorites.length),    emoji: '❤️' },
-            { label: 'Sequência',      value: `${streak.current}d 🔥`,    emoji: '🔥' },
-            { label: 'Recorde',        value: `${streak.longest}d`,        emoji: '🏆' },
+            { label: 'Feitos',    value: String(history.length || 0), emoji: '🥂' },
+            { label: 'Favoritos', value: String(favorites.length),    emoji: '❤️' },
+            { label: 'Sequência', value: `${streak.current}d`,        emoji: '🔥' },
+            { label: 'Recorde',   value: `${streak.longest}d`,        emoji: '🏆' },
           ].map(({ label, value, emoji }) => (
             <View key={label} style={styles.statCard}>
               <Text style={styles.statEmoji}>{emoji}</Text>
@@ -259,7 +272,7 @@ export default function PerfilScreen({ navigation }) {
               <Text style={styles.statLabel}>{label}</Text>
             </View>
           ))}
-        </ScrollView>
+        </View>
 
         {/* SECTION TABS */}
         <View style={styles.tabs}>
@@ -304,7 +317,7 @@ export default function PerfilScreen({ navigation }) {
                 <View style={styles.barChart}>
                   {weekBars.map(({ day, v, hoje }, idx) => (
                     <View key={idx} style={styles.barCol}>
-                      <View style={[styles.bar, { height: v === 0 ? 4 : (v / maxWeek) * 50, backgroundColor: v > 0 ? (hoje ? colors.primary : colors.dark) : '#F0F0EC' }]}/>
+                      <View style={[styles.bar, { height: v === 0 ? 4 : (v / maxWeek) * 80, backgroundColor: v > 0 ? (hoje ? colors.primary : colors.dark) : '#F0F0EC' }]}/>
                       <Text style={[styles.barLabel, hoje && { color: colors.primary }]}>{day}</Text>
                     </View>
                   ))}
@@ -440,14 +453,17 @@ const styles = StyleSheet.create({
   titleAccent: { fontFamily: fonts.displayItal, color: colors.primary },
 
   avatarRow: { flexDirection: 'row', alignItems: 'center', gap: 16, paddingHorizontal: spacing.xl, paddingBottom: spacing.lg },
-  avatar: { width: 72, height: 72, borderRadius: 22, backgroundColor: colors.dark, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.2, shadowRadius: 16, elevation: 6 },
-  userName: { fontSize: 18, fontFamily: fonts.black, color: colors.text },
-  userRole: { fontSize: 13, fontFamily: fonts.semiBold, color: colors.textMuted, marginTop: 2 },
+  avatar: { width: 72, height: 72, borderRadius: 22, backgroundColor: colors.dark, alignItems: 'center', justifyContent: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 8 }, shadowOpacity: 0.2, shadowRadius: 16, elevation: 6, flexShrink: 0 },
+  avatarInitials: { fontSize: 28, fontFamily: fonts.black, color: colors.gold, letterSpacing: -1 },
+  streakBadge: { backgroundColor: '#FFF3CD', borderRadius: 50, paddingHorizontal: 8, paddingVertical: 3 },
+  streakBadgeText: { fontSize: 12, fontFamily: fonts.extraBold, color: '#C84B31' },
+  userName: { fontSize: 17, fontFamily: fonts.black, color: colors.text },
+  userRole: { fontSize: 12, fontFamily: fonts.semiBold, color: colors.textMuted, marginTop: 2 },
   levelRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 6 },
   levelBg:   { flex: 1, height: 6, backgroundColor: '#F0F0EC', borderRadius: 3, overflow: 'hidden' },
   levelFill: { height: '100%', backgroundColor: colors.primary, borderRadius: 3 },
   levelText: { fontSize: 10, fontFamily: fonts.extraBold, color: colors.textMuted },
-  editBtn: { width: 36, height: 36, borderRadius: 10, backgroundColor: '#F5F5F2', alignItems: 'center', justifyContent: 'center' },
+  editBtn: { width: 36, height: 36, borderRadius: 10, backgroundColor: '#F5F5F2', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   nameInput: {
     backgroundColor: '#F5F5F2', borderRadius: 10, borderWidth: 2, borderColor: colors.border,
     paddingHorizontal: 12, paddingVertical: 8,
@@ -466,11 +482,11 @@ const styles = StyleSheet.create({
   },
   cancelNameText: { fontSize: 12, fontFamily: fonts.semiBold, color: colors.textMuted },
 
-  statsGrid: { flexDirection: 'row', gap: 10, paddingHorizontal: spacing.xl, paddingRight: spacing.xl, marginBottom: spacing.lg },
-  statCard: { width: 90, backgroundColor: colors.surface, borderRadius: radius.md, padding: 14, alignItems: 'center', borderWidth: 2, borderColor: '#F5F5F5', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1 },
-  statEmoji: { fontSize: 22 },
-  statValue: { fontSize: 20, fontFamily: fonts.black, color: colors.text, marginTop: 4 },
-  statLabel: { fontSize: 10, fontFamily: fonts.extraBold, color: colors.textLight, marginTop: 2, textAlign: 'center', lineHeight: 13 },
+  statsGrid: { flexDirection: 'row', gap: 8, paddingHorizontal: spacing.xl, marginBottom: spacing.lg },
+  statCard: { flex: 1, backgroundColor: colors.surface, borderRadius: radius.md, padding: 12, alignItems: 'center', borderWidth: 2, borderColor: '#F5F5F5', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.04, shadowRadius: 4, elevation: 1 },
+  statEmoji: { fontSize: 18 },
+  statValue: { fontSize: 18, fontFamily: fonts.black, color: colors.text, marginTop: 4 },
+  statLabel: { fontSize: 9, fontFamily: fonts.extraBold, color: colors.textLight, marginTop: 2, textAlign: 'center', lineHeight: 12 },
 
   tabs: { flexDirection: 'row', marginHorizontal: spacing.xl, backgroundColor: '#F0F0EC', borderRadius: radius.md, padding: 4, gap: 3 },
   tab: { flex: 1, alignItems: 'center', paddingVertical: 9, borderRadius: 12 },
@@ -486,7 +502,7 @@ const styles = StyleSheet.create({
   card: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.lg, borderWidth: 2, borderColor: '#F5F5F5' },
   cardTitle: { fontSize: 13, fontFamily: fonts.extraBold, color: colors.text, marginBottom: 14 },
 
-  barChart: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, height: 56 },
+  barChart: { flexDirection: 'row', alignItems: 'flex-end', gap: 8, height: 90 },
   barCol: { flex: 1, alignItems: 'center', gap: 4 },
   bar: { width: '100%', borderRadius: 4 },
   barLabel: { fontSize: 9, fontFamily: fonts.extraBold, color: colors.textLight },
