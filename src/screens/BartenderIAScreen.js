@@ -112,12 +112,15 @@ const RULES = [
 ];
 
 const NEGATION_PATTERNS = [
-  /\bsem\s+(\w+(?:\s\w+)?)/g,
-  /\bn[aã]o\s+(?:quero|gosto\s+de|curto|seja)\s+(\w+(?:(?:\s+\w+){0,2})?)/g,
-  /\bnada\s+de\s+(\w+(?:\s\w+)?)/g,
-  /\bevitar?\s+(\w+(?:\s\w+)?)/g,
-  /\bdetesto\s+(\w+(?:\s\w+)?)/g,
-  /\bodeio\s+(\w+(?:\s\w+)?)/g,
+  /\bsem\s+(?:ser\s+)?(esse|isso|aquele|este)?\s*(\w+(?:\s+\w+)?)/g,
+  /\bn[aã]o\s+(?:quero|gosto\s+(?:de|do|da)|gosta\s+(?:de|do|da)|curto|seja|gostam\s+(?:de|do|da))\s+(\w+(?:(?:\s+\w+){0,2})?)/g,
+  /\bn[aã]o\s+(?:quero|gosto|gosta)\s+(?:de|do|da|um|uma)\s+(\w+(?:\s+\w+)?)/g,
+  /\bnada\s+de\s+(\w+(?:\s+\w+)?)/g,
+  /\bevitar?\s+(\w+(?:\s+\w+)?)/g,
+  /\bdetesto\s+(\w+(?:\s+\w+)?)/g,
+  /\bodeio\s+(\w+(?:\s+\w+)?)/g,
+  /\bmuito\s+(\w+)\s+(?:pro|pra|para|demais)/g,
+  /\b(\w+)\s+demais\b/g,
 ];
 
 const INGREDIENT_WORDS = {
@@ -173,7 +176,9 @@ function extractNegatedTerms(normalized) {
     pattern.lastIndex = 0;
     let match;
     while ((match = pattern.exec(normalized)) !== null) {
-      terms.add(normalizeText(match[1].trim()));
+      // Last capture group is the actual negated term
+      const captured = match[match.length - 1];
+      if (captured) terms.add(normalizeText(captured.trim()));
     }
   }
   return [...terms];
@@ -297,7 +302,7 @@ function zeResponse(top, activeRules, similarFamilies, negatedRules, userBar, co
   return `Pelo que você descreveu, ia de ${d0.name}. ${d0.subtitle}. ${d1 ? `${d1.name} também é forte candidato.` : ''} Se não convenceu, me fala o que não tá certo.`;
 }
 
-function localRecommend(input, userBar = [], drinks = [], context = {}) {
+function localRecommend(input, userBar = [], drinks = [], context = {}, excludeIds = []) {
   const normalized = normalizeText(input);
 
   const similarFamilies      = detectSimilarTo(normalized);
@@ -368,19 +373,22 @@ function localRecommend(input, userBar = [], drinks = [], context = {}) {
   });
 
   const top = scored
-    .filter(s => s.score > 0)
+    .filter(s => s.score > 0 && !excludeIds.includes(s.drink.id))
     .sort((a, b) => b.score - a.score)
     .slice(0, 3)
     .map(s => s.drink);
 
   if (top.length === 0) {
     const fallback = [...POPULAR_FALLBACK]
+      .filter(id => !excludeIds.includes(id))
       .sort(() => Math.random() - 0.5)
       .slice(0, 3)
       .map(id => drinks.find(d => d.id === id))
       .filter(Boolean);
     return {
-      text: 'Não reconheci um estilo específico, mas raramente erro com esses clássicos:',
+      text: excludeIds.length > 0
+        ? 'Mudando de rota então. Aqui tem outras pedidas que funcionam:'
+        : 'Não reconheci um estilo específico, mas raramente erro com esses clássicos:',
       drinks: fallback,
     };
   }
@@ -451,13 +459,34 @@ export default function BartenderIAScreen({ navigation }) {
     if (!msg) return;
     try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
 
+    // Snapshot before state update so the timeout closure captures current state
+    const snapshot = messages;
+
     setMessages(prev => [...prev, { role: 'user', text: msg }]);
     setInput('');
     setTyping(true);
     scrollToBottom();
 
     setTimeout(() => {
-      const { text: zeText, drinks: zeDrinks } = localRecommend(msg, userBar, drinks, context);
+      // Cumulative context: all user turns + current message
+      const allUserText = [
+        ...snapshot.filter(m => m.role === 'user').map(m => m.text),
+        msg,
+      ].join(' ');
+
+      // IDs of every drink already shown in this conversation
+      const shownIds = snapshot
+        .filter(m => m.role === 'ze')
+        .flatMap(m => m.drinks || [])
+        .map(d => d.id);
+
+      // Detect "give me a different one" requests
+      const norm = normalizeText(msg);
+      const isAltRequest = /\b(outro|outra|diferente|sem ser (esse|isso|aquele)|nao (pode ser|quero|seja) esse|muda|troca|algo diferente|pode ser outro|outra opcao|outra sugestao)\b/.test(norm);
+
+      const excludeIds = isAltRequest ? shownIds : [];
+
+      const { text: zeText, drinks: zeDrinks } = localRecommend(allUserText, userBar, drinks, context, excludeIds);
       setMessages(prev => [...prev, { role: 'ze', text: zeText, drinks: zeDrinks }]);
       setTyping(false);
       scrollToBottom();
