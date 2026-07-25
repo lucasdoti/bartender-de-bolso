@@ -176,7 +176,6 @@ function extractNegatedTerms(normalized) {
     pattern.lastIndex = 0;
     let match;
     while ((match = pattern.exec(normalized)) !== null) {
-      // Last capture group is the actual negated term
       const captured = match[match.length - 1];
       if (captured) terms.add(normalizeText(captured.trim()));
     }
@@ -192,114 +191,6 @@ function extractIngredientNeeds(normalized) {
     }
   }
   return [...needs];
-}
-
-// ─── ZÉ AMARGO — geração de resposta ─────────────────────────────────────────
-
-function zeResponse(top, activeRules, similarFamilies, negatedRules, userBar, context) {
-  const { history = [], ratings = {} } = context;
-  const allTags  = activeRules.flatMap(r => r.tags  || []);
-  const allBases = activeRules.flatMap(r => r.bases || []);
-  const allFams  = [...new Set([
-    ...activeRules.filter(r => r.family).map(r => r.family),
-    ...similarFamilies,
-  ])];
-
-  // Checa se o usuário tem os ingredientes pra fazer o top[0] agora
-  const canMakeFirst = top.length > 0 && userBar.length > 0 &&
-    (top[0].needs || []).length > 0 &&
-    (top[0].needs || []).every(n => userBar.includes(n));
-
-  // Checa se usuário já fez o drink antes
-  const alreadyMade = top.length > 0 && history.some(h => h.id === top[0].id);
-  const alreadyRated = top.length > 0 && ratings[top[0].id] > 0;
-
-  if (top.length === 0) {
-    return 'Hm. Não peguei direito o que você tá buscando. Fala mais — pra que ocasião é? Tem alguma base preferida ou algo que tem em casa?';
-  }
-
-  const d0 = top[0];
-  const d1 = top[1];
-  const extra = canMakeFirst ? ' Você tem os ingredientes — pode fazer agora.' : '';
-  const familiar = alreadyMade
-    ? (alreadyRated ? ` Você já fez e avaliou bem — acho que sabe o que esperar.` : ` Você já fez antes. Às vezes voltar pro clássico é a resposta certa.`)
-    : '';
-
-  // Similar to
-  if (similarFamilies.length > 0) {
-    const fam = similarFamilies[0];
-    const famDesc = FAMILIES[fam]?.desc || 'esse estilo';
-    const others = top.slice(1).map(d => d.name).join(' ou ');
-    return `Se você curte ${famDesc}, vai gostar de ${d0.name} — ${d0.subtitle}.${familiar}${extra}${others ? ` Também pode ir de ${others}.` : ''}`;
-  }
-
-  // Calor/refrescante
-  if (allTags.includes('calor')) {
-    return `Com esse calor, sem pensar muito: ${d0.name}. ${d0.subtitle}.${extra}${d1 ? ` Se quiser variar, ${d1.name} também resolve.` : ''}`;
-  }
-
-  // Frio/aconchegante
-  if (allTags.includes('frio')) {
-    return `Pra esse friozinho, ${d0.name} é meu palpite. ${d0.subtitle}. Feito direito, é aconchegante de verdade.${extra}`;
-  }
-
-  // Date/especial
-  if (allTags.includes('date')) {
-    return `Pra impressionar? ${d0.name}. Não é óbvio, mas também não é complicado. A pessoa vai notar que você se preparou.${extra}${d1 ? ` ${d1.name} é outra pedida segura.` : ''}`;
-  }
-
-  // Festa/grupo
-  if (allTags.includes('festas')) {
-    return `Pra animar a galera, ${d0.name} é certeiro — todo mundo gosta e dá pra fazer em quantidade.${d1 ? ` ${d1.name} também funciona bem em batelada.` : ''}`;
-  }
-
-  // Solo/relaxar
-  if (allTags.includes('solo')) {
-    return `Fim de dia, só você? ${d0.name}. ${d0.subtitle}. Sem pressa, desse jeito.${extra}`;
-  }
-
-  // Brasil/cachaça
-  if (allTags.includes('brasil') || allBases.includes('Cachaça')) {
-    return `Cachaça é o que o Brasil tem de melhor, sem discussão. ${d0.name} é a pedida — ${d0.subtitle}.${familiar}${extra}`;
-  }
-
-  // Café
-  if (allFams.includes('cafe')) {
-    return `Café no drink? Minha pedida é ${d0.name}. ${d0.subtitle}. É o tipo de coisa que você faz e quer de novo.${extra}`;
-  }
-
-  // Negroni/amargo
-  if (allFams.includes('negroni') || allBases.some(b => ['Campari', 'Aperol'].includes(b))) {
-    return `${d0.name} — ${d0.subtitle}. Não é pra todo mundo, mas quem gosta não larga.${familiar}${extra}`;
-  }
-
-  // Bourbon/whisky clássico
-  if (allFams.includes('bourbon_stirred') || allBases.some(b => ['Whisky', 'Bourbon'].includes(b))) {
-    return `Quer intensidade? ${d0.name}. ${d0.subtitle}. Mexido, não batido — esse é o detalhe.${extra}`;
-  }
-
-  // Spritz/borbulhante
-  if (allFams.includes('spritz')) {
-    return `Algo leve e borbulhante? ${d0.name} é perfeito pra isso. ${d0.subtitle}.${d1 ? ` Ou ${d1.name} se quiser variar.` : ''}${extra}`;
-  }
-
-  // Gin/botânico
-  if (allBases.includes('Gin')) {
-    return `Gin tem uma complexidade que poucos destilados têm. ${d0.name} é onde eu ia pra você — ${d0.subtitle}.${extra}`;
-  }
-
-  // Rum/tropical
-  if (allBases.includes('Rum') || allFams.includes('tropical')) {
-    return `Rum é charme caribenho puro. ${d0.name} — ${d0.subtitle}.${extra}${d1 ? ` ${d1.name} também é boa pedida.` : ''}`;
-  }
-
-  // Can make right now
-  if (canMakeFirst) {
-    return `Com o que você tem aí, ${d0.name} é a escolha certa. ${d0.subtitle}. Você tem os ingredientes, só falta fazer.`;
-  }
-
-  // Generic
-  return `Pelo que você descreveu, ia de ${d0.name}. ${d0.subtitle}. ${d1 ? `${d1.name} também é forte candidato.` : ''} Se não convenceu, me fala o que não tá certo.`;
 }
 
 function localRecommend(input, userBar = [], drinks = [], context = {}, excludeIds = []) {
@@ -386,15 +277,143 @@ function localRecommend(input, userBar = [], drinks = [], context = {}, excludeI
       .map(id => drinks.find(d => d.id === id))
       .filter(Boolean);
     return {
-      text: excludeIds.length > 0
-        ? 'Mudando de rota então. Aqui tem outras pedidas que funcionam:'
-        : 'Não reconheci um estilo específico, mas raramente erro com esses clássicos:',
       drinks: fallback,
+      fallback: true,
     };
   }
 
-  const text = zeResponse(top, activeRules, similarFamilies, negatedRules, userBar, context);
-  return { text, drinks: top };
+  return { drinks: top, fallback: false };
+}
+
+// ─── PERFIL CONVERSACIONAL ────────────────────────────────────────────────────
+
+function extractProfile(normalized, current) {
+  const p = { ...current };
+
+  if (!p.flavor) {
+    if (/\b(amargo|bitter|campari|aperol|bittersweet)\b/.test(normalized)) p.flavor = 'amargo';
+    else if (/\b(doce|adocicado|docinho|suave doce)\b/.test(normalized)) p.flavor = 'doce';
+    else if (/\b(citrico|azedo|limao|acido|sour|fresco|cítrico)\b/.test(normalized)) p.flavor = 'citrico';
+    else if (/\b(frutado|tropical|maracuja|morango|frutas)\b/.test(normalized)) p.flavor = 'frutado';
+    else if (/\b(herbal|botanico|floral|aromatico)\b/.test(normalized)) p.flavor = 'herbal';
+  }
+
+  if (!p.occasion) {
+    if (/\b(jantar|janta|impressionar|romantico|namorad|especial|elegante|sofisticado|date|conquista)\b/.test(normalized)) p.occasion = 'date';
+    else if (/\b(festa|aniversario|galera|amigos|grupo|celebra|balada|animado)\b/.test(normalized)) p.occasion = 'festas';
+    else if (/\b(sozinho|sozinha|relaxar|netflix|em casa|fim de dia|sossego|tranquilo|serie)\b/.test(normalized)) p.occasion = 'solo';
+    else if (/\b(calor|verao|refrescante|piscina|praia|churras|gelado)\b/.test(normalized)) p.occasion = 'calor';
+    else if (/\b(frio|inverno|aconchegante|friozinho|cobertor|quentinho)\b/.test(normalized)) p.occasion = 'frio';
+  }
+
+  if (!p.base) {
+    if (/\bgin\b/.test(normalized)) p.base = 'gin';
+    else if (/\bvodka\b/.test(normalized)) p.base = 'vodka';
+    else if (/\b(rum|rhum)\b/.test(normalized)) p.base = 'rum';
+    else if (/\b(whisky|whiskey|bourbon|scotch)\b/.test(normalized)) p.base = 'whisky';
+    else if (/\b(cachaca|caipirinha)\b/.test(normalized)) p.base = 'cachaca';
+    else if (/\b(tequila|mezcal)\b/.test(normalized)) p.base = 'tequila';
+  }
+
+  if (!p.strength) {
+    if (/\b(forte|potente|encorpado|intenso|pesado)\b/.test(normalized)) p.strength = 'forte';
+    else if (/\b(leve|suave|fraco|delicado)\b/.test(normalized)) p.strength = 'leve';
+  }
+
+  return p;
+}
+
+function hasEnoughInfo(profile) {
+  if (profile.base) return true;
+  const signals = [profile.flavor, profile.occasion, profile.strength].filter(Boolean).length;
+  return signals >= 2;
+}
+
+// Zé's questions — cada uma com personalidade própria
+const QUESTIONS = {
+  flavor: {
+    key: 'flavor',
+    text: 'Que tipo de sabor você curte mais? Amargo e complexo tipo Campari, doce e suave, cítrico aquele com bastante limão, ou algo frutado e tropical?',
+  },
+  occasion: {
+    key: 'occasion',
+    text: 'Me conta a situação — é jantar especial, festa com a galera, ou você quer algo pra relaxar sozinho mesmo?',
+  },
+  base: {
+    key: 'base',
+    text: 'Você tem algum destilado que curte mais? Gin, vodka, rum, cachaça, whisky, tequila — ou pode ser qualquer um?',
+  },
+};
+
+function nextQuestion(profile, questionsAsked) {
+  if (!profile.flavor && !questionsAsked.includes('flavor')) return QUESTIONS.flavor;
+  if (!profile.occasion && !questionsAsked.includes('occasion')) return QUESTIONS.occasion;
+  if (!profile.base && !questionsAsked.includes('base')) return QUESTIONS.base;
+  return null;
+}
+
+// ─── NARRATIVA DO DRINK ───────────────────────────────────────────────────────
+
+function drinkStory(drink, profile) {
+  const name     = drink.name || '';
+  const subtitle = drink.subtitle || '';
+  const desc     = drink.description || '';
+  const base     = drink.base || '';
+
+  // Safe ingredient extraction (handles string[] or object[])
+  const ingrs = Array.isArray(drink.ingredients)
+    ? drink.ingredients
+        .map(i => (typeof i === 'string' ? i : (i?.name || i?.item || '')))
+        .filter(s => s.length > 0)
+        .slice(0, 3)
+    : [];
+
+  const lines = [];
+
+  // Hook contextual por ocasião
+  if (profile?.occasion === 'date') {
+    lines.push(`${name}. A pessoa vai olhar pro drink e já entender que você se preparou.`);
+  } else if (profile?.occasion === 'festas') {
+    lines.push(`${name}. Faz um, todo mundo vai pedir o próximo.`);
+  } else if (profile?.occasion === 'solo') {
+    lines.push(`${name}. Pra você, no seu ritmo, fim de dia desse jeito.`);
+  } else if (profile?.occasion === 'calor') {
+    lines.push(`${name}. Com esse calor, exatamente isso.`);
+  } else if (profile?.occasion === 'frio') {
+    lines.push(`${name}. Aconchegante do jeito certo.`);
+  } else {
+    lines.push(`${name}.`);
+  }
+
+  // Descrição/história (primeira frase)
+  if (desc) {
+    const first = desc.split(/(?<=[.!?])\s/)[0].trim();
+    if (first.length > 15) lines.push(first);
+  } else if (subtitle) {
+    lines.push(subtitle + '.');
+  }
+
+  // Ingredientes
+  if (ingrs.length > 0) {
+    const more = drink.ingredients.length > 3 ? ' e mais alguns elementos' : '';
+    lines.push(`Leva ${ingrs.join(', ')}${more}.`);
+  } else if (base) {
+    lines.push(`Base ${base}.`);
+  }
+
+  // Fechamento por sabor
+  const flavorClose = {
+    amargo:  'Amargo e complexo — exatamente o perfil que você descreveu.',
+    doce:    'Suave e equilibrado, fácil de gostar.',
+    citrico: 'Cítrico, fresco, aquele tipo de drink que você termina e quer outro.',
+    frutado: 'Frutado e vibrante — tropical do jeito certo.',
+    herbal:  'Herbal e aromático. O tipo de drink que fica na memória.',
+  };
+  if (profile?.flavor && flavorClose[profile.flavor]) {
+    lines.push(flavorClose[profile.flavor]);
+  }
+
+  return lines.join(' ');
 }
 
 // ─── ABERTURA CONTEXTUALIZADA ─────────────────────────────────────────────────
@@ -424,10 +443,10 @@ function buildOpening(firstName, history, streak, ingredients) {
 // ─── SUGESTÕES DE INÍCIO ──────────────────────────────────────────────────────
 
 const STARTERS = [
-  'Calor aqui, quero algo refrescante',
-  'Tenho cachaça e limão em casa',
-  'Algo parecido com Negroni mas diferente',
-  'Pra impressionar numa janta',
+  'Quero algo pra impressionar num jantar',
+  'Me ajuda a escolher algo refrescante',
+  'Quero experimentar algo diferente',
+  'Tenho cachaça e limão, o que faço?',
 ];
 
 // ─── COMPONENTE ───────────────────────────────────────────────────────────────
@@ -459,7 +478,6 @@ export default function BartenderIAScreen({ navigation }) {
     if (!msg) return;
     try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch (_) {}
 
-    // Snapshot before state update so the timeout closure captures current state
     const snapshot = messages;
 
     setMessages(prev => [...prev, { role: 'user', text: msg }]);
@@ -468,26 +486,69 @@ export default function BartenderIAScreen({ navigation }) {
     scrollToBottom();
 
     setTimeout(() => {
-      // Cumulative context: all user turns + current message
-      const allUserText = [
-        ...snapshot.filter(m => m.role === 'user').map(m => m.text),
-        msg,
-      ].join(' ');
+      const norm = normalizeText(msg);
 
-      // IDs of every drink already shown in this conversation
+      // Build cumulative profile from all user messages
+      const allUserMsgs = [...snapshot.filter(m => m.role === 'user').map(m => m.text), msg];
+      const profile = allUserMsgs.reduce(
+        (acc, t) => extractProfile(normalizeText(t), acc),
+        { flavor: null, occasion: null, base: null, strength: null }
+      );
+
+      // Questions already asked in this conversation
+      const questionsAsked = snapshot
+        .filter(m => m.role === 'ze' && m._qk)
+        .map(m => m._qk);
+
+      // Has Zé already recommended something?
+      const alreadyRecommended = snapshot.some(m => m.role === 'ze' && (m.drinks || []).length > 0);
+
+      // Detect "show me another" requests
+      const isAltRequest = /\b(outro|outra|diferente|sem ser (esse|isso|aquele)|nao (pode ser|quero|seja) esse|muda|troca|mais opcoes|ver mais|outra opcao|outra sugestao)\b/.test(norm);
+
+      // Drinks already shown (for exclusion)
       const shownIds = snapshot
         .filter(m => m.role === 'ze')
         .flatMap(m => m.drinks || [])
         .map(d => d.id);
-
-      // Detect "give me a different one" requests
-      const norm = normalizeText(msg);
-      const isAltRequest = /\b(outro|outra|diferente|sem ser (esse|isso|aquele)|nao (pode ser|quero|seja) esse|muda|troca|algo diferente|pode ser outro|outra opcao|outra sugestao)\b/.test(norm);
-
       const excludeIds = isAltRequest ? shownIds : [];
 
-      const { text: zeText, drinks: zeDrinks } = localRecommend(allUserText, userBar, drinks, context, excludeIds);
-      setMessages(prev => [...prev, { role: 'ze', text: zeText, drinks: zeDrinks }]);
+      // Phase 1: gather info via questions (max 2 questions before first recommendation)
+      const shouldAsk = !alreadyRecommended && !hasEnoughInfo(profile) && questionsAsked.length < 2 && !isAltRequest;
+
+      if (shouldAsk) {
+        const q = nextQuestion(profile, questionsAsked);
+        if (q) {
+          setMessages(prev => [...prev, { role: 'ze', text: q.text, drinks: [], _qk: q.key }]);
+          setTyping(false);
+          scrollToBottom();
+          return;
+        }
+      }
+
+      // Phase 2: recommend with drink story
+      const allUserText = allUserMsgs.join(' ');
+      const { drinks: topDrinks, fallback } = localRecommend(allUserText, userBar, drinks, context, excludeIds);
+
+      let zeText;
+      let showDrinks;
+
+      if (isAltRequest) {
+        // Show 3 alternatives
+        zeText = excludeIds.length > 0
+          ? 'Mudando de rota. Aqui tem outras pedidas que funcionam:'
+          : 'Olha, mais algumas opções:';
+        showDrinks = topDrinks;
+      } else if (topDrinks.length > 0 && !fallback) {
+        // Tell the story of the top drink
+        zeText    = drinkStory(topDrinks[0], profile);
+        showDrinks = topDrinks.slice(0, 1);
+      } else {
+        zeText    = 'Não peguei um estilo específico, mas raramente erro com esses clássicos:';
+        showDrinks = topDrinks;
+      }
+
+      setMessages(prev => [...prev, { role: 'ze', text: zeText, drinks: showDrinks }]);
       setTyping(false);
       scrollToBottom();
     }, 700);
@@ -534,7 +595,6 @@ export default function BartenderIAScreen({ navigation }) {
               );
             }
 
-            // Zé's message
             return (
               <View key={i} style={styles.zeRow}>
                 <View style={styles.zeAvatarSmall}>
@@ -554,7 +614,6 @@ export default function BartenderIAScreen({ navigation }) {
                       rating={ratings[drink.id]}
                     />
                   ))}
-                  {/* Quick-start chips only after opening message */}
                   {i === 0 && isFirstMessage && (
                     <View style={styles.starters}>
                       {STARTERS.map(s => (
@@ -574,7 +633,6 @@ export default function BartenderIAScreen({ navigation }) {
             );
           })}
 
-          {/* Typing indicator */}
           {typing && (
             <View style={styles.zeRow}>
               <View style={styles.zeAvatarSmall}>
@@ -617,15 +675,14 @@ export default function BartenderIAScreen({ navigation }) {
 
 // ─── ESTILOS ──────────────────────────────────────────────────────────────────
 
-const ZE_BG   = '#1C1A14';   // fundo escuro — bar à noite
-const BUBBLE_ZE = '#2A2720'; // balão do Zé — um tom acima do fundo
-const GOLD    = '#FFD966';
+const ZE_BG    = '#1C1A14';
+const BUBBLE_ZE = '#2A2720';
+const GOLD     = '#FFD966';
 const GOLD_DIM = '#B8860B';
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: ZE_BG },
 
-  // Header
   header: {
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
     paddingHorizontal: spacing.xl, paddingTop: spacing.md, paddingBottom: spacing.md,
@@ -641,7 +698,6 @@ const styles = StyleSheet.create({
   headerName: { fontSize: 15, fontFamily: fonts.extraBold, color: '#fff' },
   headerSub:  { fontSize: 11, fontFamily: fonts.semiBold, color: 'rgba(255,255,255,0.4)', marginTop: 1 },
 
-  // Avatar Zé — header
   zeAvatar: {
     width: 38, height: 38, borderRadius: 12,
     backgroundColor: GOLD_DIM,
@@ -649,11 +705,9 @@ const styles = StyleSheet.create({
   },
   zeAvatarText: { fontSize: 13, fontFamily: fonts.black, color: ZE_BG, letterSpacing: -0.5 },
 
-  // Chat
   chat:        { flex: 1 },
   chatContent: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg, paddingBottom: 16, gap: 16 },
 
-  // Zé row
   zeRow:         { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   zeAvatarSmall: {
     width: 30, height: 30, borderRadius: 9, backgroundColor: GOLD_DIM,
@@ -668,7 +722,6 @@ const styles = StyleSheet.create({
   },
   zeText: { fontSize: 14, fontFamily: fonts.semiBold, color: 'rgba(255,255,255,0.88)', lineHeight: 21 },
 
-  // User row
   userRow:   { flexDirection: 'row', justifyContent: 'flex-end' },
   userBubble: {
     backgroundColor: colors.primary, borderRadius: radius.lg,
@@ -677,7 +730,6 @@ const styles = StyleSheet.create({
   },
   userText: { fontSize: 14, fontFamily: fonts.semiBold, color: '#fff', lineHeight: 20 },
 
-  // Typing
   typingBubble: {
     backgroundColor: BUBBLE_ZE, borderRadius: radius.lg, borderTopLeftRadius: 4,
     paddingHorizontal: 18, paddingVertical: 14,
@@ -685,7 +737,6 @@ const styles = StyleSheet.create({
   },
   typingDots: { fontSize: 16, color: 'rgba(255,255,255,0.4)', letterSpacing: 3 },
 
-  // Quick-start chips
   starters:    { gap: 8, marginTop: 4 },
   starterChip: {
     backgroundColor: 'rgba(255,255,255,0.06)',
@@ -694,7 +745,6 @@ const styles = StyleSheet.create({
   },
   starterText: { fontSize: 13, fontFamily: fonts.semiBold, color: 'rgba(255,255,255,0.65)' },
 
-  // Input
   inputRow: {
     flexDirection: 'row', alignItems: 'flex-end', gap: 10,
     paddingHorizontal: spacing.lg, paddingVertical: 12,
