@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, StyleSheet, Share, Image,
-  Modal, Pressable, Dimensions,
+  Modal, Pressable, Dimensions, Alert, ActivityIndicator,
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { useApp } from '../context/AppContext';
@@ -119,6 +120,9 @@ export default function DrinkDetailScreen({ navigation, route }) {
   const [scale, setScale]              = useState(1);
   const [timerActive, setTimerActive]  = useState(false);
   const [timerLeft, setTimerLeft]      = useState(drink.stirSeconds || 30);
+  const [photoModal, setPhotoModal]    = useState(false);
+  const [drinkPhotoUrl, setDrinkPhotoUrl] = useState(null);
+  const [uploading, setUploading]      = useState(false);
 
   const GlassComponent = glassMap[drink.id];
   const isFav = favorites.includes(drink.id);
@@ -146,8 +150,80 @@ export default function DrinkDetailScreen({ navigation, route }) {
   const marcarComoFeito = () => {
     if (marcadoComoFeito) return;
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    addToHistory(drink.id);
     setMarcado(true);
+    setPhotoModal(true);
+  };
+
+  const uploadDrinkPhoto = async (uri) => {
+    setUploading(true);
+    try {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      const path = `${user.id}/${drink.id}-${Date.now()}.jpg`;
+      const { data, error } = await supabase.storage
+        .from('user-photos')
+        .upload(path, blob, { contentType: 'image/jpeg' });
+      if (error) throw error;
+      const { data: { publicUrl } } = supabase.storage.from('user-photos').getPublicUrl(data.path);
+      return publicUrl;
+    } catch (e) {
+      console.log('Upload error:', e);
+      return null;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const finishWithPhoto = async (uri) => {
+    setPhotoModal(false);
+    const url = uri ? await uploadDrinkPhoto(uri) : null;
+    setDrinkPhotoUrl(url);
+    addToHistory(drink.id, url);
+  };
+
+  const pickFromCamera = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permissão negada', 'Precisa de permissão para usar a câmera.');
+      setPhotoModal(false);
+      addToHistory(drink.id, null);
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ['images'], quality: 0.75, allowsEditing: true, aspect: [1, 1],
+    });
+    if (!result.canceled) finishWithPhoto(result.assets[0].uri);
+    else { setPhotoModal(false); addToHistory(drink.id, null); }
+  };
+
+  const pickFromGallery = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permissão negada', 'Precisa de permissão para acessar a galeria.');
+      setPhotoModal(false);
+      addToHistory(drink.id, null);
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'], quality: 0.75, allowsEditing: true, aspect: [1, 1],
+    });
+    if (!result.canceled) finishWithPhoto(result.assets[0].uri);
+    else { setPhotoModal(false); addToHistory(drink.id, null); }
+  };
+
+  const shareWithPhoto = async () => {
+    try {
+      const ingList = drink.ingredients
+        .map(ing => `  • ${ing.amount ? ing.amount + ' ' : ''}${ing.name}`)
+        .join('\n');
+      const photoLine = drinkPhotoUrl ? `\n📸 ${drinkPhotoUrl}` : '';
+      const msg =
+        `🍸 Fiz um ${drink.name}!\n${drink.subtitle}\n` +
+        `${photoLine}\n\n` +
+        `Ingredientes:\n${ingList}\n\n` +
+        `Feito com o app Bartender de Bolso!`;
+      await Share.share({ message: msg, title: drink.name });
+    } catch (_) {}
   };
 
   const startTimer = () => {
@@ -434,6 +510,11 @@ export default function DrinkDetailScreen({ navigation, route }) {
                   <View style={styles.doneCard}>
                     <Text style={{ fontSize: 28 }}>🥂</Text>
                     <Text style={styles.doneTitle}>Mandou bem! Saúde! 🥂</Text>
+                    {uploading ? (
+                      <ActivityIndicator color="#FFD966" style={{ marginVertical: 8 }} />
+                    ) : drinkPhotoUrl ? (
+                      <Image source={{ uri: drinkPhotoUrl }} style={styles.donePhoto} />
+                    ) : null}
                     <Text style={styles.doneSub}>Como foi esse drink?</Text>
                     <View style={styles.starsRow}>
                       {[1,2,3,4,5].map(star => (
@@ -451,6 +532,9 @@ export default function DrinkDetailScreen({ navigation, route }) {
                         {['','Não gostei 😕','Mais ou menos 😐','Razoável 😌','Muito bom! 😄','Perfeito! 🤩'][ratings[drink.id]]}
                       </Text>
                     )}
+                    <TouchableOpacity onPress={shareWithPhoto} style={styles.shareCardBtn}>
+                      <Text style={styles.shareCardText}>↗ Compartilhar</Text>
+                    </TouchableOpacity>
                   </View>
                 ) : (
                   <TouchableOpacity onPress={marcarComoFeito} activeOpacity={0.85} style={styles.fezBtn}>
@@ -538,6 +622,28 @@ export default function DrinkDetailScreen({ navigation, route }) {
         </TouchableOpacity>
       )}
 
+      {/* PHOTO MODAL */}
+      <Modal visible={photoModal} transparent animationType="slide" statusBarTranslucent>
+        <View style={styles.photoModalOverlay}>
+          <View style={styles.photoModalSheet}>
+            <Text style={styles.photoModalTitle}>Registrar foto?</Text>
+            <Text style={styles.photoModalSub}>Salve uma foto no seu histórico de drinks</Text>
+            <TouchableOpacity onPress={pickFromCamera} activeOpacity={0.85} style={styles.photoOptCamera}>
+              <Text style={styles.photoOptCameraText}>📷  Tirar foto agora</Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={pickFromGallery} activeOpacity={0.85} style={styles.photoOptGallery}>
+              <Text style={styles.photoOptGalleryText}>🖼  Escolher da galeria</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => { setPhotoModal(false); addToHistory(drink.id, null); }}
+              style={styles.photoOptSkip}
+            >
+              <Text style={styles.photoOptSkipText}>Pular por agora</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
       <BottomNav navigation={navigation} />
     </SafeAreaView>
   );
@@ -623,6 +729,9 @@ const styles = StyleSheet.create({
   stepDesc:  { fontSize: 12, fontFamily: fonts.semiBold, color: '#888', marginTop: 4, lineHeight: 18 },
 
   doneCard: { backgroundColor: '#1C1A14', borderRadius: radius.lg, padding: spacing.lg, alignItems: 'center', gap: 6 },
+  donePhoto: { width: 120, height: 120, borderRadius: 16, marginVertical: 8 },
+  shareCardBtn: { marginTop: 8, backgroundColor: 'rgba(255,210,80,0.15)', borderRadius: radius.md, paddingHorizontal: 20, paddingVertical: 10, borderWidth: 1, borderColor: 'rgba(255,210,80,0.3)' },
+  shareCardText: { fontSize: 13, fontFamily: fonts.extraBold, color: '#FFD966' },
   fezBtn: { backgroundColor: '#1C1A14', borderRadius: radius.lg, padding: spacing.lg, alignItems: 'center', gap: 4, borderWidth: 1, borderColor: 'rgba(255,210,80,0.2)' },
   fezBtnTitle: { fontSize: 16, fontFamily: fonts.extraBold, color: '#FFD966', marginTop: 4 },
   fezBtnSub: { fontSize: 12, fontFamily: fonts.semiBold, color: '#888' },
@@ -632,6 +741,18 @@ const styles = StyleSheet.create({
   starsRow: { flexDirection: 'row', gap: 8, marginTop: 6 },
   starIcon: { fontSize: 24, color: '#FFD966' },
   ratedText: { fontSize: 12, fontFamily: fonts.extraBold, color: '#FFD966' },
+
+  // Photo modal
+  photoModalOverlay: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.55)' },
+  photoModalSheet: { backgroundColor: '#fff', borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 28, gap: 10, paddingBottom: 44 },
+  photoModalTitle: { fontSize: 18, fontFamily: fonts.extraBold, color: '#111', textAlign: 'center', marginBottom: 4 },
+  photoModalSub: { fontSize: 13, fontFamily: fonts.semiBold, color: '#888', textAlign: 'center', marginBottom: 8 },
+  photoOptCamera: { backgroundColor: '#1C1A14', borderRadius: 16, paddingVertical: 16, alignItems: 'center' },
+  photoOptCameraText: { fontSize: 15, fontFamily: fonts.extraBold, color: '#FFD966' },
+  photoOptGallery: { backgroundColor: '#F5F5F2', borderRadius: 16, paddingVertical: 16, alignItems: 'center' },
+  photoOptGalleryText: { fontSize: 15, fontFamily: fonts.extraBold, color: '#333' },
+  photoOptSkip: { paddingVertical: 14, alignItems: 'center' },
+  photoOptSkipText: { fontSize: 13, fontFamily: fonts.semiBold, color: '#aaa' },
 
   // O que me falta
   allSetCard: { flexDirection: 'row', alignItems: 'center', gap: 12, backgroundColor: '#F0FFF4', borderRadius: radius.lg, padding: spacing.md, borderWidth: 2, borderColor: '#86EFAC', marginTop: 4 },

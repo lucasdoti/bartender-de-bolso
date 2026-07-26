@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
-  View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Alert, Platform, ActivityIndicator,
+  View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Alert, Platform, ActivityIndicator, Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
@@ -36,6 +36,37 @@ export default function PerfilScreen({ navigation }) {
   const [editingName, setEditingName]   = useState(false);
   const [newNameValue, setNewNameValue] = useState('');
   const [savingName, setSavingName]     = useState(false);
+  const [ranking, setRanking]           = useState([]);
+  const [rankingLoading, setRankingLoading] = useState(false);
+
+  useEffect(() => {
+    if (section !== 'ranking') return;
+    setRankingLoading(true);
+    (async () => {
+      try {
+        const { data: histData } = await supabase.from('history').select('user_id');
+        if (!histData?.length) { setRanking([]); return; }
+        const counts = {};
+        histData.forEach(h => { counts[h.user_id] = (counts[h.user_id] || 0) + 1; });
+        const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+        const userIds = sorted.map(([id]) => id);
+        const { data: profilesData } = await supabase.from('profiles').select('id, name').in('id', userIds);
+        const nameMap = {};
+        profilesData?.forEach(p => { nameMap[p.id] = p.name; });
+        setRanking(sorted.map(([userId, count], idx) => ({
+          userId,
+          count,
+          name: nameMap[userId] || null,
+          rank: idx + 1,
+          isMe: userId === user?.id,
+        })));
+      } catch (e) {
+        console.log('Ranking error:', e);
+      } finally {
+        setRankingLoading(false);
+      }
+    })();
+  }, [section]);
 
   const handleLogout = () => {
     Alert.alert('Sair', 'Tem certeza que deseja sair da sua conta?', [
@@ -176,6 +207,7 @@ export default function PerfilScreen({ navigation }) {
   const historyDrinks = history.map(h => ({
     ...drinks.find(d => d.id === h.id),
     date: new Date(h.date).toLocaleDateString('pt-BR', { weekday: 'short', hour: '2-digit', minute: '2-digit' }),
+    photoUrl: h.photoUrl,
   })).filter(Boolean);
 
   return (
@@ -277,9 +309,10 @@ export default function PerfilScreen({ navigation }) {
         {/* SECTION TABS */}
         <View style={styles.tabs}>
           {[
-            { id: 'stats',      label: '📊 Atividade'  },
-            { id: 'historico',  label: '🕐 Histórico'  },
-            { id: 'conquistas', label: '🏆 Conquistas' },
+            { id: 'stats',      label: '📊 Stats'     },
+            { id: 'historico',  label: '🕐 Histórico' },
+            { id: 'conquistas', label: '🏆 Badges'    },
+            { id: 'ranking',    label: '👥 Ranking'   },
           ].map(tab => (
             <TouchableOpacity
               key={tab.id}
@@ -353,9 +386,13 @@ export default function PerfilScreen({ navigation }) {
             ) : (
               historyDrinks.map((drink, i) => (
                 <View key={i} style={styles.histCard}>
-                  <View style={[styles.histGlass, { backgroundColor: drink.color }]}>
-                    <Text style={{ fontSize: 20 }}>🥂</Text>
-                  </View>
+                  {drink.photoUrl ? (
+                    <Image source={{ uri: drink.photoUrl }} style={styles.histPhoto} />
+                  ) : (
+                    <View style={[styles.histGlass, { backgroundColor: drink.color }]}>
+                      <Text style={{ fontSize: 20 }}>🥂</Text>
+                    </View>
+                  )}
                   <View style={{ flex: 1 }}>
                     <Text style={styles.histName}>{drink.name}</Text>
                     <Text style={styles.histDate}>🕐 {drink.date}</Text>
@@ -400,6 +437,50 @@ export default function PerfilScreen({ navigation }) {
                 <Text style={[styles.featuredSub, { marginTop: 6 }]}>{drinksNoNivel} de 5 drinks neste nível</Text>
               </View>
             </>
+          )}
+
+          {/* ── RANKING ── */}
+          {section === 'ranking' && (
+            rankingLoading ? (
+              <ActivityIndicator color={colors.primary} style={{ marginTop: 40 }} />
+            ) : ranking.length === 0 ? (
+              <View style={styles.emptySection}>
+                <Text style={{ fontSize: 32 }}>🏆</Text>
+                <Text style={styles.emptySectionText}>Nenhum dado de ranking ainda</Text>
+              </View>
+            ) : (
+              <>
+                <View style={styles.rankingHeader}>
+                  <Text style={styles.rankingTitle}>Quem preparou mais drinks</Text>
+                  <Text style={styles.rankingSub}>Entre todos os usuários do app</Text>
+                </View>
+                {ranking.map((entry, i) => {
+                  const medals = ['🥇', '🥈', '🥉'];
+                  const medal = i < 3 ? medals[i] : null;
+                  const myName = user?.user_metadata?.name || 'Você';
+                  const displayName = entry.isMe ? myName : (entry.name || `Bartender #${entry.rank}`);
+                  return (
+                    <View key={entry.userId} style={[styles.rankCard, entry.isMe && styles.rankCardMe]}>
+                      <View style={styles.rankPos}>
+                        {medal
+                          ? <Text style={{ fontSize: 22 }}>{medal}</Text>
+                          : <Text style={styles.rankNum}>{entry.rank}</Text>
+                        }
+                      </View>
+                      <View style={{ flex: 1 }}>
+                        <Text style={[styles.rankName, entry.isMe && { color: colors.gold }]}>
+                          {displayName}{entry.isMe ? ' (você)' : ''}
+                        </Text>
+                        <Text style={styles.rankCount}>{entry.count} {entry.count === 1 ? 'drink preparado' : 'drinks preparados'}</Text>
+                      </View>
+                      <View style={styles.rankBar}>
+                        <View style={[styles.rankBarFill, { width: `${(entry.count / ranking[0].count) * 100}%` }]}/>
+                      </View>
+                    </View>
+                  );
+                })}
+              </>
+            )
           )}
 
         </View>
@@ -514,10 +595,23 @@ const styles = StyleSheet.create({
 
   histCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.md, flexDirection: 'row', alignItems: 'center', gap: 14, borderWidth: 2, borderColor: '#F5F5F5' },
   histGlass: { width: 52, height: 52, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },
+  histPhoto: { width: 52, height: 52, borderRadius: 14 },
   histName: { fontSize: 14, fontFamily: fonts.extraBold, color: colors.text },
   histDate: { fontSize: 11, fontFamily: fonts.semiBold, color: colors.textLight, marginTop: 2 },
   arrowBtn: { width: 30, height: 30, borderRadius: 8, backgroundColor: '#F5F5F5', alignItems: 'center', justifyContent: 'center' },
   arrow: { fontSize: 18, color: '#aaa' },
+
+  rankingHeader: { marginBottom: 4 },
+  rankingTitle: { fontSize: 14, fontFamily: fonts.extraBold, color: colors.text },
+  rankingSub: { fontSize: 11, fontFamily: fonts.semiBold, color: colors.textLight, marginTop: 2 },
+  rankCard: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.md, flexDirection: 'row', alignItems: 'center', gap: 12, borderWidth: 2, borderColor: '#F5F5F5' },
+  rankCardMe: { borderColor: colors.gold, backgroundColor: '#FFFDF0' },
+  rankPos: { width: 36, alignItems: 'center' },
+  rankNum: { fontSize: 15, fontFamily: fonts.black, color: colors.textMuted },
+  rankName: { fontSize: 14, fontFamily: fonts.extraBold, color: colors.text },
+  rankCount: { fontSize: 11, fontFamily: fonts.semiBold, color: colors.textLight, marginTop: 2 },
+  rankBar: { width: 60, height: 6, backgroundColor: '#F0F0EC', borderRadius: 3, overflow: 'hidden' },
+  rankBarFill: { height: '100%', backgroundColor: colors.primary, borderRadius: 3 },
 
   badgesGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   badgeCard: { width: '30%', backgroundColor: colors.surface, borderRadius: radius.lg, padding: 14, alignItems: 'center', gap: 8, borderWidth: 2, borderColor: '#F5F5F5' },
