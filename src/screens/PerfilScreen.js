@@ -386,22 +386,7 @@ export default function PerfilScreen({ navigation }) {
               </View>
             ) : (
               historyDrinks.map((drink, i) => (
-                <TouchableOpacity
-                  key={i}
-                  style={styles.histCard}
-                  activeOpacity={0.85}
-                  onPress={() => navigation.navigate('DrinkDetail', { drinkId: drink.id })}
-                  onLongPress={() => {
-                    Alert.alert(
-                      'Remover do histórico?',
-                      `Remover "${drink.name}" do seu histórico?`,
-                      [
-                        { text: 'Cancelar', style: 'cancel' },
-                        { text: 'Remover', style: 'destructive', onPress: () => removeFromHistory(drink.id, drink.rawDate) },
-                      ]
-                    );
-                  }}
-                >
+                <View key={i} style={styles.histCard}>
                   {drink.photoUrl ? (
                     <Image source={{ uri: drink.photoUrl }} style={styles.histPhoto} />
                   ) : (
@@ -409,7 +394,11 @@ export default function PerfilScreen({ navigation }) {
                       <Text style={{ fontSize: 20 }}>🥂</Text>
                     </View>
                   )}
-                  <View style={{ flex: 1 }}>
+                  <TouchableOpacity
+                    style={{ flex: 1 }}
+                    activeOpacity={0.7}
+                    onPress={() => navigation.navigate('DrinkDetail', { drinkId: drink.id })}
+                  >
                     <Text style={styles.histName}>{drink.name}</Text>
                     <Text style={styles.histDate}>🕐 {drink.date}</Text>
                     {ratings[drink.id] > 0 && (
@@ -419,11 +408,22 @@ export default function PerfilScreen({ navigation }) {
                         ))}
                       </View>
                     )}
-                  </View>
-                  <View style={styles.arrowBtn}>
-                    <Text style={styles.arrow}>›</Text>
-                  </View>
-                </TouchableOpacity>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.deleteBtn}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    onPress={() => Alert.alert(
+                      'Remover do histórico?',
+                      `Remover "${drink.name}" do seu histórico?`,
+                      [
+                        { text: 'Cancelar', style: 'cancel' },
+                        { text: 'Remover', style: 'destructive', onPress: () => removeFromHistory(drink.id, drink.rawDate) },
+                      ]
+                    )}
+                  >
+                    <Text style={styles.deleteBtnText}>🗑</Text>
+                  </TouchableOpacity>
+                </View>
               ))
             )
           )}
@@ -642,6 +642,9 @@ const styles = StyleSheet.create({
   configIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: '#F5F5F2', alignItems: 'center', justifyContent: 'center' },
   configLabel: { fontSize: 14, fontFamily: fonts.bold, color: colors.text },
   configSub:   { fontSize: 11, fontFamily: fonts.semiBold, color: colors.textLight, marginTop: 1 },
+
+  deleteBtn: { width: 34, height: 34, borderRadius: 10, backgroundColor: '#FFF0F0', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  deleteBtnText: { fontSize: 15 },
 
   emptySection: { alignItems: 'center', paddingVertical: 40, gap: 12 },
   emptySectionText: { fontSize: 14, fontFamily: fonts.semiBold, color: colors.textLight },
