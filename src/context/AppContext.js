@@ -128,6 +128,15 @@ export function AppProvider({ children }) {
     await supabase.from('history').insert(insertData);
   };
 
+  const removeFromHistory = async (drinkId, date) => {
+    if (!user) return;
+    setHistory(prev => prev.filter(h => !(h.id === drinkId && h.date === date)));
+    await supabase.from('history').delete()
+      .eq('user_id', user.id)
+      .eq('drink_id', drinkId)
+      .eq('made_at', date);
+  };
+
   // ── AVALIAÇÕES ──
   const rateDrink = async (drinkId, stars) => {
     if (!user) return;
@@ -146,7 +155,7 @@ export function AppProvider({ children }) {
     <AppContext.Provider value={{
       favorites,    toggleFavorite,
       ingredients,  toggleIngredient,
-      history,      addToHistory,
+      history,      addToHistory,    removeFromHistory,
       ratings,      rateDrink,
       extraDrinks,  refreshExtraDrinks,
       streak,

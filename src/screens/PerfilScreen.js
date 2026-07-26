@@ -29,7 +29,7 @@ const configItems = [
 ];
 
 export default function PerfilScreen({ navigation }) {
-  const { favorites, history, ratings, streak } = useApp();
+  const { favorites, history, ratings, streak, removeFromHistory } = useApp();
   const drinks = useDrinks();
   const { signOut, user } = useAuth();
   const [section, setSection] = useState('stats');
@@ -207,6 +207,7 @@ export default function PerfilScreen({ navigation }) {
   const historyDrinks = history.map(h => ({
     ...drinks.find(d => d.id === h.id),
     date: new Date(h.date).toLocaleDateString('pt-BR', { weekday: 'short', hour: '2-digit', minute: '2-digit' }),
+    rawDate: h.date,
     photoUrl: h.photoUrl,
   })).filter(Boolean);
 
@@ -385,7 +386,22 @@ export default function PerfilScreen({ navigation }) {
               </View>
             ) : (
               historyDrinks.map((drink, i) => (
-                <View key={i} style={styles.histCard}>
+                <TouchableOpacity
+                  key={i}
+                  style={styles.histCard}
+                  activeOpacity={0.85}
+                  onPress={() => navigation.navigate('DrinkDetail', { drinkId: drink.id })}
+                  onLongPress={() => {
+                    Alert.alert(
+                      'Remover do histórico?',
+                      `Remover "${drink.name}" do seu histórico?`,
+                      [
+                        { text: 'Cancelar', style: 'cancel' },
+                        { text: 'Remover', style: 'destructive', onPress: () => removeFromHistory(drink.id, drink.rawDate) },
+                      ]
+                    );
+                  }}
+                >
                   {drink.photoUrl ? (
                     <Image source={{ uri: drink.photoUrl }} style={styles.histPhoto} />
                   ) : (
@@ -404,10 +420,10 @@ export default function PerfilScreen({ navigation }) {
                       </View>
                     )}
                   </View>
-                  <TouchableOpacity style={styles.arrowBtn} onPress={() => navigation.navigate('DrinkDetail', { drinkId: drink.id })}>
+                  <View style={styles.arrowBtn}>
                     <Text style={styles.arrow}>›</Text>
-                  </TouchableOpacity>
-                </View>
+                  </View>
+                </TouchableOpacity>
               ))
             )
           )}
