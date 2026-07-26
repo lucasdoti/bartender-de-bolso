@@ -81,12 +81,12 @@ export function AppProvider({ children }) {
       const [favs, bar, hist, extra] = await Promise.allSettled([
         supabase.from('favorites').select('drink_id').eq('user_id', user.id),
         supabase.from('my_bar').select('ingredient_id').eq('user_id', user.id),
-        supabase.from('history').select('drink_id, made_at').eq('user_id', user.id).order('made_at', { ascending: false }),
+        supabase.from('history').select('drink_id, made_at, photo_url').eq('user_id', user.id).order('made_at', { ascending: false }),
         supabase.from('drinks_extra').select('*').eq('published', true),
       ]);
       if (favs.status  === 'fulfilled' && favs.value.data)  setFavorites(favs.value.data.map(f => f.drink_id));
       if (bar.status   === 'fulfilled' && bar.value.data)   setIngredients(bar.value.data.map(b => b.ingredient_id));
-      if (hist.status  === 'fulfilled' && hist.value.data)  setHistory(hist.value.data.map(h => ({ id: h.drink_id, date: h.made_at })));
+      if (hist.status  === 'fulfilled' && hist.value.data)  setHistory(hist.value.data.map(h => ({ id: h.drink_id, date: h.made_at, photoUrl: h.photo_url || null })));
       if (extra.status === 'fulfilled' && extra.value.data) setExtraDrinks(extra.value.data.map(normalizeExtraDrink));
     } catch (e) {
       console.log('Erro ao carregar dados:', e);
@@ -119,11 +119,13 @@ export function AppProvider({ children }) {
   };
 
   // ── HISTÓRICO ──
-  const addToHistory = async (drinkId) => {
+  const addToHistory = async (drinkId, photoUrl = null) => {
     if (!user) return;
-    const entry = { id: drinkId, date: new Date().toISOString() };
+    const entry = { id: drinkId, date: new Date().toISOString(), photoUrl };
     setHistory(prev => [entry, ...prev].slice(0, 50));
-    await supabase.from('history').insert({ user_id: user.id, drink_id: drinkId });
+    const insertData = { user_id: user.id, drink_id: drinkId };
+    if (photoUrl) insertData.photo_url = photoUrl;
+    await supabase.from('history').insert(insertData);
   };
 
   // ── AVALIAÇÕES ──
