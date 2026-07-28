@@ -412,14 +412,22 @@ export default function PerfilScreen({ navigation }) {
                   <TouchableOpacity
                     style={styles.deleteBtn}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                    onPress={() => Alert.alert(
-                      'Remover do histórico?',
-                      `Remover "${drink.name}" do seu histórico?`,
-                      [
-                        { text: 'Cancelar', style: 'cancel' },
-                        { text: 'Remover', style: 'destructive', onPress: () => removeFromHistory(drink.id, drink.rawDate) },
-                      ]
-                    )}
+                    onPress={() => {
+                      if (Platform.OS === 'web') {
+                        if (window.confirm(`Remover "${drink.name}" do seu histórico?`)) {
+                          removeFromHistory(drink.id, drink.rawDate);
+                        }
+                      } else {
+                        Alert.alert(
+                          'Remover do histórico?',
+                          `Remover "${drink.name}" do seu histórico?`,
+                          [
+                            { text: 'Cancelar', style: 'cancel' },
+                            { text: 'Remover', style: 'destructive', onPress: () => removeFromHistory(drink.id, drink.rawDate) },
+                          ]
+                        );
+                      }
+                    }}
                   >
                     <Text style={styles.deleteBtnText}>🗑</Text>
                   </TouchableOpacity>
