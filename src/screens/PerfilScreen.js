@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
-  View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Alert, Platform, ActivityIndicator, Image,
+  View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Alert, Platform, ActivityIndicator, Image, Modal, Pressable, Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
@@ -38,6 +38,7 @@ export default function PerfilScreen({ navigation }) {
   const [savingName, setSavingName]     = useState(false);
   const [ranking, setRanking]           = useState([]);
   const [rankingLoading, setRankingLoading] = useState(false);
+  const [fullscreenPhoto, setFullscreenPhoto] = useState(null);
 
   useEffect(() => {
     if (section !== 'ranking') return;
@@ -139,7 +140,6 @@ export default function PerfilScreen({ navigation }) {
 
   // ── ESTATÍSTICAS REAIS (calculadas do histórico) ──
 
-  // Drink mais preparado
   const contagem = {};
   history.forEach(h => { contagem[h.id] = (contagem[h.id] || 0) + 1; });
   let drinkFavoritoId = null, maxVezes = 0;
@@ -148,12 +148,10 @@ export default function PerfilScreen({ navigation }) {
   });
   const drinkFavorito = drinks.find(d => d.id === drinkFavoritoId);
 
-  // Nível: 1 a cada 5 drinks feitos (mínimo nível 1)
   const nivel = Math.max(1, Math.floor(history.length / 5) + 1);
   const drinksNoNivel = history.length % 5;
   const progressoNivel = (drinksNoNivel / 5) * 100;
 
-  // Destilados mais usados (a partir do histórico)
   const baseCores = {
     Rum: '#C84B31', Gin: '#1565C0', Vodka: '#7B1FA2', Cachaça: '#2E7D32',
     Tequila: '#F9A825', Whisky: '#E65100', Bourbon: '#BF360C', Aperol: '#E64A19',
@@ -170,7 +168,6 @@ export default function PerfilScreen({ navigation }) {
     .sort((a, b) => b.pct - a.pct)
     .slice(0, 4);
 
-  // Drinks da semana real (últimos 7 dias)
   const diasSemana = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
   const hoje = new Date();
   const weekBars = [];
@@ -185,7 +182,6 @@ export default function PerfilScreen({ navigation }) {
   }
   const maxWeek = Math.max(...weekBars.map(w => w.v), 1);
 
-  // Semanas ativo (desde o primeiro drink)
   let semanasAtivo = 1;
   if (history.length > 0) {
     const datas = history.map(h => new Date(h.date)).sort((a, b) => a - b);
@@ -194,7 +190,6 @@ export default function PerfilScreen({ navigation }) {
     semanasAtivo = Math.max(1, diff);
   }
 
-  // Conquistas reais
   const badges = [
     { emoji: '🥂', label: 'Primeiro drink',      earned: history.length >= 1 },
     { emoji: '🔥', label: '5 drinks feitos',     earned: history.length >= 5 },
@@ -215,7 +210,6 @@ export default function PerfilScreen({ navigation }) {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 100 }}>
 
-        {/* HEADER */}
         <View style={styles.header}>
           <Text style={styles.title}>
             Meu <Text style={styles.titleAccent}>Perfil</Text>
@@ -223,7 +217,6 @@ export default function PerfilScreen({ navigation }) {
           <AppIcon size={38} />
         </View>
 
-        {/* AVATAR */}
         {(() => {
           const name = user?.user_metadata?.name || 'Bartender';
           const initials = name.split(' ').slice(0, 2).map(n => n[0]).join('').toUpperCase().substring(0, 2) || 'B';
@@ -291,7 +284,6 @@ export default function PerfilScreen({ navigation }) {
           );
         })()}
 
-        {/* STAT CARDS — grid fixo, sem scroll */}
         <View style={styles.statsGrid}>
           {[
             { label: 'Feitos',    value: String(history.length || 0), emoji: '🥂' },
@@ -307,7 +299,6 @@ export default function PerfilScreen({ navigation }) {
           ))}
         </View>
 
-        {/* SECTION TABS */}
         <View style={styles.tabs}>
           {[
             { id: 'stats',      label: '📊 Stats'     },
@@ -329,7 +320,6 @@ export default function PerfilScreen({ navigation }) {
 
         <View style={{ paddingHorizontal: spacing.xl, marginTop: spacing.lg, gap: 12 }}>
 
-          {/* ── ATIVIDADE ── */}
           {section === 'stats' && (
             <>
               {drinkFavorito ? (
@@ -363,21 +353,20 @@ export default function PerfilScreen({ navigation }) {
                   <Text style={styles.cardTitle}>Destilados mais usados</Text>
                   {destilados.map(({ name, pct, color }) => (
                     <View key={name} style={{ marginBottom: 10 }}>
-                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
-                      <Text style={styles.destName}>{name}</Text>
-                      <Text style={[styles.destPct, { color }]}>{pct}%</Text>
+                      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 4 }}>
+                        <Text style={styles.destName}>{name}</Text>
+                        <Text style={[styles.destPct, { color }]}>{pct}%</Text>
+                      </View>
+                      <View style={styles.progressBg}>
+                        <View style={[styles.progressFill, { width: `${pct}%`, backgroundColor: color }]}/>
+                      </View>
                     </View>
-                    <View style={styles.progressBg}>
-                      <View style={[styles.progressFill, { width: `${pct}%`, backgroundColor: color }]}/>
-                    </View>
-                  </View>
-                ))}
-              </View>
+                  ))}
+                </View>
               )}
             </>
           )}
 
-          {/* ── HISTÓRICO ── */}
           {section === 'historico' && (
             historyDrinks.length === 0 ? (
               <View style={styles.emptySection}>
@@ -388,7 +377,9 @@ export default function PerfilScreen({ navigation }) {
               historyDrinks.map((drink, i) => (
                 <View key={i} style={styles.histCard}>
                   {drink.photoUrl ? (
-                    <Image source={{ uri: drink.photoUrl }} style={styles.histPhoto} />
+                    <TouchableOpacity onPress={() => setFullscreenPhoto(drink.photoUrl)} activeOpacity={0.85}>
+                      <Image source={{ uri: drink.photoUrl }} style={styles.histPhoto} />
+                    </TouchableOpacity>
                   ) : (
                     <View style={[styles.histGlass, { backgroundColor: drink.color }]}>
                       <Text style={{ fontSize: 20 }}>🥂</Text>
@@ -436,7 +427,6 @@ export default function PerfilScreen({ navigation }) {
             )
           )}
 
-          {/* ── CONQUISTAS ── */}
           {section === 'conquistas' && (
             <>
               <View style={styles.badgesGrid}>
@@ -450,7 +440,6 @@ export default function PerfilScreen({ navigation }) {
                   </View>
                 ))}
               </View>
-
               <View style={styles.featuredCard}>
                 <Text style={styles.featuredLabel}>✦ Próximo nível</Text>
                 <Text style={styles.featuredName}>Nível {nivel + 1} 🥃</Text>
@@ -463,7 +452,6 @@ export default function PerfilScreen({ navigation }) {
             </>
           )}
 
-          {/* ── RANKING ── */}
           {section === 'ranking' && (
             rankingLoading ? (
               <ActivityIndicator color={colors.primary} style={{ marginTop: 40 }} />
@@ -509,7 +497,6 @@ export default function PerfilScreen({ navigation }) {
 
         </View>
 
-        {/* ADMIN — visível apenas para o dono */}
         {user?.email === 'lucas_doti@hotmail.com' && (
           <TouchableOpacity
             activeOpacity={0.85}
@@ -521,7 +508,6 @@ export default function PerfilScreen({ navigation }) {
           </TouchableOpacity>
         )}
 
-        {/* CONFIGURAÇÕES */}
         <View style={{ paddingHorizontal: spacing.xl, marginTop: spacing.xl }}>
           <Text style={styles.sectionLabel}>Configurações</Text>
           <View style={styles.configCard}>
@@ -546,6 +532,20 @@ export default function PerfilScreen({ navigation }) {
         </View>
 
       </ScrollView>
+
+      <Modal visible={!!fullscreenPhoto} transparent animationType="fade" statusBarTranslucent>
+        <Pressable style={styles.photoFullOverlay} onPress={() => setFullscreenPhoto(null)}>
+          {fullscreenPhoto && (
+            <Image
+              source={{ uri: fullscreenPhoto }}
+              style={styles.photoFullImg}
+              resizeMode="contain"
+            />
+          )}
+          <Text style={styles.photoFullHint}>Toque para fechar</Text>
+        </Pressable>
+      </Modal>
+
       <BottomNav active="Perfil" navigation={navigation} />
     </SafeAreaView>
   );
@@ -653,6 +653,10 @@ const styles = StyleSheet.create({
 
   deleteBtn: { width: 34, height: 34, borderRadius: 10, backgroundColor: '#FFF0F0', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   deleteBtnText: { fontSize: 15 },
+
+  photoFullOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.93)', alignItems: 'center', justifyContent: 'center', gap: 16 },
+  photoFullImg: { width: Dimensions.get('window').width, height: Dimensions.get('window').width },
+  photoFullHint: { fontSize: 12, color: 'rgba(255,255,255,0.4)', fontFamily: fonts.semiBold },
 
   emptySection: { alignItems: 'center', paddingVertical: 40, gap: 12 },
   emptySectionText: { fontSize: 14, fontFamily: fonts.semiBold, color: colors.textLight },
