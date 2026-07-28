@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
-  View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Alert, Platform, ActivityIndicator, Image,
+  View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Alert, Platform, ActivityIndicator, Image, Modal, Pressable, Dimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useApp } from '../context/AppContext';
@@ -38,6 +38,7 @@ export default function PerfilScreen({ navigation }) {
   const [savingName, setSavingName]     = useState(false);
   const [ranking, setRanking]           = useState([]);
   const [rankingLoading, setRankingLoading] = useState(false);
+  const [fullscreenPhoto, setFullscreenPhoto] = useState(null);
 
   useEffect(() => {
     if (section !== 'ranking') return;
@@ -388,7 +389,9 @@ export default function PerfilScreen({ navigation }) {
               historyDrinks.map((drink, i) => (
                 <View key={i} style={styles.histCard}>
                   {drink.photoUrl ? (
-                    <Image source={{ uri: drink.photoUrl }} style={styles.histPhoto} />
+                    <TouchableOpacity onPress={() => setFullscreenPhoto(drink.photoUrl)} activeOpacity={0.85}>
+                      <Image source={{ uri: drink.photoUrl }} style={styles.histPhoto} />
+                    </TouchableOpacity>
                   ) : (
                     <View style={[styles.histGlass, { backgroundColor: drink.color }]}>
                       <Text style={{ fontSize: 20 }}>🥂</Text>
@@ -546,6 +549,20 @@ export default function PerfilScreen({ navigation }) {
         </View>
 
       </ScrollView>
+      {/* FULLSCREEN PHOTO */}
+      <Modal visible={!!fullscreenPhoto} transparent animationType="fade" statusBarTranslucent>
+        <Pressable style={styles.photoFullOverlay} onPress={() => setFullscreenPhoto(null)}>
+          {fullscreenPhoto && (
+            <Image
+              source={{ uri: fullscreenPhoto }}
+              style={styles.photoFullImg}
+              resizeMode="contain"
+            />
+          )}
+          <Text style={styles.photoFullHint}>Toque para fechar</Text>
+        </Pressable>
+      </Modal>
+
       <BottomNav active="Perfil" navigation={navigation} />
     </SafeAreaView>
   );
@@ -653,6 +670,10 @@ const styles = StyleSheet.create({
 
   deleteBtn: { width: 34, height: 34, borderRadius: 10, backgroundColor: '#FFF0F0', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   deleteBtnText: { fontSize: 15 },
+
+  photoFullOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.93)', alignItems: 'center', justifyContent: 'center', gap: 16 },
+  photoFullImg: { width: Dimensions.get('window').width, height: Dimensions.get('window').width },
+  photoFullHint: { fontSize: 12, color: 'rgba(255,255,255,0.4)', fontFamily: fonts.semiBold },
 
   emptySection: { alignItems: 'center', paddingVertical: 40, gap: 12 },
   emptySectionText: { fontSize: 14, fontFamily: fonts.semiBold, color: colors.textLight },
