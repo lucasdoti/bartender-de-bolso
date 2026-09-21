@@ -21,6 +21,35 @@ function normalizeExtraDrink(d) {
 
 async function loadStreak(userId) {
   const today = new Date().toDateString();
+
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('streak_current, streak_longest, streak_last_date')
+      .eq('id', userId)
+      .maybeSingle();
+
+    if (!error && data && 'streak_current' in data) {
+      const cur  = data.streak_current  || 0;
+      const lon  = data.streak_longest  || 0;
+      const last = data.streak_last_date || null;
+
+      if (last === today) return { current: cur, longest: lon };
+
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const newCur = last === yesterday.toDateString() ? cur + 1 : 1;
+      const newLon = Math.max(newCur, lon);
+
+      await supabase.from('profiles').upsert(
+        { id: userId, streak_current: newCur, streak_longest: newLon, streak_last_date: today },
+        { onConflict: 'id' }
+      );
+      return { current: newCur, longest: newLon };
+    }
+  } catch (_) {}
+
+  // Fallback: AsyncStorage (migração de dados antigos)
   const [lastRaw, curRaw, lonRaw] = await Promise.all([
     AsyncStorage.getItem(`streak_last_${userId}`),
     AsyncStorage.getItem(`streak_cur_${userId}`),
