@@ -16,9 +16,11 @@
       "backgroundColor": "#FAFAF8"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": false,
+      "bundleIdentifier": "com.lucasdoti.bartenderdebolso"
     },
     "android": {
+      "package": "com.lucasdoti.bartenderdebolso",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1C1A14"
@@ -38,16 +40,21 @@
     },
     "plugins": [
       "expo-font",
-      "expo-updates"
+      "expo-updates",
+      "expo-image-picker",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#FFD966"
+        }
+      ]
     ],
     "extra": {
       "eas": {
         "projectId": "9ce71bf4-c215-47f1-9efd-f262fdb03dfb"
       }
     },
-    "owner": "lucasdotisouza-2",
-    "updates": {
-      "url": "https://u.expo.dev/9ce71bf4-c215-47f1-9efd-f262fdb03dfb"
-    }
+    "owner": "lucasdotisouza-2"
   }
 }
