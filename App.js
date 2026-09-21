@@ -27,6 +27,7 @@ import OnboardingScreen from './src/screens/OnboardingScreen';
 import AgeGateScreen from './src/screens/AgeGateScreen';
 import OfflineBanner from './src/components/OfflineBanner';
 import { scheduleDailyDrinkNotification } from './src/lib/notifications';
+import { configurePurchases } from './src/lib/purchases';
 
 const Loader = () => (
   <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FAFAF8' }}>
@@ -40,6 +41,7 @@ function Root() {
   const [onboardingDone,  setOnboardingDone]  = useState(null);
 
   useEffect(() => {
+    configurePurchases();
     Promise.all([
       AsyncStorage.getItem('age_confirmed'),
       AsyncStorage.getItem('onboarding_done'),

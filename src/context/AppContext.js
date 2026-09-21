@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 import { useAuth } from './AuthContext';
+import { checkPremiumEntitlement, addCustomerInfoListener } from '../lib/purchases';
 
 const AppContext = createContext();
 
@@ -94,9 +95,16 @@ export function AppProvider({ children }) {
     if (user.email === ADMIN_EMAIL) {
       setIsPremium(true);
     } else {
-      supabase.from('profiles').select('is_premium').eq('id', user.id).maybeSingle()
-        .then(({ data }) => setIsPremium(data?.is_premium ?? false));
+      checkPremiumEntitlement().then(active => {
+        if (active) { setIsPremium(true); return; }
+        // Fallback: coluna is_premium no Supabase (admin manual)
+        supabase.from('profiles').select('is_premium').eq('id', user.id).maybeSingle()
+          .then(({ data }) => setIsPremium(data?.is_premium ?? false));
+      });
     }
+
+    const unsub = addCustomerInfoListener(active => setIsPremium(active));
+    return () => { if (typeof unsub === 'function') unsub(); };
     loadData();
     AsyncStorage.getItem(`drink_ratings_${user.id}`).then(val => {
       setRatings(val ? JSON.parse(val) : {});

@@ -48,7 +48,8 @@
           "icon": "./assets/icon.png",
           "color": "#FFD966"
         }
-      ]
+      ],
+      "react-native-purchases"
     ],
     "extra": {
       "eas": {
