@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
-  View, Text, ScrollView, TouchableOpacity, StyleSheet,
+  View, Text, ScrollView, TouchableOpacity, StyleSheet, TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,6 +10,7 @@ import AppIcon from '../components/AppIcon';
 import BottomNav from '../components/BottomNav';
 import { DrinkCardList } from '../components/DrinkCard';
 import { Share } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ingredientCategories } from '../data/ingredients';
 import { xaropes, engarrafados } from '../data/recipes';
 import { useDrinks } from '../hooks/useDrinks';
@@ -45,6 +46,24 @@ export default function MeuBarScreen({ navigation }) {
   const [openCat, setOpenCat]           = useState('Destilados');
   const [openRecipe, setOpenRecipe]     = useState(null);
   const [showShoppingList, setShowShoppingList] = useState(false);
+  const [customShoppingItems, setCustomShoppingItems] = useState([]);
+  const [removedAutoIds, setRemovedAutoIds]           = useState([]);
+  const [newItemText, setNewItemText]                  = useState('');
+  const [editingItemId, setEditingItemId]              = useState(null);
+  const [editItemText, setEditItemText]                = useState('');
+
+  useEffect(() => {
+    AsyncStorage.getItem('shopping_custom').then(v => { if (v) setCustomShoppingItems(JSON.parse(v)); });
+    AsyncStorage.getItem('shopping_removed').then(v => { if (v) setRemovedAutoIds(JSON.parse(v)); });
+  }, []);
+
+  useEffect(() => {
+    AsyncStorage.setItem('shopping_custom', JSON.stringify(customShoppingItems));
+  }, [customShoppingItems]);
+
+  useEffect(() => {
+    AsyncStorage.setItem('shopping_removed', JSON.stringify(removedAutoIds));
+  }, [removedAutoIds]);
 
   // Calcula o que falta comprar baseado nos favoritos
   const shoppingList = (() => {
@@ -64,6 +83,25 @@ export default function MeuBarScreen({ navigation }) {
     setTempSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
 
   const clearTemp = () => { setTempSelected([]); setShowResults(false); };
+
+  const visibleAutoItems   = shoppingList.filter(i => !removedAutoIds.includes(i.id));
+  const totalShoppingCount = visibleAutoItems.length + customShoppingItems.length;
+
+  const addCustomItem = () => {
+    if (!newItemText.trim()) return;
+    setCustomShoppingItems(prev => [...prev, { id: Date.now().toString(), label: newItemText.trim() }]);
+    setNewItemText('');
+  };
+
+  const removeCustomItem = (id) => setCustomShoppingItems(prev => prev.filter(i => i.id !== id));
+  const removeAutoItem   = (id) => setRemovedAutoIds(prev => [...prev, id]);
+
+  const saveEditItem = () => {
+    if (!editItemText.trim()) return;
+    setCustomShoppingItems(prev => prev.map(i => i.id === editingItemId ? { ...i, label: editItemText.trim() } : i));
+    setEditingItemId(null);
+    setEditItemText('');
+  };
 
   const barResults    = calcMatches(ingredients, drinks);
   const barPerfect    = barResults.filter(d => d.match === 100);
@@ -228,50 +266,134 @@ export default function MeuBarScreen({ navigation }) {
                 activeOpacity={0.8}
                 style={styles.shoppingBtn}
               >
-                <Text style={styles.shoppingBtnText}>🛒 Lista de compras</Text>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Text style={styles.shoppingBtnText}>🛒 Lista de compras</Text>
+                  {totalShoppingCount > 0 && (
+                    <View style={styles.shoppingCountBadge}>
+                      <Text style={styles.shoppingCountText}>{totalShoppingCount}</Text>
+                    </View>
+                  )}
+                </View>
                 <Text style={styles.shoppingBtnSub}>
-                  {shoppingList.length === 0
+                  {totalShoppingCount === 0
                     ? 'Você tem tudo para seus favoritos!'
-                    : `${shoppingList.length} item${shoppingList.length > 1 ? 'ns' : ''} faltando para seus favoritos`}
+                    : `${totalShoppingCount} item${totalShoppingCount > 1 ? 'ns' : ''} na lista`}
                 </Text>
               </TouchableOpacity>
 
               {showShoppingList && (
                 <View style={styles.shoppingPanel}>
-                  {shoppingList.length === 0 ? (
-                    <Text style={styles.shoppingEmpty}>✅ Seu bar já tem tudo para preparar os drinks favoritos!</Text>
-                  ) : (
-                    <>
+                  {/* Auto-gerados dos favoritos */}
+                  {visibleAutoItems.length > 0 && (
+                    <View style={{ marginBottom: 14 }}>
+                      <Text style={styles.shoppingSectionLabel}>📋 Falta para seus favoritos</Text>
                       {ingredientCategories.map(cat => {
-                        const catItems = shoppingList.filter(i => i.cat === cat.cat);
-                        if (catItems.length === 0) return null;
+                        const catItems = visibleAutoItems.filter(i => i.cat === cat.cat);
+                        if (!catItems.length) return null;
                         return (
-                          <View key={cat.cat} style={{ marginBottom: 12 }}>
+                          <View key={cat.cat} style={{ marginBottom: 8 }}>
                             <Text style={styles.shoppingCat}>{cat.emoji} {cat.cat}</Text>
                             {catItems.map(item => (
-                              <View key={item.id} style={styles.shoppingItem}>
+                              <View key={item.id} style={styles.shoppingRow}>
                                 <Text style={styles.shoppingDot}>·</Text>
-                                <Text style={styles.shoppingItemName}>{item.label}</Text>
+                                <Text style={[styles.shoppingItemName, { flex: 1 }]}>{item.label}</Text>
+                                <TouchableOpacity onPress={() => removeAutoItem(item.id)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                                  <Text style={styles.removeItemBtn}>✕</Text>
+                                </TouchableOpacity>
                               </View>
                             ))}
                           </View>
                         );
                       })}
-                      <TouchableOpacity
-                        onPress={() => {
-                          const text = '🛒 Lista de compras — Bartender de Bolso\n\n' +
-                            ingredientCategories.flatMap(cat => {
-                              const items = shoppingList.filter(i => i.cat === cat.cat);
+                    </View>
+                  )}
+
+                  {/* Itens custom */}
+                  {customShoppingItems.length > 0 && (
+                    <View style={{ marginBottom: 14 }}>
+                      <Text style={styles.shoppingSectionLabel}>✏️ Adicionados por você</Text>
+                      {customShoppingItems.map(item => (
+                        editingItemId === item.id ? (
+                          <View key={item.id} style={styles.editRow}>
+                            <TextInput
+                              value={editItemText}
+                              onChangeText={setEditItemText}
+                              style={styles.editInput}
+                              autoFocus
+                              onSubmitEditing={saveEditItem}
+                              returnKeyType="done"
+                            />
+                            <TouchableOpacity onPress={saveEditItem} style={styles.editSaveBtn}>
+                              <Text style={styles.editSaveText}>✓</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => setEditingItemId(null)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                              <Text style={styles.removeItemBtn}>✕</Text>
+                            </TouchableOpacity>
+                          </View>
+                        ) : (
+                          <View key={item.id} style={styles.shoppingRow}>
+                            <Text style={styles.shoppingDot}>·</Text>
+                            <TouchableOpacity
+                              style={{ flex: 1 }}
+                              onPress={() => { setEditingItemId(item.id); setEditItemText(item.label); }}
+                            >
+                              <Text style={styles.shoppingItemName}>{item.label}</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => removeCustomItem(item.id)} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+                              <Text style={styles.removeItemBtn}>✕</Text>
+                            </TouchableOpacity>
+                          </View>
+                        )
+                      ))}
+                    </View>
+                  )}
+
+                  {visibleAutoItems.length === 0 && customShoppingItems.length === 0 && (
+                    <Text style={styles.shoppingEmpty}>✅ Seu bar já tem tudo para preparar os drinks favoritos!</Text>
+                  )}
+
+                  {/* Adicionar item */}
+                  <View style={styles.addItemRow}>
+                    <TextInput
+                      value={newItemText}
+                      onChangeText={setNewItemText}
+                      placeholder="Adicionar item..."
+                      placeholderTextColor={colors.textLight}
+                      style={styles.addItemInput}
+                      onSubmitEditing={addCustomItem}
+                      returnKeyType="done"
+                    />
+                    <TouchableOpacity
+                      onPress={addCustomItem}
+                      style={[styles.addItemBtn, !newItemText.trim() && { opacity: 0.4 }]}
+                      disabled={!newItemText.trim()}
+                    >
+                      <Text style={styles.addItemBtnText}>+</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* Compartilhar */}
+                  {(visibleAutoItems.length > 0 || customShoppingItems.length > 0) && (
+                    <TouchableOpacity
+                      onPress={() => {
+                        const autoSection = visibleAutoItems.length > 0
+                          ? ['📋 Falta para favoritos:', ...ingredientCategories.flatMap(cat => {
+                              const items = visibleAutoItems.filter(i => i.cat === cat.cat);
                               if (!items.length) return [];
-                              return [`${cat.emoji} ${cat.cat}`, ...items.map(i => `  · ${i.label}`), ''];
-                            }).join('\n');
-                          Share.share({ message: text });
-                        }}
-                        style={styles.shoppingShareBtn}
-                      >
-                        <Text style={styles.shoppingShareText}>📤 Compartilhar lista</Text>
-                      </TouchableOpacity>
-                    </>
+                              return [`${cat.emoji} ${cat.cat}`, ...items.map(i => `  · ${i.label}`)];
+                            }), '']
+                          : [];
+                        const customSection = customShoppingItems.length > 0
+                          ? ['✏️ Outros itens:', ...customShoppingItems.map(i => `  · ${i.label}`)]
+                          : [];
+                        const text = '🛒 Lista de compras — Bartender de Bolso\n\n' +
+                          [...autoSection, ...customSection].join('\n');
+                        Share.share({ message: text });
+                      }}
+                      style={styles.shoppingShareBtn}
+                    >
+                      <Text style={styles.shoppingShareText}>📤 Compartilhar lista</Text>
+                    </TouchableOpacity>
                   )}
                 </View>
               )}
@@ -609,12 +731,24 @@ const styles = StyleSheet.create({
   shoppingBtn: { backgroundColor: '#0D1B2A', borderRadius: radius.lg, padding: spacing.md, marginBottom: 12 },
   shoppingBtnText: { fontSize: 14, fontFamily: fonts.extraBold, color: '#FFD966' },
   shoppingBtnSub: { fontSize: 11, fontFamily: fonts.semiBold, color: '#888', marginTop: 3 },
-  shoppingPanel: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.md, marginBottom: 16, borderWidth: 2, borderColor: '#F0F0EC' },
+  shoppingCountBadge: { backgroundColor: '#FFD966', borderRadius: 10, paddingHorizontal: 8, paddingVertical: 2 },
+  shoppingCountText: { fontSize: 11, fontFamily: fonts.extraBold, color: '#0D1B2A' },
+  shoppingPanel: { backgroundColor: colors.surface, borderRadius: radius.lg, padding: spacing.md, marginBottom: 16, borderWidth: 2, borderColor: '#F0F0EC', gap: 0 },
   shoppingEmpty: { fontSize: 13, fontFamily: fonts.semiBold, color: '#2E7D32', textAlign: 'center', paddingVertical: 8 },
-  shoppingCat: { fontSize: 12, fontFamily: fonts.extraBold, color: colors.textMuted, marginBottom: 6, letterSpacing: 0.5 },
-  shoppingItem: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 3 },
+  shoppingSectionLabel: { fontSize: 11, fontFamily: fonts.extraBold, color: colors.textLight, letterSpacing: 0.8, textTransform: 'uppercase', marginBottom: 8 },
+  shoppingCat: { fontSize: 12, fontFamily: fonts.extraBold, color: colors.textMuted, marginBottom: 4, letterSpacing: 0.5 },
+  shoppingRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 4 },
   shoppingDot: { fontSize: 16, color: colors.primary, lineHeight: 20 },
   shoppingItemName: { fontSize: 13, fontFamily: fonts.semiBold, color: colors.text },
+  removeItemBtn: { fontSize: 12, color: '#CCCCCC', fontFamily: fonts.extraBold, paddingHorizontal: 4 },
+  editRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 4 },
+  editInput: { flex: 1, fontSize: 13, fontFamily: fonts.semiBold, color: colors.text, borderBottomWidth: 1.5, borderBottomColor: colors.primary, paddingVertical: 2 },
+  editSaveBtn: { width: 28, height: 28, borderRadius: 8, backgroundColor: colors.primary, alignItems: 'center', justifyContent: 'center' },
+  editSaveText: { fontSize: 14, color: '#fff', fontFamily: fonts.extraBold },
+  addItemRow: { flexDirection: 'row', alignItems: 'center', gap: 8, borderTopWidth: 1, borderTopColor: '#F0F0EC', paddingTop: 12, marginTop: 4 },
+  addItemInput: { flex: 1, fontSize: 13, fontFamily: fonts.semiBold, color: colors.text, paddingVertical: 8, paddingHorizontal: 12, backgroundColor: '#F5F5F2', borderRadius: radius.md },
+  addItemBtn: { width: 36, height: 36, borderRadius: 10, backgroundColor: colors.dark, alignItems: 'center', justifyContent: 'center' },
+  addItemBtnText: { fontSize: 20, color: '#FFD966', fontFamily: fonts.extraBold, lineHeight: 22 },
   shoppingShareBtn: { marginTop: 12, backgroundColor: '#F0F0EC', borderRadius: radius.md, padding: spacing.sm, alignItems: 'center' },
   shoppingShareText: { fontSize: 13, fontFamily: fonts.extraBold, color: colors.text },
 });
