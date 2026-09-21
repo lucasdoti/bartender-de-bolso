@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 import Purchases, { LOG_LEVEL } from 'react-native-purchases';
 
 const IOS_KEY     = 'test_ukZWTFzdDPvTYftzNhHGwKxNAep';
-const ANDROID_KEY = 'ANDROID_KEY_PLACEHOLDER';
+const ANDROID_KEY = 'goog_YIIStFUROJINqLTSHLfiPkkaUoE';
 
 export function configurePurchases() {
   if (Platform.OS === 'web') return;
