@@ -6,8 +6,6 @@ import { checkPremiumEntitlement, addCustomerInfoListener } from '../lib/purchas
 
 const AppContext = createContext();
 
-const ADMIN_EMAIL = 'lucas_doti@hotmail.com';
-
 function normalizeExtraDrink(d) {
   return {
     ...d,
@@ -92,24 +90,21 @@ export function AppProvider({ children }) {
       setIsPremium(false);
       return;
     }
-    if (user.email === ADMIN_EMAIL) {
-      setIsPremium(true);
-    } else {
-      checkPremiumEntitlement().then(active => {
-        if (active) { setIsPremium(true); return; }
-        // Fallback: coluna is_premium no Supabase (admin manual)
-        supabase.from('profiles').select('is_premium').eq('id', user.id).maybeSingle()
-          .then(({ data }) => setIsPremium(data?.is_premium ?? false));
-      });
-    }
+    checkPremiumEntitlement().then(active => {
+      if (active) { setIsPremium(true); return; }
+      supabase.from('profiles').select('is_premium').eq('id', user.id).maybeSingle()
+        .then(({ data }) => setIsPremium(data?.is_premium ?? false));
+    });
 
     const unsub = addCustomerInfoListener(active => setIsPremium(active));
-    return () => { if (typeof unsub === 'function') unsub(); };
+
     loadData();
     AsyncStorage.getItem(`drink_ratings_${user.id}`).then(val => {
       setRatings(val ? JSON.parse(val) : {});
     });
     loadStreak(user.id).then(setStreak);
+
+    return () => { if (typeof unsub === 'function') unsub(); };
   }, [user]);
 
   const loadData = async () => {

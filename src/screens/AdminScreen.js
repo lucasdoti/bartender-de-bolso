@@ -5,7 +5,10 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
 import { useApp } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import { colors, fonts, radius, spacing } from '../theme';
+
+const ADMIN_EMAIL = 'lucas_doti@hotmail.com';
 import drinks from '../data/drinks';
 import ingredientCategories from '../data/ingredients';
 
@@ -61,6 +64,14 @@ function userHandle(email = '') {
 
 export default function AdminScreen({ navigation }) {
   const { refreshExtraDrinks } = useApp();
+  const { user } = useAuth();
+
+  // Guard: redireciona se não for admin
+  useEffect(() => {
+    if (user && user.email !== ADMIN_EMAIL) {
+      navigation.replace('Tabs');
+    }
+  }, [user]);
   const [stats, setStats]               = useState(null);
   const [userList, setUserList]         = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
@@ -149,21 +160,24 @@ export default function AdminScreen({ navigation }) {
     setTogglingId(null);
   };
 
+  const sanitize = (str, max = 500) => str.trim().slice(0, max);
+
   const handleAddDrink = async () => {
     if (!formName.trim()) { setAddError('Nome obrigatório.'); return; }
+    if (formName.trim().length > 100) { setAddError('Nome muito longo (máx 100 caracteres).'); return; }
     setAddError('');
     setAddingDrink(true);
     const { error: err } = await supabase.from('drinks_extra').insert({
-      name: formName.trim(),
-      base: formBase || null,
-      color: formColor,
-      difficulty: formDiff,
-      time: formTime.trim() || '5 min',
-      description: formDesc.trim(),
-      ingredients: parseIngredients(formIngs),
-      steps: parseSteps(formSteps),
-      tags: parseTags(formTags),
-      published: formPublished,
+      name:        sanitize(formName, 100),
+      base:        formBase || null,
+      color:       formColor,
+      difficulty:  formDiff,
+      time:        sanitize(formTime || '5 min', 20),
+      description: sanitize(formDesc, 1000),
+      ingredients: parseIngredients(sanitize(formIngs, 3000)),
+      steps:       parseSteps(sanitize(formSteps, 3000)),
+      tags:        parseTags(sanitize(formTags, 200)),
+      published:   formPublished,
     });
     setAddingDrink(false);
     if (err) { setAddError('Erro: ' + err.message); return; }

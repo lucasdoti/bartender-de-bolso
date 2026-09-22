@@ -10,6 +10,9 @@ import { colors, fonts, radius, spacing } from '../theme';
 import AppIcon from '../components/AppIcon';
 import PrivacyPolicyScreen from './PrivacyPolicyScreen';
 
+const MAX_ATTEMPTS  = 5;
+const LOCKOUT_MS    = 15 * 60 * 1000; // 15 minutos
+
 export default function AuthScreen() {
   const { signIn, signUp } = useAuth();
   const [mode, setMode]         = useState('login'); // 'login' | 'signup' | 'forgot'
@@ -20,6 +23,8 @@ export default function AuthScreen() {
   const [showPolicy, setShowPolicy] = useState(false);
   const [errorMsg, setErrorMsg]   = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [attempts, setAttempts]     = useState(0);
+  const [lockedUntil, setLockedUntil] = useState(null);
 
   if (showPolicy) {
     return <PrivacyPolicyScreen navigation={{ goBack: () => setShowPolicy(false) }} />;
@@ -38,7 +43,14 @@ export default function AuthScreen() {
     return msg;
   };
 
+  const isLocked = lockedUntil && Date.now() < lockedUntil;
+  const remainingMin = isLocked ? Math.ceil((lockedUntil - Date.now()) / 60000) : 0;
+
   const handleSubmit = async () => {
+    if (isLocked) {
+      setErrorMsg(`Muitas tentativas. Aguarde ${remainingMin} minuto${remainingMin > 1 ? 's' : ''} para tentar novamente.`);
+      return;
+    }
     setErrorMsg('');
     setSuccessMsg('');
 
@@ -67,7 +79,20 @@ export default function AuthScreen() {
     setLoading(true);
     if (mode === 'login') {
       const { error } = await signIn(email.trim(), password);
-      if (error) setErrorMsg(traduzErro(error.message));
+      if (error) {
+        const newAttempts = attempts + 1;
+        setAttempts(newAttempts);
+        if (newAttempts >= MAX_ATTEMPTS) {
+          setLockedUntil(Date.now() + LOCKOUT_MS);
+          setAttempts(0);
+          setErrorMsg(`Conta bloqueada por 15 minutos após ${MAX_ATTEMPTS} tentativas incorretas.`);
+        } else {
+          setErrorMsg(`${traduzErro(error.message)} (${newAttempts}/${MAX_ATTEMPTS} tentativas)`);
+        }
+      } else {
+        setAttempts(0);
+        setLockedUntil(null);
+      }
     } else {
       const { error } = await signUp(email.trim(), password, name.trim());
       if (error) {
