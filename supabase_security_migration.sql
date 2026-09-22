@@ -156,32 +156,38 @@ $$;
 
 -- ============================================================
 -- 11. Storage Policy — user-photos
---     (Rodar em Storage → Policies no dashboard, ou via SQL)
+--     RLS em storage.objects (forma correta no Supabase)
 -- ============================================================
 
--- INSERT: usuário só pode enviar para sua própria pasta
-INSERT INTO storage.policies (name, bucket_id, operation, definition)
-VALUES (
-  'user_photos_insert_own',
-  'user-photos',
-  'INSERT',
-  '(storage.foldername(name))[1] = auth.uid()::text'
-) ON CONFLICT DO NOTHING;
+DROP POLICY IF EXISTS "user_photos_insert_own" ON storage.objects;
+DROP POLICY IF EXISTS "user_photos_select_own" ON storage.objects;
+DROP POLICY IF EXISTS "user_photos_update_own" ON storage.objects;
+DROP POLICY IF EXISTS "user_photos_delete_own" ON storage.objects;
 
--- SELECT: usuário só vê as próprias fotos (remove acesso público se quiser privacidade)
-INSERT INTO storage.policies (name, bucket_id, operation, definition)
-VALUES (
-  'user_photos_select_own',
-  'user-photos',
-  'SELECT',
-  '(storage.foldername(name))[1] = auth.uid()::text'
-) ON CONFLICT DO NOTHING;
+-- INSERT: usuário só pode enviar para sua própria pasta (user-photos/{uid}/...)
+CREATE POLICY "user_photos_insert_own" ON storage.objects
+  FOR INSERT WITH CHECK (
+    bucket_id = 'user-photos'
+    AND (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+-- SELECT: usuário só vê as próprias fotos
+CREATE POLICY "user_photos_select_own" ON storage.objects
+  FOR SELECT USING (
+    bucket_id = 'user-photos'
+    AND (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+-- UPDATE: usuário só atualiza as próprias fotos
+CREATE POLICY "user_photos_update_own" ON storage.objects
+  FOR UPDATE USING (
+    bucket_id = 'user-photos'
+    AND (storage.foldername(name))[1] = auth.uid()::text
+  );
 
 -- DELETE: usuário apaga só as próprias fotos
-INSERT INTO storage.policies (name, bucket_id, operation, definition)
-VALUES (
-  'user_photos_delete_own',
-  'user-photos',
-  'DELETE',
-  '(storage.foldername(name))[1] = auth.uid()::text'
-) ON CONFLICT DO NOTHING;
+CREATE POLICY "user_photos_delete_own" ON storage.objects
+  FOR DELETE USING (
+    bucket_id = 'user-photos'
+    AND (storage.foldername(name))[1] = auth.uid()::text
+  );
