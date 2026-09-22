@@ -1,4 +1,4 @@
-name: EAS Update (Expo Go)
+name: EAS Update (Production)
 
 on:
   push:

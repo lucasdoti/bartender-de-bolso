@@ -8,7 +8,6 @@ import { useApp } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
 import { colors, fonts, radius, spacing } from '../theme';
 
-const ADMIN_EMAIL = 'lucas_doti@hotmail.com';
 import drinks from '../data/drinks';
 import ingredientCategories from '../data/ingredients';
 
