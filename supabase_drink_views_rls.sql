@@ -38,4 +38,5 @@ CREATE POLICY "users_select_own_views"
 -- Garante que service_role (usado pelas RPCs SECURITY DEFINER) tem acesso total
 GRANT SELECT, INSERT ON drink_views TO authenticated;
 GRANT ALL ON drink_views TO service_role;
-GRANT USAGE, SELECT ON SEQUENCE drink_views_id_seq TO authenticated;
+-- Sequências da tabela (cobre qualquer nome de sequence gerada pelo BIGSERIAL)
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO authenticated;
