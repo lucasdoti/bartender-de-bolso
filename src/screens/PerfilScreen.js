@@ -29,7 +29,7 @@ const configItems = [
 ];
 
 export default function PerfilScreen({ navigation }) {
-  const { favorites, history, ratings, streak, removeFromHistory } = useApp();
+  const { favorites, history, ratings, streak, removeFromHistory, isAdmin } = useApp();
   const drinks = useDrinks();
   const { signOut, user } = useAuth();
   const [section, setSection] = useState('stats');
@@ -101,7 +101,15 @@ export default function PerfilScreen({ navigation }) {
               supabase.from('favorites').delete().eq('user_id', uid),
               supabase.from('my_bar').delete().eq('user_id', uid),
               supabase.from('drink_suggestions').delete().eq('user_id', uid),
+              supabase.from('profiles').delete().eq('id', uid),
             ]);
+            // Remove fotos do Storage
+            supabase.storage.from('user-photos').list(uid).then(({ data: files }) => {
+              if (files?.length) {
+                const paths = files.map(f => `${uid}/${f.name}`);
+                supabase.storage.from('user-photos').remove(paths);
+              }
+            });
             await signOut();
           },
         },
@@ -497,7 +505,7 @@ export default function PerfilScreen({ navigation }) {
 
         </View>
 
-        {user?.email === 'lucas_doti@hotmail.com' && (
+        {isAdmin && (
           <TouchableOpacity
             activeOpacity={0.85}
             onPress={() => navigation.navigate('Admin')}

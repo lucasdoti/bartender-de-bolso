@@ -40,7 +40,7 @@ export default function AuthScreen() {
     if (msg.includes('Invalid login'))       return 'Email ou senha incorretos.';
     if (msg.includes('already registered'))  return 'Este email já está cadastrado.';
     if (msg.includes('Email not confirmed')) return 'Confirme seu email antes de entrar.';
-    return msg;
+    return 'Ocorreu um erro. Tente novamente.';
   };
 
   const isLocked = lockedUntil && Date.now() < lockedUntil;
@@ -71,8 +71,8 @@ export default function AuthScreen() {
       setErrorMsg('Preencha todos os campos.');
       return;
     }
-    if (password.length < 6) {
-      setErrorMsg('A senha precisa ter pelo menos 6 caracteres.');
+    if (password.length < 8) {
+      setErrorMsg('A senha precisa ter pelo menos 8 caracteres.');
       return;
     }
 

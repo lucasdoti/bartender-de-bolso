@@ -82,14 +82,19 @@ export function AppProvider({ children }) {
   const [streak,      setStreak]      = useState({ current: 0, longest: 0 });
   const [loading,     setLoading]     = useState(true);
   const [isPremium,   setIsPremium]   = useState(false);
+  const [isAdmin,     setIsAdmin]     = useState(false);
 
   useEffect(() => {
     if (!user) {
       setFavorites([]); setIngredients([]); setHistory([]);
       setRatings({}); setExtraDrinks([]); setStreak({ current: 0, longest: 0 });
       setIsPremium(false);
+      setIsAdmin(false);
       return;
     }
+    // Verifica admin via Supabase (coluna is_admin em profiles)
+    supabase.from('profiles').select('is_admin').eq('id', user.id).maybeSingle()
+      .then(({ data }) => setIsAdmin(data?.is_admin === true));
     checkPremiumEntitlement().then(active => {
       if (active) { setIsPremium(true); return; }
       supabase.from('profiles').select('is_premium').eq('id', user.id).maybeSingle()
@@ -193,6 +198,7 @@ export function AppProvider({ children }) {
       streak,
       loading,
       isPremium,
+      isAdmin,
     }}>
       {children}
     </AppContext.Provider>

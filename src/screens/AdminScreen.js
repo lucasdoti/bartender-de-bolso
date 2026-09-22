@@ -63,15 +63,15 @@ function userHandle(email = '') {
 }
 
 export default function AdminScreen({ navigation }) {
-  const { refreshExtraDrinks } = useApp();
+  const { refreshExtraDrinks, isAdmin } = useApp();
   const { user } = useAuth();
 
-  // Guard: redireciona se não for admin
+  // Guard: redireciona se não for admin (verificado via Supabase)
   useEffect(() => {
-    if (user && user.email !== ADMIN_EMAIL) {
+    if (user !== null && isAdmin === false) {
       navigation.replace('Tabs');
     }
-  }, [user]);
+  }, [user, isAdmin]);
   const [stats, setStats]               = useState(null);
   const [userList, setUserList]         = useState([]);
   const [recentActivity, setRecentActivity] = useState([]);
