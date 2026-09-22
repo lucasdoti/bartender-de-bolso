@@ -53,11 +53,10 @@ drinks, coquetéis, bartender, receitas, mojito, caipirinha, negroni, bar, coque
 18+ (conteúdo de bebidas alcoólicas)
 
 ## URL da Política de Privacidade
-[Preencher com URL do site/web app onde a política está hospedada]
-Exemplo: https://bartender-de-bolso.vercel.app/privacy
+https://lucasdoti.github.io/bartender-de-bolso/privacy-policy.html
 
 ## Contato de suporte
 lucas_doti@hotmail.com
 
 ## Website
-[URL do web app se existir]
+https://lucasdoti.github.io/bartender-de-bolso/
