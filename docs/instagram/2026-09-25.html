@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Pink Gin Tônica - Bartender de Bolso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 1080px;
+    height: 1080px;
+    background: #0D0D14;
+    overflow: hidden;
+    font-family: 'Inter', sans-serif;
+  }
+  .card {
+    position: relative;
+    width: 1080px;
+    height: 1080px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .glow {
+    position: absolute;
+    width: 700px;
+    height: 700px;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(155,111,212,0.18) 0%, rgba(155,111,212,0) 70%);
+    z-index: 1;
+  }
+  .grid {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1080px;
+    height: 1080px;
+    background-image:
+      linear-gradient(rgba(155,111,212,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(155,111,212,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: 0;
+  }
+  .content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .eyebrow {
+    font-size: 13px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: #9B6FD4;
+    font-weight: 600;
+    margin-bottom: 28px;
+  }
+  .emoji {
+    font-size: 120px;
+    line-height: 1;
+    margin-bottom: 20px;
+  }
+  .drink-name {
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+    font-size: 72px;
+    color: #FFFFFF;
+    line-height: 1.1;
+    margin-bottom: 32px;
+    max-width: 900px;
+  }
+  .divider {
+    width: 200px;
+    height: 1px;
+    background: rgba(155,111,212,0.3);
+    margin-bottom: 32px;
+  }
+  .ingredients {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 60px;
+  }
+  .ingredient {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 22px;
+    color: rgba(240,234,255,0.8);
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #FFD966;
+    flex-shrink: 0;
+  }
+  .footer {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 20px;
+  }
+  .handle {
+    font-size: 18px;
+    color: #9B6FD4;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .brand {
+    font-size: 14px;
+    color: rgba(255,255,255,0.4);
+    font-weight: 400;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="glow"></div>
+    <div class="grid"></div>
+    <div class="content">
+      <div class="eyebrow">App de Coquetéis</div>
+      <div class="emoji">🍸</div>
+      <div class="drink-name">Pink Gin<br>Tônica</div>
+      <div class="divider"></div>
+      <div class="ingredients">
+        <div class="ingredient"><span class="dot"></span>Gin rosado 50ml</div>
+        <div class="ingredient"><span class="dot"></span>Água tônica 150ml</div>
+        <div class="ingredient"><span class="dot"></span>Pomelo em fatias</div>
+        <div class="ingredient"><span class="dot"></span>Gelo bastante</div>
+        <div class="ingredient"><span class="dot"></span>Copo tipo taça</div>
+      </div>
+    </div>
+    <div class="footer">
+      <div class="handle">@bartenderdebolso</div>
+      <div class="brand">Bartender de Bolso</div>
+    </div>
+  </div>
+</body>
+</html>
