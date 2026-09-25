@@ -4,16 +4,248 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bartender de Bolso</title>
-  <meta http-equiv="refresh" content="0; url=privacy-policy.html" />
+  <meta name="description" content="Mais de 200 receitas de drinks na palma da sua mão. Filtre por ingredientes que você já tem em casa." />
+  <link rel="icon" href="icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" />
   <style>
-    body { background: #0D0D14; color: #E0E0E0; font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0D0D14;
+      --surface: #12101E;
+      --purple: #9B6FD4;
+      --purple-light: #C4A3F0;
+      --gold: #FFD966;
+      --text: #F0EAFF;
+      --muted: #9080A8;
+      --border: rgba(255,255,255,0.07);
+    }
+
+    html { background: var(--bg); }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── GLOW BG ── */
+    .bg-glow {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(155,111,212,0.18) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 80% 80%, rgba(107,79,160,0.10) 0%, transparent 60%);
+    }
+
+    main { position: relative; z-index: 1; }
+
+    /* ── HERO ── */
+    .hero {
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center; padding: 72px 24px 56px;
+    }
+
+    .app-icon {
+      width: 120px; height: 120px; border-radius: 28px;
+      box-shadow: 0 0 0 1px rgba(155,111,212,0.3), 0 20px 60px rgba(155,111,212,0.25);
+      margin-bottom: 28px;
+    }
+
+    .eyebrow {
+      font-size: 12px; font-weight: 700; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--purple); margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(38px, 8vw, 64px);
+      font-weight: 900; line-height: 1.1;
+      color: #fff; margin-bottom: 20px;
+      text-wrap: balance;
+    }
+
+    .hero-sub {
+      font-size: 18px; color: var(--muted); line-height: 1.6;
+      max-width: 480px; margin-bottom: 40px;
+    }
+
+    /* ── PLAY STORE BUTTON ── */
+    .cta-group { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+
+    .btn-store {
+      display: inline-flex; align-items: center; gap: 14px;
+      background: var(--surface); border: 1px solid rgba(155,111,212,0.35);
+      border-radius: 14px; padding: 14px 28px;
+      text-decoration: none; color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .btn-store:hover { border-color: var(--purple); box-shadow: 0 0 20px rgba(155,111,212,0.2); }
+    .btn-store svg { flex-shrink: 0; }
+    .btn-store-text { text-align: left; }
+    .btn-store-text span { display: block; font-size: 11px; color: var(--muted); }
+    .btn-store-text strong { font-size: 17px; font-weight: 700; }
+
+    .soon-badge {
+      font-size: 12px; font-weight: 600;
+      background: rgba(155,111,212,0.12);
+      border: 1px solid rgba(155,111,212,0.25);
+      color: var(--purple-light); padding: 4px 14px; border-radius: 100px;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      width: 80px; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(155,111,212,0.4), transparent);
+      margin: 0 auto 64px;
+    }
+
+    /* ── FEATURES ── */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px; padding: 0 24px; max-width: 880px; margin: 0 auto 80px;
+    }
+
+    .feature-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 28px 24px;
+      transition: border-color 0.2s;
+    }
+    .feature-card:hover { border-color: rgba(155,111,212,0.3); }
+
+    .feature-emoji { font-size: 36px; margin-bottom: 16px; display: block; }
+    .feature-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+    .feature-card p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+    /* ── STATS ── */
+    .stats {
+      display: flex; justify-content: center; flex-wrap: wrap;
+      gap: 0; max-width: 600px; margin: 0 auto 80px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; overflow: hidden;
+    }
+
+    .stat {
+      flex: 1; min-width: 140px; padding: 28px 20px; text-align: center;
+      border-right: 1px solid var(--border);
+    }
+    .stat:last-child { border-right: none; }
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px; font-weight: 900; color: var(--gold);
+      display: block; margin-bottom: 4px;
+    }
+    .stat-label { font-size: 13px; color: var(--muted); font-weight: 500; }
+
+    /* ── INSTAGRAM ── */
+    .instagram {
+      text-align: center; padding: 0 24px 80px;
+    }
+    .instagram p { font-size: 15px; color: var(--muted); margin-bottom: 16px; }
+    .ig-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, #833ab4, #fd1d1d, #fcb045);
+      border-radius: 12px; padding: 12px 24px;
+      text-decoration: none; color: #fff; font-weight: 700; font-size: 15px;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 28px 24px; text-align: center;
+      font-size: 13px; color: var(--muted);
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+    }
+    footer a { color: var(--purple); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
-  <div>
-    <p style="font-size:48px">🥃</p>
-    <p>Bartender de Bolso</p>
-    <p><a href="privacy-policy.html" style="color:#9B6FD4">Política de Privacidade</a></p>
-  </div>
+  <div class="bg-glow"></div>
+  <main>
+
+    <!-- HERO -->
+    <section class="hero">
+      <img src="icon.png" alt="Bartender de Bolso" class="app-icon" />
+      <p class="eyebrow">App de Coquetéis</p>
+      <h1>Bartender de Bolso</h1>
+      <p class="hero-sub">
+        Mais de 200 receitas de drinks na palma da sua mão.
+        Filtre pelos ingredientes que você já tem em casa e descubra o que fazer agora.
+      </p>
+      <div class="cta-group">
+        <a href="#" class="btn-store">
+          <!-- Google Play icon -->
+          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M4 3.5L16.5 14 4 24.5V3.5Z" fill="#4FC3F7"/>
+            <path d="M4 3.5L14.5 14 4 24.5L4 3.5Z" fill="#4FC3F7"/>
+            <path d="M4 3.5L20 9.5L16.5 14L4 3.5Z" fill="#81C784"/>
+            <path d="M4 24.5L16.5 14L20 18.5L4 24.5Z" fill="#F48FB1"/>
+            <path d="M20 9.5L24.5 12.5C25.5 13.1 25.5 14.9 24.5 15.5L20 18.5L16.5 14L20 9.5Z" fill="#FFD54F"/>
+          </svg>
+          <div class="btn-store-text">
+            <span>Disponível em breve no</span>
+            <strong>Google Play</strong>
+          </div>
+        </a>
+        <span class="soon-badge">Em análise · chegando em breve</span>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- STATS -->
+    <div class="stats" style="margin-bottom: 64px;">
+      <div class="stat">
+        <span class="stat-num">200+</span>
+        <span class="stat-label">Receitas de drinks</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">🆓</span>
+        <span class="stat-label">Gratuito</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">📱</span>
+        <span class="stat-label">Android</span>
+      </div>
+    </div>
+
+    <!-- FEATURES -->
+    <section class="features">
+      <div class="feature-card">
+        <span class="feature-emoji">🍹</span>
+        <h3>200+ Receitas</h3>
+        <p>De clássicos como Mojito e Negroni até drinks brasileiros como Caipirinha e Batida de Maracujá.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-emoji">🧪</span>
+        <h3>Meu Bar</h3>
+        <p>Cadastre os ingredientes que você tem em casa e descubra quais drinks você já pode fazer agora.</p>
+      </div>
+      <div class="feature-card">
+        <span class="feature-emoji">❤️</span>
+        <h3>Favoritos</h3>
+        <p>Salve seus drinks preferidos para acessar rápido na próxima vez que tiver visitas.</p>
+      </div>
+    </section>
+
+    <!-- INSTAGRAM -->
+    <section class="instagram">
+      <p>Siga para receber receitas todo dia</p>
+      <a href="https://instagram.com/bartenderdebolso" class="ig-link" target="_blank" rel="noopener">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        @bartenderdebolso
+      </a>
+    </section>
+
+  </main>
+
+  <footer>
+    <span>© 2026 Bartender de Bolso</span>
+    <a href="privacy-policy.html">Política de Privacidade</a>
+  </footer>
 </body>
 </html>
