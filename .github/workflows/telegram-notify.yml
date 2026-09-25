@@ -1,0 +1,50 @@
+name: Telegram - Post do Dia
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'instagram-content/**.md'
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Pegar arquivo novo
+        id: post
+        run: |
+          FILE=$(git diff --name-only HEAD~1 HEAD -- 'instagram-content/*.md' | head -1)
+          echo "file=$FILE" >> $GITHUB_OUTPUT
+          DATE=$(basename "$FILE" .md)
+          echo "date=$DATE" >> $GITHUB_OUTPUT
+
+      - name: Montar mensagem
+        id: msg
+        run: |
+          FILE="${{ steps.post.outputs.file }}"
+          DATE="${{ steps.post.outputs.date }}"
+          CARD_URL="https://lucasdoti.github.io/bartender-de-bolso/instagram/${DATE}.html"
+
+          # Extrair legenda do markdown (entre ### LEGENDA e ### DICA)
+          LEGENDA=$(awk '/^### LEGENDA/{flag=1;next}/^### DICA/{flag=0}flag' "$FILE")
+
+          # Montar texto final
+          TEXT="${LEGENDA}
+
+---
+Ver card: ${CARD_URL}"
+
+          # Escapar para JSON (newlines -> \n)
+          TEXT_ESCAPED=$(echo "$TEXT" | python3 -c "import sys,json; print(json.dumps(sys.stdin.read()))")
+
+          echo "text=$TEXT_ESCAPED" >> $GITHUB_OUTPUT
+
+      - name: Enviar no Telegram
+        run: |
+          curl -sS -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" \
+            -H "Content-Type: application/json" \
+            -d "{\"chat_id\":${{ secrets.TELEGRAM_CHAT_ID }},\"text\":${{ steps.msg.outputs.text }}}"
