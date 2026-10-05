@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Daiquiri - Bartender de Bolso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Abril+Fatface&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#EDE8D8;--ink:#1B3E22;--acc:#D4C020;--acc2:#A89618;--muted:rgba(27,62,34,.5)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1080px;height:1080px;background:var(--bg);font-family:'Inter',sans-serif;overflow:hidden}
+.card{width:1080px;height:1080px;background:var(--bg);border:5px solid var(--ink);display:flex;flex-direction:column;padding:56px 69px 43px;position:relative;overflow:hidden}
+.circle{position:absolute;border-radius:50%;border:3px solid var(--ink);pointer-events:none;opacity:.05}
+.eyebrow{font-size:19px;font-weight:800;letter-spacing:8px;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:22px;flex-shrink:0}
+.eyebrow::after{content:'';flex:1;height:2px;background:currentColor}
+.drink-name{font-family:'Abril Fatface',serif;font-size:160px;line-height:.88;color:var(--ink);text-transform:uppercase;margin:22px 0 30px;flex-shrink:0}
+.sep{height:3px;background:var(--ink);opacity:.12;flex-shrink:0}
+.history{flex:1;display:flex;flex-direction:column;justify-content:center;padding:26px 0;gap:13px}
+.h-label{font-size:17px;font-weight:800;letter-spacing:7px;text-transform:uppercase;color:var(--acc2)}
+.h-text{font-size:27px;line-height:1.6;color:var(--ink)}
+.h-text mark{background:var(--acc);color:var(--ink);padding:0 6px}
+.ings{display:flex;flex-wrap:wrap;gap:11px 30px;margin-top:22px;flex-shrink:0}
+.ing{font-size:20px;font-weight:700;text-transform:uppercase;letter-spacing:2.5px;color:var(--muted);display:flex;align-items:center;gap:11px}
+.ing::before{content:'';width:9px;height:9px;border-radius:50%;background:var(--acc2);flex-shrink:0}
+.footer{display:flex;align-items:baseline;justify-content:space-between;margin-top:24px;flex-shrink:0}
+.handle{font-size:24px;font-weight:700;color:var(--ink)}
+.app{font-size:19px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="circle" style="width:430px;height:430px;bottom:-130px;right:-130px;"></div>
+  <div class="circle" style="width:195px;height:195px;bottom:65px;right:65px;"></div>
+  <p class="eyebrow">App de Coquetéis</p>
+  <h1 class="drink-name">DAIQUIRI</h1>
+  <div class="sep"></div>
+  <div class="history">
+    <p class="h-label">Curiosidade</p>
+    <p class="h-text">Nascido em Cuba no fim do século 19, perto de uma mina com esse nome. Só três ingredientes — e virou o drink preferido de <mark>Ernest Hemingway</mark> em Havana.</p>
+  </div>
+  <div class="sep"></div>
+  <div class="ings">
+    <span class="ing">Rum branco 50ml</span>
+    <span class="ing">Limão 25ml</span>
+    <span class="ing">Açúcar 15ml</span>
+    <span class="ing">Gelo</span>
+  </div>
+  <div class="footer">
+    <span class="handle">@bartenderdebolso</span>
+    <span class="app">Bartender de Bolso</span>
+  </div>
+</div>
+</body>
+</html>
